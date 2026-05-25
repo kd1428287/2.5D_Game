@@ -10,7 +10,7 @@ public:
 	void Update();
 	
 	Math::Vector2 GetMousePos();
-	Math::Vector2 GetMouseDir();
+	//Math::Vector2 GetMouseDir();
 
 	// キーが「押された瞬間」 (Trigger)
 	bool IsTriggered(int key) const {
