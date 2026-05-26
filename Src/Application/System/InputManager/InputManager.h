@@ -3,8 +3,11 @@
 class InputManager
 {
 public:
-	InputManager() {};
-	~InputManager() {};
+	static InputManager& Instance()
+	{
+		static InputManager instance;
+		return instance;
+	}
 
 	void Init();
 	void Update();
@@ -44,6 +47,9 @@ public:
 	}
 
 private:
+
+	InputManager() {};
+	~InputManager() {};
 
 	std::array<bool, 256> currentKeys;
 	std::array<bool, 256> prevKeys;

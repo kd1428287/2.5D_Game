@@ -34,6 +34,10 @@ public :
 	// 現在のシーンにオブジェクトを追加
 	void AddObject(const std::shared_ptr<KdGameObject>& _obj);
 
+	void SetCameraPos(Math::Vector3 camPos);
+	void SetCameraPos(KdGameObject* camTargetObj);
+	void SetCameraAngle(float xAng, float yAng, float zAng);
+
 private :
 
 	// マネージャーの初期化

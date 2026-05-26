@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+class InputManager;
+class CameraManager;
+class TimeManager;
+
 class GameEngine
 {
 public:

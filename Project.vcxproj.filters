@@ -94,9 +94,6 @@
     <Filter Include="Src\Application\System\InputManager">
       <UniqueIdentifier>{79959514-6113-40e4-87db-37943cf36bf1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Src\Application\System\BaseManager">
-      <UniqueIdentifier>{9c1c571c-d8ee-4d98-a676-a0bd4aa31640}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Src\Application\Object\Character\Player">
       <UniqueIdentifier>{804f90fe-7070-44c9-b7ac-4ffd7564c200}</UniqueIdentifier>
     </Filter>
@@ -105,6 +102,15 @@
     </Filter>
     <Filter Include="Src\Application\Object\Character\Enemy\BaseEnemy">
       <UniqueIdentifier>{1d2e63a5-9281-46f1-8858-7c47eb9eb691}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\TimeManager">
+      <UniqueIdentifier>{c3ee3dcd-5363-4f7c-9d95-106922b42158}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\CameraManager">
+      <UniqueIdentifier>{3153201a-599c-46d3-90b9-b1471a18c8b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\GameEngine">
+      <UniqueIdentifier>{77030546-8671-4cbe-9a3a-3b134288833e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -291,6 +297,12 @@
     <ClInclude Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.h">
       <Filter>Src\Application\Object\Character\Enemy\BaseEnemy</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\System\GameEngine\GameEngine.h">
+      <Filter>Src\Application\System\GameEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\CameraManager\CameraManager.h">
+      <Filter>Src\Application\System\CameraManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -445,6 +457,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.cpp">
       <Filter>Src\Application\Object\Character\Enemy\BaseEnemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\CameraManager\CameraManager.cpp">
+      <Filter>Src\Application\System\CameraManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

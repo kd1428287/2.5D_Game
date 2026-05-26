@@ -37,6 +37,8 @@ void BaseScene::Update()
 	{
 		obj->Update(0);
 	}
+
+	UpdateCamera(0);
 }
 
 void BaseScene::PostUpdate()
@@ -155,4 +157,13 @@ void BaseScene::Event()
 void BaseScene::Init()
 {
 	// 各シーンで必要な内容を実装(オーバーライド)する
+}
+
+void BaseScene::UpdateCamera(float dt)
+{
+	m_camPos = { 0,0,-3 };
+	Math::Matrix camMat = 
+		//Math::Matrix::CreateRotationX(m_camAng.x) * 
+		Math::Matrix::CreateTranslation(m_camPos);
+	m_camera->SetCameraMatrix(camMat);
 }
