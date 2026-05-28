@@ -10,7 +10,13 @@ void InputManager::Init()
 }
 
 void InputManager::Update()
-{}
+{
+	prevKeys = currentKeys;
+
+	for (int i = 0; i < 256; ++i) {
+		currentKeys[i] = (GetAsyncKeyState(i) & 0x8000) != 0;
+	}
+}
 
 Math::Vector2 InputManager::GetMousePos()
 {

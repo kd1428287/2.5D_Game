@@ -3,8 +3,12 @@
 
 #include "Application/Object/Character/Player/Player.h"
 
+#include "Application/System/InputManager/InputManager.h"
+
 void GameScene::Event()
 {
+	InputManager::Instance().Update();
+
 	if (GetAsyncKeyState('T') & 0x8000)
 	{
 		SceneManager::Instance().SetNextScene
