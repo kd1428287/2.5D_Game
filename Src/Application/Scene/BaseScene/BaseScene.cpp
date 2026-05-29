@@ -1,5 +1,7 @@
 ﻿#include "BaseScene.h"
 
+#include "Application/System/CameraManager/CameraManager.h"
+
 void BaseScene::PreUpdate()
 {
 	// Updateの前の更新処理
@@ -38,7 +40,7 @@ void BaseScene::Update()
 		obj->Update(0);
 	}
 
-	UpdateCamera(0);
+	CameraManager::Instance().Update();
 }
 
 void BaseScene::PostUpdate()
@@ -52,10 +54,10 @@ void BaseScene::PostUpdate()
 void BaseScene::PreDraw()
 {
 	// カメラ情報がある場合はシェーダーにセット
-	if (m_camera)
+	/*if (m_camera)
 	{
 		m_camera->SetToShader();
-	}
+	}*/
 
 	for (auto& obj : m_objList)
 	{
@@ -161,9 +163,19 @@ void BaseScene::Init()
 
 void BaseScene::UpdateCamera(float dt)
 {
-	m_camPos = { 0,0,-3 };
-	Math::Matrix camMat = 
-		//Math::Matrix::CreateRotationX(m_camAng.x) * 
-		Math::Matrix::CreateTranslation(m_camPos);
-	m_camera->SetCameraMatrix(camMat);
+	//m_camPos = { 0,6,-2 };
+	//m_camAng.x = -30;
+	//Math::Matrix camMat = Math::Matrix::Identity;
+	//if (m_camTargetObj)
+	//{
+	//	 camMat =
+	//		//Math::Matrix::CreateRotationX(m_camAng.x) * 
+	//		Math::Matrix::CreateTranslation(m_camPos) * m_camTargetObj->GetMatrix();
+	//}
+	//else {
+	//	camMat =
+	//		Math::Matrix::CreateRotationX(m_camAng.x) * 
+	//		Math::Matrix::CreateTranslation(m_camPos);
+	//}
+	//m_camera->SetCameraMatrix(camMat);
 }

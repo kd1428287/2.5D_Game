@@ -43,7 +43,7 @@ protected :
 
 	std::unique_ptr<KdCamera> m_camera = nullptr;
 	Math::Vector3 m_camPos;
-	KdGameObject* m_camTargetObj;
+	KdGameObject* m_camTargetObj = nullptr;
 	Math::Vector3 m_camTargetPos;
 	Math::Vector3 m_camAng;
 

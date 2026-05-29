@@ -4,13 +4,13 @@ class InputManager;
 class CameraManager;
 class TimeManager;
 
-class GameEngine
+class GameManager
 {
 public:
 
-	static GameEngine& Instance()
+	static GameManager& Instance()
 	{
-		static GameEngine instance;
+		static GameManager instance;
 		return instance;
 	}
 
@@ -18,6 +18,6 @@ public:
 	void Update();
 	
 private:
-	GameEngine() { Init(); };
-	~GameEngine() {};
+	GameManager() { Init(); };
+	~GameManager() {};
 };

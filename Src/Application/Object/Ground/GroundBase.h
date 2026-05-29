@@ -1,15 +1,15 @@
 ﻿#pragma once
 
-class Ground : public KdGameObject
+class GroundBase : public KdGameObject
 {
 public:
-	Ground() {};
-	~Ground()override {};
+	GroundBase() {};
+	~GroundBase()override {};
 
 	void Init()override;
 	void DrawLit()override;
 
-	void SetPos(Math::Vector3 pos) { m_pos = pos; };
+	//void SetPos(Math::Vector3 pos) { m_pos = pos; };
 
 private:
 	std::shared_ptr<KdModelData> m_model;

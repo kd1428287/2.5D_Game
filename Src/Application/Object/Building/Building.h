@@ -3,8 +3,16 @@
 enum class BuildingState
 {
 	None = 0,
-	IsBreak,
+	UnBreak,
+	Break,
+	Erase,
 };
+
+enum class BuildingType
+{
+
+};
+
 class Building : public KdGameObject
 {
 public:
@@ -13,6 +21,7 @@ public:
 
 	void Init()override;
 	void Update(float dt)override;
+	void PostUpdate()override;
 
 	void GenerateDepthMapFromLight()override;
 	void DrawLit()override;
