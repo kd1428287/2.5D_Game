@@ -27,13 +27,14 @@ public:
 
 private:
 	void ActiveInput();
+	void UpdateMove(float dt);
 
 private:
 	std::shared_ptr<KdSquarePolygon> m_polygon = nullptr;
 	std::shared_ptr<KdModelData> m_model = nullptr;
 
 	Math::Vector3 m_pos;
-	Math::Vector3 m_nowVec;
+	Math::Vector3 m_angle;
 	Math::Vector3 m_moveVec;
 	float m_speed = 0.0f;
 	PlayerState m_state = PlayerState::Idle;

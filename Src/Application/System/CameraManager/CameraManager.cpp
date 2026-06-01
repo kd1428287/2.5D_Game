@@ -2,7 +2,7 @@
 
 void CameraManager::Init()
 {
-	m_camPos = { 0.0f,2.0f,-2.0f };
+	m_camPos = { 0.0f,3.0f,-3.0f };
 	m_camAng.x = 30.0f;
 	m_projection = 60.0f;
 	m_camera = std::make_unique<KdCamera>();
@@ -16,7 +16,10 @@ void CameraManager::Update()
 	Math::Matrix mat = 
 		(Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_camAng.x)) *
 		Math::Matrix::CreateTranslation(m_camPos)) * 
+		Math::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_camAng.z)) *
 		targetMat;
+
+	//Math::Matrix::CreateLookAt
 
 	m_camera->SetCameraMatrix(mat);
 

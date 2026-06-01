@@ -21,25 +21,26 @@ void Player::Init()
 	CameraManager::Instance().SetCameraTarget(this);
 	
 	//m_pos.y = 3.0f;
-	m_speed = 0.2f;
+	m_speed = 0.0f;
+	m_angle = { 0,0,0 };
 }
 
 void Player::PreUpdate()
 {
-	m_nowVec.Normalize();
-	m_moveVec = m_nowVec;
+	
 }
 
 void Player::Update(float dt)
 {
 	ActiveInput();
+	UpdateMove(dt);
+	
 
-	m_moveVec.Normalize();
-	m_pos += m_moveVec * m_speed;
-	m_speed *= 0.01f;
-	if (m_speed > 0.0f)m_speed = 0.0f;
-
-	m_mWorld = Math::Matrix::CreateTranslation(m_pos);
+	m_mWorld = 
+		Math::Matrix::CreateScale(1.0f) *
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.z)) *
+		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x)) *
+		Math::Matrix::CreateTranslation(m_pos);
 }
 
 void Player::PostUpdate()
@@ -64,6 +65,12 @@ void Player::ActiveInput()
 		m_state = PlayerState::Attack_start;
 	}*/
 
+	
+}
+
+void Player::UpdateMove(float dt)
+{
+	float zRotation = 0.0f;
 	if (InputManager::Instance().IsPressed(VK_UP))
 	{
 		m_speed += 0.05f;
@@ -74,10 +81,25 @@ void Player::ActiveInput()
 	}
 	if (InputManager::Instance().IsPressed(VK_LEFT))
 	{
-		m_moveVec.x = -0.2f;
+		zRotation = -1.0f;
 	}
 	if (InputManager::Instance().IsPressed(VK_RIGHT))
 	{
-		m_moveVec.x = 0.2f;
+		zRotation = 1.0f;
 	}
+
+	float pitch_rad = DirectX::XMConvertToRadians(m_angle.x);
+	float yaw_rad = DirectX::XMConvertToRadians(m_angle.z + zRotation);
+	float x = std::cos(pitch_rad) * std::sin(yaw_rad);
+	float y = std::sin(pitch_rad);
+	float z = std::cos(pitch_rad) * std::cos(yaw_rad);
+	m_moveVec = { x, y, z };
+
+	CameraManager::Instance().SetCameraAngleZ(zRotation);
+
+	m_moveVec.Normalize();
+	m_pos += m_moveVec * m_speed;
+	m_speed *= 0.01f * dt * 60.0f;
+	if (m_speed > -0.005f && m_speed < 0.005f)m_speed = 0.0f;
+	else m_angle.z += zRotation;
 }

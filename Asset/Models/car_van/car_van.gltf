@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.1.19",
+		"generator":"Khronos glTF Blender I/O v5.1.20",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -9,7 +9,8 @@
 			"name":"Scene",
 			"nodes":[
 				0,
-				1
+				1,
+				2
 			]
 		}
 	],
@@ -18,10 +19,15 @@
 			"mesh":0,
 			"name":"car-van-red_Cube.624",
 			"rotation":[
+				4.835649178858148e-06,
 				0.7071068286895752,
+				-0.7071068286895752,
+				4.835649633605499e-06
+			],
+			"translation":[
 				0,
 				0,
-				0.7071068286895752
+				-0.030729146674275398
 			]
 		},
 		{
@@ -36,6 +42,26 @@
 				0,
 				0.46072715520858765,
 				-0.0759456530213356
+			]
+		},
+		{
+			"mesh":2,
+			"name":"\u5e73\u9762",
+			"rotation":[
+				0,
+				1,
+				0,
+				6.957850018807221e-06
+			],
+			"scale":[
+				1,
+				1,
+				1.0469359159469604
+			],
+			"translation":[
+				0,
+				0.1896403431892395,
+				0
 			]
 		}
 	],
@@ -137,6 +163,20 @@
 				"metallicFactor":0,
 				"roughnessFactor":0.6900347471237183
 			}
+		},
+		{
+			"doubleSided":true,
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb",
+			"pbrMetallicRoughness":{
+				"baseColorFactor":[
+					0.21253660321235657,
+					0.18876974284648895,
+					0.21403133869171143,
+					1
+				],
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
 		}
 	],
 	"meshes":[
@@ -213,13 +253,27 @@
 					"indices":24
 				}
 			]
+		},
+		{
+			"name":"\u5e73\u9762",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":25,
+						"NORMAL":26,
+						"TEXCOORD_0":27
+					},
+					"indices":28,
+					"material":7
+				}
+			]
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":432,
+			"count":464,
 			"max":[
 				0.4643999934196472,
 				0.9936400055885315,
@@ -235,7 +289,7 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":432,
+			"count":464,
 			"type":"VEC3"
 		},
 		{
@@ -445,163 +499,221 @@
 			"componentType":5123,
 			"count":36,
 			"type":"SCALAR"
+		},
+		{
+			"bufferView":25,
+			"componentType":5126,
+			"count":4,
+			"max":[
+				0.42878538370132446,
+				0,
+				0.9636003971099854
+			],
+			"min":[
+				-0.42878538370132446,
+				0,
+				-1.0695621967315674
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":26,
+			"componentType":5126,
+			"count":4,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":27,
+			"componentType":5126,
+			"count":4,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":28,
+			"componentType":5123,
+			"count":6,
+			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":5184,
+			"byteLength":5568,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":5184,
-			"byteOffset":5184,
+			"byteLength":5568,
+			"byteOffset":5568,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":2148,
-			"byteOffset":10368,
+			"byteOffset":11136,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":240,
-			"byteOffset":12516,
+			"byteOffset":13284,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":240,
-			"byteOffset":12756,
+			"byteOffset":13524,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":60,
-			"byteOffset":12996,
+			"byteOffset":13764,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":1344,
-			"byteOffset":13056,
+			"byteOffset":13824,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":1344,
-			"byteOffset":14400,
+			"byteOffset":15168,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":264,
-			"byteOffset":15744,
+			"byteOffset":16512,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":1056,
-			"byteOffset":16008,
+			"byteOffset":16776,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":1056,
-			"byteOffset":17064,
+			"byteOffset":17832,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":444,
-			"byteOffset":18120,
+			"byteOffset":18888,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":6144,
-			"byteOffset":18564,
+			"byteOffset":19332,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":6144,
-			"byteOffset":24708,
+			"byteOffset":25476,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":3072,
-			"byteOffset":30852,
+			"byteOffset":31620,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":528,
-			"byteOffset":33924,
+			"byteOffset":34692,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":528,
-			"byteOffset":34452,
+			"byteOffset":35220,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":144,
-			"byteOffset":34980,
+			"byteOffset":35748,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":1920,
-			"byteOffset":35124,
+			"byteOffset":35892,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":1920,
-			"byteOffset":37044,
+			"byteOffset":37812,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":408,
-			"byteOffset":38964,
+			"byteOffset":39732,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":288,
-			"byteOffset":39372,
+			"byteOffset":40140,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":288,
-			"byteOffset":39660,
+			"byteOffset":40428,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":192,
-			"byteOffset":39948,
+			"byteOffset":40716,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":72,
-			"byteOffset":40140,
+			"byteOffset":40908,
+			"target":34963
+		},
+		{
+			"buffer":0,
+			"byteLength":48,
+			"byteOffset":40980,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":48,
+			"byteOffset":41028,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":32,
+			"byteOffset":41076,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":12,
+			"byteOffset":41108,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":40212,
+			"byteLength":41120,
 			"uri":"car_van.bin"
 		}
 	]

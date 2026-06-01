@@ -1,6 +1,7 @@
 ﻿#include "BaseScene.h"
 
 #include "Application/System/CameraManager/CameraManager.h"
+#include "../../main.h"
 
 void BaseScene::PreUpdate()
 {
@@ -37,7 +38,7 @@ void BaseScene::Update()
 	// KdGameObjectを継承した全てのオブジェクトの更新 (ポリモーフィズム)
 	for (auto& obj : m_objList)
 	{
-		obj->Update(0);
+		obj->Update(Application::Instance().GetDeltaTime());
 	}
 
 	CameraManager::Instance().Update();
