@@ -2,7 +2,7 @@
 #include"../SceneManager.h"
 
 #include "Application/Object/Character/Player/Player.h"
-#include "Application/Object/Ground/GroundBase.h"
+#include "Application/Object/Ground/Ground.h"
 
 #include "Application/System/InputManager/InputManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
@@ -31,8 +31,12 @@ void GameScene::Init()
 	player->Init();
 	m_objList.push_back(player);
 
-	auto ground = std::make_shared<GroundBase>();
+	auto ground = std::make_shared<Ground>();
 	ground->Init();
+	m_objList.push_back(ground);
+	ground = std::make_shared<Ground>();
+	ground->Init();
+	ground->SetPos({ 8,0,0 });
 	m_objList.push_back(ground);
 
 

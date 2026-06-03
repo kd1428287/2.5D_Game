@@ -124,6 +124,9 @@
     <Filter Include="Src\Application\System\GameManager">
       <UniqueIdentifier>{77030546-8671-4cbe-9a3a-3b134288833e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Building\EventObject">
+      <UniqueIdentifier>{6d0155df-1d34-4e5d-9f27-8bb52a1faebd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -327,6 +330,9 @@
     <ClInclude Include="Src\Application\System\GameManager\GameManager.h">
       <Filter>Src\Application\System\GameManager</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Building\EventObject\EventObject.h">
+      <Filter>Src\Application\Object\Building\EventObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -499,6 +505,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\System\GameManager\GameManager.cpp">
       <Filter>Src\Application\System\GameManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Building\EventObject\EventObject.cpp">
+      <Filter>Src\Application\Object\Building\EventObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

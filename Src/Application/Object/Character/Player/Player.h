@@ -1,14 +1,14 @@
 ﻿#pragma once
 
-enum class PlayerState
+enum class SpeedLevel
 {
 	Idle,
-	Walk_start,
-	Walk_middle,
-	Walk_end,
-	Attack_start,
-	Attack_middle,
-	Attack_end,
+	Speed1,
+	Speed2,
+	Speed3,
+	Speed4,
+	Speed5,
+	Clash,
 };
 
 class Player : public KdGameObject
@@ -25,6 +25,8 @@ public:
 	void GenerateDepthMapFromLight()override;
 	void DrawLit()override;
 
+	void ChangeSpeedLevel(SpeedLevel level);
+
 private:
 	void ActiveInput();
 	void UpdateMove(float dt);
@@ -36,6 +38,10 @@ private:
 	Math::Vector3 m_pos;
 	Math::Vector3 m_angle;
 	Math::Vector3 m_moveVec;
-	float m_speed = 0.0f;
-	PlayerState m_state = PlayerState::Idle;
+	float m_speed = 0.0f;				//スピード
+	float m_gravity = 0.0f;				//重力
+
+	float m_acceleration = 0.0f;		//加速力
+	float m_turningForce = 0.0f;		//旋回力
+	SpeedLevel m_level = SpeedLevel::Idle;
 };

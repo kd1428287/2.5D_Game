@@ -15,8 +15,9 @@ void CameraManager::Update()
 	if (m_targetObj)targetMat = m_targetObj->GetMatrix();
 	Math::Matrix mat = 
 		(Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_camAng.x)) *
+			
 		Math::Matrix::CreateTranslation(m_camPos)) * 
-		Math::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_camAng.z)) *
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_camAng.y)) *
 		targetMat;
 
 	//Math::Matrix::CreateLookAt
