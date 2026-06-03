@@ -321,9 +321,6 @@
     <ClInclude Include="Src\Application\Object\Building\Building.h">
       <Filter>Src\Application\Object\Building</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Application\Object\Ground\GroundBase.h">
-      <Filter>Src\Application\Object\Ground</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Application\Object\ObjectManager\ObjectManager.h">
       <Filter>Src\Application\Object\ObjectManager</Filter>
     </ClInclude>
@@ -332,6 +329,9 @@
     </ClInclude>
     <ClInclude Include="Src\Application\Object\Building\EventObject\EventObject.h">
       <Filter>Src\Application\Object\Building\EventObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Ground\Ground.h">
+      <Filter>Src\Application\Object\Ground</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -497,9 +497,6 @@
     <ClCompile Include="Src\Application\Object\Building\Building.cpp">
       <Filter>Src\Application\Object\Building</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Application\Object\Ground\GroundBase.cpp">
-      <Filter>Src\Application\Object\Ground</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Application\Object\ObjectManager\ObjectManager.cpp">
       <Filter>Src\Application\Object\ObjectManager</Filter>
     </ClCompile>
@@ -508,6 +505,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Building\EventObject\EventObject.cpp">
       <Filter>Src\Application\Object\Building\EventObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Ground\Ground.cpp">
+      <Filter>Src\Application\Object\Ground</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

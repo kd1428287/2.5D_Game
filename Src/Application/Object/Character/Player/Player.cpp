@@ -40,7 +40,6 @@ void Player::Update(float dt)
 	
 
 	m_mWorld = 
-		Math::Matrix::CreateScale(1.0f) *
 		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.z)) *
 		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x)) *
 		Math::Matrix::CreateTranslation(m_pos);
@@ -99,7 +98,7 @@ void Player::PostUpdate()
 	if (hit)
 	{
 		// 当たっていたらプレイヤー座標を更新
-		m_pos = hitPos + Math::Vector3(0, -0.1f, 0);
+		m_pos = hitPos +Math::Vector3(0, -0.1f, 0);
 		m_gravity = 0.0f;
 	}
 
@@ -168,7 +167,7 @@ void Player::PostUpdate()
 	// ----------------------------------------------------
 	// 全ての押し出しが終わった後の最終的な m_pos で m_mWorld を確定させる
 	// ----------------------------------------------------
-	m_mWorld = Math::Matrix::CreateScale(1.0f) *
+	m_mWorld = 
 		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.z)) *
 		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x)) *
 		Math::Matrix::CreateTranslation(m_pos);
@@ -220,11 +219,12 @@ void Player::UpdateMove(float dt)
 	// 一時的な上下移動
 	if (InputManager::Instance().IsPressed(VK_SHIFT))
 	{
-		m_gravity -= 2.0f * dt;
+		m_gravity += 0.1f * dt;
+		//m_pos.y -= 0.05f;
 	}
 	if (InputManager::Instance().IsPressed(VK_SPACE))
 	{
-		m_pos.y += 0.05f;
+		m_gravity -= 0.1f * dt;
 	}
 
 	float pitch_rad = DirectX::XMConvertToRadians(m_angle.x);
@@ -262,7 +262,7 @@ void Player::UpdateMove(float dt)
 		break;
 	}
 
-	m_gravity += 0.1f * dt;
+	m_gravity += 0.01f * dt;
 
 	m_moveVec.Normalize();
 	m_pos += m_moveVec * m_speed * dt;

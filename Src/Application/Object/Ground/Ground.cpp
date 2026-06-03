@@ -11,6 +11,8 @@ void Ground::Init()
 	// 当たり判定を付けたいので、実体化
 	m_pCollider = std::make_unique<KdCollider>();
 
+	m_model->Load("Asset/Models/map_tiles/map_grass.gltf");
+
 	// モデルの形状で当たり判定を登録
 	m_pCollider->RegisterCollisionShape
 	(
