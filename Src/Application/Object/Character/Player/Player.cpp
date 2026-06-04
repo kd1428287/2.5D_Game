@@ -14,12 +14,9 @@ void Player::Init()
 
 	// モデル
 	m_model = std::make_shared<KdModelData>();
-	m_model->Load("Asset/Models/car_van/car_van.gltf");
-
-	//カメラ追従対象設定
-	CameraManager::Instance().SetCameraTarget(this);
+	m_model = RESOURCE.GetModel("Asset/Models/car_van/car_van.gltf");
 	
-	m_pos = { 0,5,0 };
+	//m_pos = { 0,5,0 };
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
 
@@ -237,9 +234,6 @@ void Player::UpdateMove(float dt)
 	float camAng = 0;
 	if (zRotation > 0)camAng = -10.0f;
 	else if (zRotation < 0)camAng = 10.0f;
-
-	//CameraManager::Instance().SetCameraAngleY((zRotation * -1.0f));
-	CameraManager::Instance().SetCameraAngleY(camAng);
 
 	// 速度レベル毎の上限処理
 	switch (m_level)

@@ -6,6 +6,9 @@
 
 #include "Application/System/InputManager/InputManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
+#include "Application/Object/ObjectManager/ObjectManager.h"
+#include "Application/Object/ObjectManager/MapManager/MapManager.h"
+
 
 void GameScene::Event()
 {
@@ -22,22 +25,15 @@ void GameScene::Event()
 
 void GameScene::Init()
 {
-	m_camera = std::make_unique<KdCamera>();
-	m_camera->SetProjectionMatrix(60);
+	BaseScene::Init();
+	
+	Math::Vector3 pos = { 0,2,0 };
 
-	CameraManager::Instance().Init();
+	auto player = m_objectManager->CreateObject<Player>(pos);
 
-	auto player = std::make_shared<Player>();
-	player->Init();
-	m_objList.push_back(player);
+	m_cameraManager->SetCameraTarget(player);
 
-	auto ground = std::make_shared<Ground>();
-	ground->Init();
-	m_objList.push_back(ground);
-	ground = std::make_shared<Ground>();
-	ground->Init();
-	ground->SetPos({ 8,0,0 });
-	m_objList.push_back(ground);
+	m_mapManager->GenarateMap(*m_objectManager);
 
-
+	
 }

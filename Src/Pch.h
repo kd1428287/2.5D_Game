@@ -120,3 +120,6 @@
 //
 //===============================================
 #include "Framework/KdFramework.h"
+
+// リソース管理
+#include "Application/System/ResourceManager/ResourceManager.h"

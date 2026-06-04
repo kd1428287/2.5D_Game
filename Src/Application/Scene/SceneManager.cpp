@@ -45,7 +45,7 @@ void SceneManager::DrawDebug()
 	m_currentScene->DrawDebug();
 }
 
-const std::list<std::shared_ptr<KdGameObject>>& SceneManager::GetObjList()
+const std::vector<std::shared_ptr<KdGameObject>>& SceneManager::GetObjList()
 {
 	return m_currentScene->GetObjList();
 }
@@ -53,21 +53,6 @@ const std::list<std::shared_ptr<KdGameObject>>& SceneManager::GetObjList()
 void SceneManager::AddObject(const std::shared_ptr<KdGameObject>& _obj)
 {
 	m_currentScene->AddObject(_obj);
-}
-
-void SceneManager::SetCameraPos(Math::Vector3 camPos)
-{
-	m_currentScene->SetCameraPos(camPos);
-}
-
-void SceneManager::SetCameraPos(KdGameObject* camTargetObj)
-{
-	m_currentScene->SetCameraPos(camTargetObj);
-}
-
-void SceneManager::SetCameraAngle(float xAng, float yAng, float zAng)
-{
-	m_currentScene->SetCameraAngle(xAng, yAng, zAng);
 }
 
 void SceneManager::ChangeScene(SceneType _sceneType)

@@ -27,10 +27,20 @@ public:
 	void DrawSprite();
 	void DrawDebug();
 
-	template<typename T>
-	T* CreateObject(Math::Vector3 pos)
+	const std::vector<std::shared_ptr<KdGameObject>>& GetObjList() 
 	{
-		std::shared_ptr<T> obj = std::make_shared<T>();
+		return m_objList;
+	}
+
+	void AddObject(const std::shared_ptr<KdGameObject>& obj)
+	{
+		m_nextObjList.push_back(obj);
+	}
+
+	template<typename T,typename... Args>
+	T* CreateObject(Args ... args)
+	{
+		std::shared_ptr<T> obj = std::make_shared<T>(args ...);
 		obj->Init();
 		m_objList.push_back(obj);
 		return obj.get();
@@ -38,4 +48,5 @@ public:
 
 private:
 	std::vector<std::shared_ptr<KdGameObject>> m_objList;
+	std::vector<std::shared_ptr<KdGameObject>> m_nextObjList;
 };

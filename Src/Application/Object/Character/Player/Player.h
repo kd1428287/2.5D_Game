@@ -15,6 +15,7 @@ class Player : public KdGameObject
 {
 public:
 	Player() {};
+	Player(Math::Vector3 pos) : m_pos(pos) {};
 	~Player()override {};
 
 	void Init()override;

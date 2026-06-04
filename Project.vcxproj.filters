@@ -133,6 +133,9 @@
     <Filter Include="Src\Application\Object\EventObject">
       <UniqueIdentifier>{6d0155df-1d34-4e5d-9f27-8bb52a1faebd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\ObjectManager\MapManager">
+      <UniqueIdentifier>{a5bd9be0-c458-45df-bd3d-c384fe4be8ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -348,6 +351,9 @@
     <ClInclude Include="Src\Application\Object\EventObject\EventObject.h">
       <Filter>Src\Application\Object\EventObject</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h">
+      <Filter>Src\Application\Object\ObjectManager\MapManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -526,6 +532,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\EventObject\EventObject.cpp">
       <Filter>Src\Application\Object\EventObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp">
+      <Filter>Src\Application\Object\ObjectManager\MapManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

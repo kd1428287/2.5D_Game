@@ -2,6 +2,11 @@
 
 class CameraManager;
 class ObjectManager;
+class MapManager;
+
+#include "Application/Object/ObjectManager/ObjectManager.h"
+#include "Application/Object/ObjectManager/MapManager/MapManager.h"
+#include "Application/System/CameraManager/CameraManager.h"
 
 class BaseScene
 {
@@ -20,16 +25,11 @@ public :
 	void DrawDebug();
 
 	// オブジェクトリストを取得
-	const std::list<std::shared_ptr<KdGameObject>>& GetObjList()
-	{
-		return m_objList;
-	}
+	const std::vector<std::shared_ptr<KdGameObject>>& GetObjList();
+	
 	
 	// オブジェクトリストに追加
-	void AddObject(const std::shared_ptr<KdGameObject>& _obj)
-	{
-		m_objList.push_back(_obj);
-	}
+	void AddObject(const std::shared_ptr<KdGameObject>& _obj);
 
 protected :
 
@@ -37,9 +37,12 @@ protected :
 	virtual void Event();
 	virtual void Init();
 
+	// マネージャーを各シーンで保持
 	std::unique_ptr<CameraManager> m_cameraManager = nullptr;
 	std::unique_ptr<ObjectManager> m_objectManager = nullptr;
+	std::unique_ptr<MapManager>m_mapManager = nullptr;
 
+	// オブジェクト管理をオブジェクトマネージャーに移管
 	// 全オブジェクトのアドレスをリストで管理
-	std::list<std::shared_ptr<KdGameObject>> m_objList;
+	//std::list<std::shared_ptr<KdGameObject>> m_objList;
 };

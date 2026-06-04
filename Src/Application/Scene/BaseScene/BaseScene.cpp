@@ -6,65 +6,29 @@
 
 void BaseScene::PreUpdate()
 {
-	// Updateの前の更新処理
-	// オブジェクトリストの整理 ・・・ 無効なオブジェクトを削除
-	auto it = m_objList.begin();
-
-	while (it != m_objList.end())
-	{
-		if ((*it)->IsExpired())	// IsExpired() ・・・ 無効ならtrue
-		{
-			// 無効なオブジェクトをリストから削除
-			it = m_objList.erase(it);
-		}
-		else
-		{
-			++it;	// 次の要素へイテレータを進める
-		}
-	}
-
-	// ↑の後には有効なオブジェクトだけのリストになっている
-
-	for (auto& obj : m_objList)
-	{
-		obj->PreUpdate();
-	}
+	m_objectManager->PreUpdate();
 }
 
 void BaseScene::Update()
 {
+	float deltaTime = Application::Instance().GetDeltaTime();
+
 	// シーン毎のイベント処理
 	Event();
 
-	// KdGameObjectを継承した全てのオブジェクトの更新 (ポリモーフィズム)
-	for (auto& obj : m_objList)
-	{
-		obj->Update(Application::Instance().GetDeltaTime());
-	}
+	m_objectManager->Update(deltaTime);
 
-	m_cameraManager->Update(Application::Instance().GetDeltaTime());
+	m_cameraManager->Update(deltaTime);
 }
 
 void BaseScene::PostUpdate()
 {
-	for (auto& obj : m_objList)
-	{
-		obj->PostUpdate();
-	}
+	m_objectManager->PostUpdate();
 }
 
 void BaseScene::PreDraw()
 {
-	// カメラ情報がある場合はシェーダーにセット
-	/*if (m_camera)
-	{
-		m_camera->SetToShader();
-	}*/
-
-	for (auto& obj : m_objList)
-	{
-		obj->PreDraw();
-	}
+	m_objectManager->PreDraw();
 }
 
 void BaseScene::Draw()
@@ -73,10 +37,7 @@ void BaseScene::Draw()
 	// 光を遮るオブジェクト(影を生み出す要因となるオブジェクト)をBeginとEndの間にまとめてDrawする
 	KdShaderManager::Instance().m_StandardShader.BeginGenerateDepthMapFromLight();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->GenerateDepthMapFromLight();
-		}
+		m_objectManager->GenerateDepthMapFromLight();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndGenerateDepthMapFromLight();
 
@@ -84,10 +45,7 @@ void BaseScene::Draw()
 	// 陰影のないオブジェクト(背景など)はBeginとEndの間にまとめてDrawする
 	KdShaderManager::Instance().m_StandardShader.BeginUnLit();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->DrawUnLit();
-		}
+		m_objectManager->DrawUnLit();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndUnLit();
 
@@ -95,10 +53,7 @@ void BaseScene::Draw()
 	// 陰影のあるオブジェクト(光源の影響を受けるオブジェクト)はBeginとEndの間にまとめてDrawする
 	KdShaderManager::Instance().m_StandardShader.BeginLit();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->DrawLit();
-		}
+		m_objectManager->DrawLit();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndLit();
 
@@ -106,10 +61,7 @@ void BaseScene::Draw()
 	// 陰影のないオブジェクト(エフェクトなど)はBeginとEndの間にまとめてDrawする
 	KdShaderManager::Instance().m_StandardShader.BeginUnLit();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->DrawEffect();
-		}
+		m_objectManager->DrawEffect();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndUnLit();
 
@@ -117,10 +69,7 @@ void BaseScene::Draw()
 	// 光源オブジェクト(自ら光るオブジェクトやエフェクト)はBeginとEndの間にまとめてDrawする
 	KdShaderManager::Instance().m_postProcessShader.BeginBright();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->DrawBright();
-		}
+		m_objectManager->DrawBright();
 	}
 	KdShaderManager::Instance().m_postProcessShader.EndBright();
 }
@@ -131,10 +80,7 @@ void BaseScene::DrawSprite()
 	// 2Dの描画はこの間で行う
 	KdShaderManager::Instance().m_spriteShader.Begin();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->DrawSprite();
-		}
+		m_objectManager->DrawSprite();
 	}
 	KdShaderManager::Instance().m_spriteShader.End();
 }
@@ -145,12 +91,19 @@ void BaseScene::DrawDebug()
 	// デバッグ情報の描画はこの間で行う
 	KdShaderManager::Instance().m_StandardShader.BeginUnLit();
 	{
-		for (auto& obj : m_objList)
-		{
-			obj->DrawDebug();
-		}
+		m_objectManager->DrawDebug();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndUnLit();
+}
+
+const std::vector<std::shared_ptr<KdGameObject>>& BaseScene::GetObjList()
+{
+	return m_objectManager->GetObjList();
+}
+
+void BaseScene::AddObject(const std::shared_ptr<KdGameObject>& _obj)
+{
+	m_objectManager->AddObject(_obj);
 }
 
 void BaseScene::Event()
@@ -164,4 +117,6 @@ void BaseScene::Init()
 	m_cameraManager->Init();
 	m_objectManager = std::make_unique<ObjectManager>();
 	m_objectManager->Init();
+	m_mapManager = std::make_unique<MapManager>();
+	m_mapManager->Init();
 }

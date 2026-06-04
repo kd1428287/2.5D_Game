@@ -279,6 +279,7 @@
     <ClInclude Include="Src\Application\Object\Character\Player\Player.h" />
     <ClInclude Include="Src\Application\Object\EventObject\EventObject.h" />
     <ClInclude Include="Src\Application\Object\Ground\Ground.h" />
+    <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\ObjectManager.h" />
     <ClInclude Include="Src\Application\Scene\BaseScene\BaseScene.h" />
     <ClInclude Include="Src\Application\Scene\GameScene\GameScene.h" />
@@ -345,6 +346,7 @@
     <ClCompile Include="Src\Application\Object\Character\Player\Player.cpp" />
     <ClCompile Include="Src\Application\Object\EventObject\EventObject.cpp" />
     <ClCompile Include="Src\Application\Object\Ground\Ground.cpp" />
+    <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\ObjectManager.cpp" />
     <ClCompile Include="Src\Application\Scene\BaseScene\BaseScene.cpp" />
     <ClCompile Include="Src\Application\Scene\GameScene\GameScene.cpp" />

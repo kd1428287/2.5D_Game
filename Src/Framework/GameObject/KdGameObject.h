@@ -22,6 +22,7 @@ public:
 	virtual void Init() {}
 
 	virtual void PreUpdate() {}
+	// デルタタイム追加
 	virtual void Update(float deltaTime) {}
 	virtual void PostUpdate() {}
 

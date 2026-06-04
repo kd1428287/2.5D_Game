@@ -29,14 +29,10 @@ public :
 	}
 
 	// 現在のシーンのオブジェクトリストを取得
-	const std::list<std::shared_ptr<KdGameObject>>& GetObjList();
+	const std::vector<std::shared_ptr<KdGameObject>>& GetObjList();
 
 	// 現在のシーンにオブジェクトを追加
 	void AddObject(const std::shared_ptr<KdGameObject>& _obj);
-
-	void SetCameraPos(Math::Vector3 camPos);
-	void SetCameraPos(KdGameObject* camTargetObj);
-	void SetCameraAngle(float xAng, float yAng, float zAng);
 
 private :
 
