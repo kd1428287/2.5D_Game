@@ -1,6 +1,7 @@
 ﻿#include "BaseScene.h"
 
 #include "Application/System/CameraManager/CameraManager.h"
+#include "Application/Object/ObjectManager/ObjectManager.h"
 #include "../../main.h"
 
 void BaseScene::PreUpdate()
@@ -41,7 +42,7 @@ void BaseScene::Update()
 		obj->Update(Application::Instance().GetDeltaTime());
 	}
 
-	CameraManager::Instance().Update();
+	m_cameraManager->Update(Application::Instance().GetDeltaTime());
 }
 
 void BaseScene::PostUpdate()
@@ -159,24 +160,8 @@ void BaseScene::Event()
 
 void BaseScene::Init()
 {
-	// 各シーンで必要な内容を実装(オーバーライド)する
-}
-
-void BaseScene::UpdateCamera(float dt)
-{
-	//m_camPos = { 0,6,-2 };
-	//m_camAng.x = -30;
-	//Math::Matrix camMat = Math::Matrix::Identity;
-	//if (m_camTargetObj)
-	//{
-	//	 camMat =
-	//		//Math::Matrix::CreateRotationX(m_camAng.x) * 
-	//		Math::Matrix::CreateTranslation(m_camPos) * m_camTargetObj->GetMatrix();
-	//}
-	//else {
-	//	camMat =
-	//		Math::Matrix::CreateRotationX(m_camAng.x) * 
-	//		Math::Matrix::CreateTranslation(m_camPos);
-	//}
-	//m_camera->SetCameraMatrix(camMat);
+	m_cameraManager = std::make_unique<CameraManager>();
+	m_cameraManager->Init();
+	m_objectManager = std::make_unique<ObjectManager>();
+	m_objectManager->Init();
 }

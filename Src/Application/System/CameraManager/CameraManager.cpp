@@ -9,7 +9,7 @@ void CameraManager::Init()
 	m_camera->SetProjectionMatrix(m_projection);
 }
 
-void CameraManager::Update()
+void CameraManager::Update(float dt)
 {
 	Math::Matrix targetMat = Math::Matrix::Identity;
 	if (m_targetObj)targetMat = m_targetObj->GetMatrix();

@@ -4,14 +4,11 @@
 class CameraManager
 {
 public:
-	static CameraManager& Instance()
-	{
-		static CameraManager instance;
-		return instance;
-	}
+	CameraManager() {};
+	~CameraManager() {};
 
 	void Init();
-	void Update();
+	void Update(float dt);
 
 	void SetCameraTarget(KdGameObject* targetObj) { m_targetObj = targetObj; };
 	void SetCameraPos(Math::Vector3 camPos) { m_camPos = camPos; }
@@ -21,8 +18,7 @@ public:
 
 
 private:
-	CameraManager() { Init(); };
-	~CameraManager() {};
+	
 
 	std::unique_ptr<KdCamera> m_camera = nullptr;
 	Math::Vector3 m_camPos;

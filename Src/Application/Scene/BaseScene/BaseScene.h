@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+class CameraManager;
+class ObjectManager;
+
 class BaseScene
 {
 public :
@@ -28,24 +31,14 @@ public :
 		m_objList.push_back(_obj);
 	}
 
-	// カメラ座標/角度セット
-	void SetCameraPos(Math::Vector3 camPos) { m_camTargetPos = camPos; }
-	void SetCameraPos(KdGameObject* camTarget) { m_camTargetObj = camTarget; }
-	void SetCameraAngle(float xAng, float yAng, float zAng) { m_camAng = Math::Vector3(xAng, yAng, zAng); }
-
 protected :
 
 	// 継承先シーンで必要ならオーバーライドする
 	virtual void Event();
 	virtual void Init();
 
-	void UpdateCamera(float dt);
-
-	std::unique_ptr<KdCamera> m_camera = nullptr;
-	Math::Vector3 m_camPos;
-	KdGameObject* m_camTargetObj = nullptr;
-	Math::Vector3 m_camTargetPos;
-	Math::Vector3 m_camAng;
+	std::unique_ptr<CameraManager> m_cameraManager = nullptr;
+	std::unique_ptr<ObjectManager> m_objectManager = nullptr;
 
 	// 全オブジェクトのアドレスをリストで管理
 	std::list<std::shared_ptr<KdGameObject>> m_objList;
