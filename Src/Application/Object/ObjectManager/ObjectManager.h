@@ -38,12 +38,12 @@ public:
 	}
 
 	template<typename T,typename... Args>
-	T* CreateObject(Args ... args)
+	std::shared_ptr<T> CreateObject(Args ... args)
 	{
 		std::shared_ptr<T> obj = std::make_shared<T>(args ...);
 		obj->Init();
 		m_objList.push_back(obj);
-		return obj.get();
+		return obj;
 	}
 
 private:

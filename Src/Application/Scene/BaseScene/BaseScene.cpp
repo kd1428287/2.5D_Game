@@ -18,12 +18,14 @@ void BaseScene::Update()
 
 	m_objectManager->Update(deltaTime);
 
-	m_cameraManager->Update(deltaTime);
+	//m_cameraManager->Update(deltaTime);
 }
 
 void BaseScene::PostUpdate()
 {
 	m_objectManager->PostUpdate();
+
+	m_cameraManager->Update(Application::Instance().GetDeltaTime());
 }
 
 void BaseScene::PreDraw()
