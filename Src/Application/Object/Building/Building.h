@@ -17,6 +17,10 @@ class Building : public KdGameObject
 {
 public:
 	Building() {};
+	Building(Math::Vector3 pos) 
+	{
+		m_mWorld = Math::Matrix::CreateTranslation(pos);
+	};
 	~Building()override {};
 
 	void Init()override;

@@ -181,7 +181,7 @@ void Player::PostUpdate()
 		rotMat * 
 		Math::Matrix::CreateTranslation(m_pos);
 
-	KdDebugGUI::Instance().AddLog("X:%f,\nY:%f,\nZ:%f,\n",m_pos.x,m_pos.y,m_pos.z);
+	//KdDebugGUI::Instance().AddLog("X:%f,\nY:%f,\nZ:%f,\n",m_pos.x,m_pos.y,m_pos.z);
 }
 
 void Player::GenerateDepthMapFromLight()

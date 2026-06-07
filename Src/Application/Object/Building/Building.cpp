@@ -3,7 +3,7 @@
 void Building::Init()
 {
 	m_model = std::make_shared<KdModelData>();
-	m_model->Load("Asset/Models/");
+	m_model->Load("Asset/Models/map_tiles/building.gltf");
 
 	// 当たり判定を付けたいので、実体化
 	m_pCollider = std::make_unique<KdCollider>();
@@ -21,8 +21,15 @@ void Building::Init()
 void Building::Update(float dt)
 {}
 
-void Building::GenerateDepthMapFromLight()
+void Building::PostUpdate()
 {}
 
+void Building::GenerateDepthMapFromLight()
+{
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
+}
+
 void Building::DrawLit()
-{}
+{
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
+}
