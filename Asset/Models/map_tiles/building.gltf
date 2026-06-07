@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.1.19",
+		"generator":"Khronos glTF Blender I/O v5.1.20",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -8,7 +8,8 @@
 		{
 			"name":"Scene",
 			"nodes":[
-				0
+				0,
+				1
 			]
 		}
 	],
@@ -17,16 +18,20 @@
 			"mesh":0,
 			"name":"building-office-small_Cube.130",
 			"rotation":[
-				0.7071068286895752,
+				0.70710688829422,
 				0,
 				0,
-				0.7071068286895752
+				0.7071066498756409
 			],
 			"translation":[
 				0,
 				-1,
 				0
 			]
+		},
+		{
+			"mesh":1,
+			"name":"COL"
 		}
 	],
 	"materials":[
@@ -56,6 +61,19 @@
 					"material":0
 				}
 			]
+		},
+		{
+			"name":"\u7acb\u65b9\u4f53",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":4,
+						"NORMAL":5,
+						"TEXCOORD_0":6
+					},
+					"indices":7
+				}
+			]
 		}
 	],
 	"textures":[
@@ -67,8 +85,8 @@
 	"images":[
 		{
 			"mimeType":"image/jpeg",
-			"name":"basetexture.jpg",
-			"uri":"../../../../../../../_MyWorks/2y/2.5D_Game/Asset/Models/landscape_asset_v2a/textures/basetexture.jpg"
+			"name":"basetexture",
+			"uri":"basetexture.jpg"
 		}
 	],
 	"accessors":[
@@ -105,6 +123,40 @@
 			"componentType":5123,
 			"count":1638,
 			"type":"SCALAR"
+		},
+		{
+			"bufferView":4,
+			"componentType":5126,
+			"count":24,
+			"max":[
+				2.969183921813965,
+				4.007410049438477,
+				2.9895431995391846
+			],
+			"min":[
+				-2.969183921813965,
+				-0.015934109687805176,
+				-2.9895431995391846
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":5,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":6,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":7,
+			"componentType":5123,
+			"count":36,
+			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
@@ -131,6 +183,30 @@
 			"byteLength":3276,
 			"byteOffset":22400,
 			"target":34963
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":25676,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":25964,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
+			"byteOffset":26252,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":72,
+			"byteOffset":26444,
+			"target":34963
 		}
 	],
 	"samplers":[
@@ -141,7 +217,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":25676,
+			"byteLength":26516,
 			"uri":"building.bin"
 		}
 	]

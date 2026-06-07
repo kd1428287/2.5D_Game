@@ -6,10 +6,11 @@
 void CameraManager::Init()
 {
 	m_camDis = { 0.0f,3.0f,-3.0f };
-	m_camAng.x = 30.0f;
+	m_camAng.x = 25.0f;
 	m_projection = 60.0f;
 	m_camera = std::make_unique<KdCamera>();
-	m_camera->SetProjectionMatrix(m_projection);
+	m_camera->SetProjectionMatrix(m_projection,2000.f,2.f);
+	//m_camera->SetFocus(5.f, 50.f, 2.f);
 	m_speed = 0.5f;
 }
 
@@ -22,7 +23,7 @@ void CameraManager::Update(float dt)
 	float targetOffset = steerInput * -15.0f; // 目標角度
 
 	// 補間（0.1f は環境により調整。本来は dt を使うのが理想）
-	float t = 0.1f * dt;
+	float t = 1.5f * dt;
 	currentSteerOffset = std::lerp(currentSteerOffset, targetOffset, t);
 
 	// 2. ターゲット行列から位置を補間して取得

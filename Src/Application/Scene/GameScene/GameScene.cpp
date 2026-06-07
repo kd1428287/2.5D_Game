@@ -3,6 +3,7 @@
 
 #include "Application/Object/Character/Player/Player.h"
 #include "Application/Object/Ground/Ground.h"
+#include "Application/Object/SkySphere/SkySphere.h"
 
 #include "Application/System/InputManager/InputManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
@@ -34,6 +35,8 @@ void GameScene::Init()
 	m_cameraManager->SetCameraTarget(player);
 
 	m_mapManager->GenarateMap(*m_objectManager);
+
+	auto sky = m_objectManager->CreateObject<SkySphere>();
 
 	
 }

@@ -1,5 +1,11 @@
 ﻿#include "ObjectManager.h"
 #include "Application/main.h"
+#include "MapManager/MapManager.h"
+#include "../Character/Player/Player.h"
+#include "../Building/Building.h"
+#include "../Ground/Ground.h"
+#include "../SkySphere/SkySphere.h"
+#include "../EventObject/EventObject.h"
 
 void ObjectManager::Init()
 {}

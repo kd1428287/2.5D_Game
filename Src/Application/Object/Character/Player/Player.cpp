@@ -19,10 +19,12 @@ void Player::Init()
 	//m_pos = { 0,5,0 };
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
-	m_level = SpeedLevel::Speed3;
+	m_level = SpeedLevel::Idle;
 
-	m_acceleration = 0.05f;
-	m_acceleration = 1.0f;
+	ChangeSpeedLevel(SpeedLevel::Idle);
+
+	//m_acceleration = 0.05f;
+	m_acceleration = 100.0f;
 
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
@@ -38,24 +40,38 @@ void Player::PreUpdate()
 
 void Player::Update(float dt)
 {
-	
-	ActiveInput();
 	UpdateMove(dt);
-	
-
-	/*m_mWorld = 
-		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.y)) *
-		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x)) *
-		Math::Matrix::CreateTranslation(m_pos);*/
+	if (m_level == SpeedLevel::Clash)
+	{
+		m_clashCount -= dt;
+		if (m_clashCount <= 0.0f)
+		{
+			ChangeSpeedLevel(SpeedLevel::Idle); 
+			m_clashCount = 0.0f;
+		}
+	}
 }
 
 void Player::PostUpdate()
 {
-	// 当たり判定はココ！！
-		// レイ判定 (ゲロ重い)
+	Math::Matrix rotMat =
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.y)) *
+		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x));
 
-		// 当たる側の処理
-		// レイ判定用の変数を設定
+	std::vector<std::shared_ptr<KdGameObject>> objList;
+	Math::Vector3 length;
+	float radius = m_gravity + 8.0f;
+	for (auto& obj : SceneManager::Instance().GetObjList())
+	{
+		length = m_pos + m_amountMove - obj->GetPos();
+		if (length.Length() < radius)objList.push_back(obj);
+	}
+
+	// 当たり判定はココ！！
+	// レイ判定 (ゲロ重い)
+
+	// 当たる側の処理
+	// レイ判定用の変数を設定
 	KdCollider::RayInfo ray;
 	// レイの発射位置を設定
 	ray.m_pos = m_pos + m_amountMove;
@@ -77,8 +93,8 @@ void Player::PostUpdate()
 	// レイに当たったオブジェクト情報を格納するリストを用意
 	std::list<KdCollider::CollisionResult> retRayList;
 
-	// 全オブジェクトと当たり判定
-	for (auto& obj : SceneManager::Instance().GetObjList())
+	// 判定
+	for (auto& obj : objList)
 	{
 		//		↓当たり判定を行う関数
 		obj->Intersects(ray, &retRayList);
@@ -108,9 +124,6 @@ void Player::PostUpdate()
 
 	
 	// 球(スフィア)判定=========
-	Math::Matrix rotMat = 
-		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.y)) *
-		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x));
 
 	const int SPHERE_NUM = 3;
 	float zOffset[SPHERE_NUM] = { 0.7f,0.0f,-0.7f };
@@ -129,7 +142,7 @@ void Player::PostUpdate()
 
 		// 車幅の半分くらいを半径に設定
 		sphere[i].m_sphere.Radius = 0.5f;
-		sphere[i].m_type = KdCollider::TypeGround; 
+		sphere[i].m_type = /*KdCollider::TypeGround &*/ KdCollider::TypeBump; 
 
 		// デバッグ描画（赤いワイヤーフレームで球を描画）
 		m_pDebugWire->AddDebugSphere(sphere[i].m_sphere.Center, sphere[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
@@ -138,11 +151,21 @@ void Player::PostUpdate()
 	std::list<KdCollider::CollisionResult> retSphereList;
 
 	// 全オブジェクトと当たり判定
-	for (auto& obj : SceneManager::Instance().GetObjList())
+	for (auto& obj : objList)
 	{
 		for (int i = 0; i < SPHERE_NUM; i++)
 		{
-			if (obj->Intersects(sphere[i], &retSphereList))break;
+			if (obj->Intersects(sphere[i], &retSphereList))
+			{
+				if (!obj->OnHit(shared_from_this(), retSphereList.back()))
+				{
+					ChangeSpeedLevel(SpeedLevel::Clash);
+					m_speed *= -0.5;
+					m_clashCount = 1.0f;
+				}
+				break;
+			}
+				
 		}
 	}
 
@@ -162,6 +185,7 @@ void Player::PostUpdate()
 
 	if (hit)
 	{
+		if (hitDir.y < 0.0f)hitDir.y = 0.0f;
 		// ベクトルを再正規化（長さを1にする）
 		hitDir.Normalize();
 
@@ -176,12 +200,8 @@ void Player::PostUpdate()
 	m_pos += m_amountMove;
 
 	m_mWorld = 
-		//Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.y)) *
-		//Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x)) *
 		rotMat * 
 		Math::Matrix::CreateTranslation(m_pos);
-
-	//KdDebugGUI::Instance().AddLog("X:%f,\nY:%f,\nZ:%f,\n",m_pos.x,m_pos.y,m_pos.z);
 }
 
 void Player::GenerateDepthMapFromLight()
@@ -202,12 +222,30 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	switch (m_level)
 	{
 	case SpeedLevel::Idle:
-	case SpeedLevel::Speed1: m_maxSpeed = 0.2f; break;
-	case SpeedLevel::Speed2: m_maxSpeed = 0.3f; break;
-	case SpeedLevel::Speed3: m_maxSpeed = 0.4f; break;
-	case SpeedLevel::Speed4: m_maxSpeed = 0.5f; break;
-	case SpeedLevel::Speed5: m_maxSpeed = 0.7f; break;
-	case SpeedLevel::Clash:  m_maxSpeed = 0.0f; break;
+	case SpeedLevel::Speed1: 
+		m_maxSpeed = 8.f;
+		m_minSpeed = -8.0f;
+		break;
+	case SpeedLevel::Speed2: 
+		m_maxSpeed = 11.f; 
+		m_minSpeed = 8.0f;
+		break;
+	case SpeedLevel::Speed3: 
+		m_maxSpeed = 15.f; 
+		m_minSpeed = 11.0f;
+		break;
+	case SpeedLevel::Speed4: 
+		m_maxSpeed = 20.f; 
+		m_minSpeed = 15.0f;
+		break;
+	case SpeedLevel::Speed5: 
+		m_maxSpeed = 25.f; 
+		m_minSpeed = 20.0f;
+		break;
+	case SpeedLevel::Clash:  
+		m_maxSpeed = 0.f;
+		m_minSpeed = -8.0f;
+		break;
 	default: break;
 	}
 }
@@ -247,16 +285,22 @@ void Player::UpdateMove(float dt)
 	// ==========================================
 	// 2. アクセルとブレーキの操作
 	// ==========================================
-	if (InputManager::Instance().IsPressed(VK_UP))
+	if (m_level != SpeedLevel::Clash)
 	{
-		m_speed += m_acceleration * dt;
-	}
-	if (InputManager::Instance().IsPressed(VK_DOWN))
-	{
-		// ブレーキ（あるいはバック）
-		m_speed -= m_acceleration * dt * 0.2;
+		if (InputManager::Instance().IsPressed(VK_UP))
+		{
+			m_speed += m_acceleration * dt;
+		}
+		if (InputManager::Instance().IsPressed(VK_DOWN))
+		{
+			// ブレーキ（あるいはバック）
+			m_speed -= m_acceleration * dt;
+		}
 	}
 
+
+	if (m_speed < m_minSpeed && m_level != SpeedLevel::Idle && m_level != SpeedLevel::Clash)ChangeSpeedLevel((SpeedLevel)((int)m_level - 1));
+	if (m_level == SpeedLevel::Idle && m_speed > std::abs(0.5f))ChangeSpeedLevel(SpeedLevel::Speed1);
 
 	// 速度レベル毎の上限処理（既存のまま）
 	if (m_speed > m_maxSpeed)m_speed = m_maxSpeed;
@@ -293,10 +337,17 @@ void Player::UpdateMove(float dt)
 
 
 	// 一時的な上下移動（既存のまま）
-	if (InputManager::Instance().IsPressed(VK_SHIFT)) m_gravity += 0.1f * dt;
-	if (InputManager::Instance().IsPressed(VK_SPACE)) m_gravity -= 0.1f * dt;
+	if (InputManager::Instance().IsTriggered(VK_SHIFT))
+	{
+		int lv = (int)GetSpeedLevel();
+		lv += 1;
+		ChangeSpeedLevel((SpeedLevel)lv);
+	}
+	if (InputManager::Instance().IsPressed(VK_SPACE)) m_gravity -= 5.f * dt;
 
-	m_gravity += 0.01f * dt;
+	m_gravity += 1.f * dt;
+
+	
 
 	// 位置の適用
 	m_amountMove += m_moveVec * m_speed * dt;
@@ -307,11 +358,13 @@ void Player::UpdateMove(float dt)
 	// 5. 速度の自然減衰（空気抵抗や摩擦）
 	// ==========================================
 	// ※ m_speed *= 0.85f * dt; だとフレームレート依存で急ブレーキがかかるため修正
-	float friction = 0.15f; 
-	m_speed -= m_speed * friction * dt;// *60.0f;
+	float friction = 0.55f; 
+	m_speed -= m_speed * friction * dt;
 
 	// 速度が微小になったら完全に停止させる
-	if (m_speed > -0.005f && m_speed < 0.005f) {
+	if (std::abs(m_speed) < 0.5f) {
 		m_speed = 0.0f;
+
+		if(m_level != SpeedLevel::Clash)ChangeSpeedLevel(SpeedLevel::Idle);
 	}
 }

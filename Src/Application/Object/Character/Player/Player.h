@@ -27,6 +27,7 @@ public:
 	void DrawLit()override;
 
 	void ChangeSpeedLevel(SpeedLevel level);
+	SpeedLevel GetSpeedLevel() { return m_level; }
 
 	float GetSteeringInput() { return m_steering / m_maxSteerAngle; }
 	Math::Vector3 GetAngle() { return m_angle; }
@@ -44,9 +45,11 @@ private:
 	Math::Vector3 m_amountMove;
 	Math::Vector3 m_moveVec;
 	float m_speed = 0.0f;				// 現在のスピード
-	float m_maxSpeed = 0.2f;			// 最大のスピード
-	float m_minSpeed = -0.2f;			// 最低のスピード
+	float m_maxSpeed = 2.f;				// 最大のスピード
+	float m_minSpeed = -2.f;			// 最低のスピード
 	float m_gravity = 0.0f;				// 重力
+
+	float m_clashCount = 0.0f;
 
 	float m_acceleration = 0.0f;		// 加速力
 

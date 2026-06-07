@@ -10,18 +10,25 @@ void MapManager::Init()
 
 void MapManager::GenarateMap(ObjectManager& _objManager)
 {
-	float mapWidth = 8;
+	int MAP_WIDTH = 30;
+	int MAP_HEIGHT = 30;
+	int width = 8;
+	int height = 8;
 	Math::Vector3 pos;
 	pos.y = -5;
 
-	for (int i = 0; i < 10; i++)
+	pos.x = MAP_WIDTH / 2.0f * width;
+	pos.z = MAP_HEIGHT / 2.0f * height;
+
+	for (int i = 0; i < MAP_WIDTH; i++)
 	{
-		pos.x = i * mapWidth;
-		for (int j = 0; j < 10; j++)
+		pos.x = (i - MAP_WIDTH / 2.0f) * width;
+		for (int j = 0; j < MAP_HEIGHT; j++)
 		{
-			pos.z = j * mapWidth;
+			pos.z = (j - MAP_HEIGHT / 2.0f) * height;
 			
 			_objManager.CreateObject<Ground>(pos, 0);
+			if (j % 2)continue;
 			_objManager.CreateObject<Building>(pos + Math::Vector3(0,1,0));
 		
 		}

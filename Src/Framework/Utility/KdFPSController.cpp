@@ -19,7 +19,7 @@ void KdFPSController::Update()
 
 	// デルタ時間の計算
 	DWORD _currentTime = timeGetTime();
-	m_DeltaTime = (_currentTime - m_frameStartTime) / static_cast<float>(kSecond) * 60.f;
+	m_DeltaTime = (_currentTime - m_frameStartTime) / static_cast<float>(kSecond);// *60.f;
 
 	Monitoring();
 }

@@ -281,6 +281,7 @@
     <ClInclude Include="Src\Application\Object\Ground\Ground.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\ObjectManager.h" />
+    <ClInclude Include="Src\Application\Object\SkySphere\SkySphere.h" />
     <ClInclude Include="Src\Application\Scene\BaseScene\BaseScene.h" />
     <ClInclude Include="Src\Application\Scene\GameScene\GameScene.h" />
     <ClInclude Include="Src\Application\Scene\SceneManager.h" />
@@ -348,6 +349,7 @@
     <ClCompile Include="Src\Application\Object\Ground\Ground.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\ObjectManager.cpp" />
+    <ClCompile Include="Src\Application\Object\SkySphere\SkySphere.cpp" />
     <ClCompile Include="Src\Application\Scene\BaseScene\BaseScene.cpp" />
     <ClCompile Include="Src\Application\Scene\GameScene\GameScene.cpp" />
     <ClCompile Include="Src\Application\Scene\SceneManager.cpp" />

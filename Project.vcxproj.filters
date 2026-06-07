@@ -136,6 +136,9 @@
     <Filter Include="Src\Application\Object\ObjectManager\MapManager">
       <UniqueIdentifier>{a5bd9be0-c458-45df-bd3d-c384fe4be8ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\SkySphere">
+      <UniqueIdentifier>{b7ded79f-5f73-41d9-a8b8-58e65801e2c7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -354,6 +357,9 @@
     <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h">
       <Filter>Src\Application\Object\ObjectManager\MapManager</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\SkySphere\SkySphere.h">
+      <Filter>Src\Application\Object\SkySphere</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -535,6 +541,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp">
       <Filter>Src\Application\Object\ObjectManager\MapManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\SkySphere\SkySphere.cpp">
+      <Filter>Src\Application\Object\SkySphere</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
