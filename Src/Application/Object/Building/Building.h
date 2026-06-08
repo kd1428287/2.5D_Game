@@ -28,13 +28,13 @@ public:
 	Building(Math::Vector3 pos) 
 	{
 		m_mWorld =
-			Math::Matrix::CreateScale(0.1f) *
+			//Math::Matrix::CreateScale(0.1f) *
 			Math::Matrix::CreateTranslation(pos);
 	};
 	Building(Math::Vector3 pos, float level) :m_breakLevel(level)
 	{
 		m_mWorld =
-			Math::Matrix::CreateScale(0.1f) *
+			//Math::Matrix::CreateScale(0.1f) *
 			Math::Matrix::CreateTranslation(pos);
 	};
 	~Building()override {};

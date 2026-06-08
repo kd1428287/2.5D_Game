@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.1.20",
+		"generator":"Khronos glTF Blender I/O v5.1.19",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -23,15 +23,25 @@
 				0,
 				0.7071066498756409
 			],
+			"scale":[
+				0.10000002384185791,
+				0.10000001639127731,
+				0.10000001639127731
+			],
 			"translation":[
 				0,
-				-1,
+				-0.09147439897060394,
 				0
 			]
 		},
 		{
 			"mesh":1,
-			"name":"COL"
+			"name":"COL",
+			"scale":[
+				0.09000001847743988,
+				0.10000002384185791,
+				0.08241842687129974
+			]
 		}
 	],
 	"materials":[
@@ -63,7 +73,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u4f53",
+			"name":"\u7acb\u65b9\u4f53.001",
 			"primitives":[
 				{
 					"attributes":{
