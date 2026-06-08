@@ -58,7 +58,7 @@ private:
 	float m_steering = 0.0f;			// 現在のステアリング角（前輪の角度：度数法）
 	float m_steerSpeed = 90.0f;			// ハンドルを切る速さ（度/秒）
 	float m_maxSteerAngle = 35.0f;		// ハンドルの最大切れ角（度）
-	float m_wheelBase = 2.0f;			// ホイールベース（前輪から後輪までの距離）
+	float m_wheelBase = 0.2f;			// ホイールベース（前輪から後輪までの距離）
 
 	SpeedLevel m_level = SpeedLevel::Idle;
 };

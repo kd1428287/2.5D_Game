@@ -5,11 +5,11 @@
 
 void CameraManager::Init()
 {
-	m_camDis = { 0.0f,3.0f,-3.0f };
+	m_camDis = { 0.0f,1.0f,-1.0f };
 	m_camAng.x = 25.0f;
 	m_projection = 60.0f;
 	m_camera = std::make_unique<KdCamera>();
-	m_camera->SetProjectionMatrix(m_projection,2000.f,2.f);
+	m_camera->SetProjectionMatrix(m_projection,2000.f,0.05f);
 	m_speed = 0.5f;
 
 	KdShaderManager::Instance().WorkAmbientController().SetFogEnable(false, true);

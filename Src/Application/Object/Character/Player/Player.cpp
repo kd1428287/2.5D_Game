@@ -61,7 +61,7 @@ void Player::PostUpdate()
 	// 全オブジェクトの中から自機から一定距離内のオブジェクトを取得
 	std::vector<std::shared_ptr<KdGameObject>> objList;
 	Math::Vector3 length;
-	float radius = m_gravity + 15.0f;
+	float radius = m_gravity + 5.0f;
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
 		length = m_pos + m_amountMove - obj->GetPos();
@@ -74,9 +74,9 @@ void Player::PostUpdate()
 	// レイの発射位置を設定
 	ray.m_pos = m_pos + m_amountMove;
 	// ちょっと上からの位置にする
-	ray.m_pos.y += 0.1f;
+	ray.m_pos.y += 0.01f;
 	// 段差の許容範囲を設定
-	float enableStepHigh = 0.2f;
+	float enableStepHigh = 0.02f;
 	ray.m_pos.y += enableStepHigh;
 	// レイの発射方向を設定
 	ray.m_dir = { 0,-1,0 };
@@ -124,12 +124,12 @@ void Player::PostUpdate()
 	// 球(スフィア)判定=========
 
 	const int SPHERE_NUM = 3;
-	float zOffset[SPHERE_NUM] = { 0.7f,0.0f,-0.7f };
+	float zOffset[SPHERE_NUM] = { 0.07f,0.0f,-0.07f };
 
 	KdCollider::SphereInfo sphere[SPHERE_NUM];
 	KdCollider::SphereInfo mainSphere;
 	mainSphere.m_sphere.Center = m_pos + m_amountMove;
-	mainSphere.m_sphere.Radius = 1.2f;
+	mainSphere.m_sphere.Radius = 0.12f;
 	mainSphere.m_type = KdCollider::TypeBump;
 
 	for (int i = 0; i < SPHERE_NUM; ++i)
@@ -140,10 +140,10 @@ void Player::PostUpdate()
 		Math::Vector3 rotatedOffset = Math::Vector3::TransformNormal(offset, rotMat);
 
 		// 球の中心座標 ＝ 車の中心座標 ＋ 高さ調整 ＋ 向きを考慮した前後のズレ
-		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.6f, 0.0f) + rotatedOffset;
+		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.06f, 0.0f) + rotatedOffset;
 
 		// 車幅の半分くらいを半径に設定
-		sphere[i].m_sphere.Radius = 0.5f;
+		sphere[i].m_sphere.Radius = 0.05f;
 		sphere[i].m_type = /*KdCollider::TypeGround |*/ KdCollider::TypeBump; 
 
 		// デバッグ描画（赤いワイヤーフレームで球を描画）
@@ -251,28 +251,28 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	{
 	case SpeedLevel::Idle:
 	case SpeedLevel::Speed1: 
-		m_maxSpeed = 8.f;
-		m_minSpeed = -8.0f;
+		m_maxSpeed = 0.8f;
+		m_minSpeed = -0.8f;
 		break;
 	case SpeedLevel::Speed2: 
-		m_maxSpeed = 11.f; 
-		m_minSpeed = 8.0f;
+		m_maxSpeed = 1.1f; 
+		m_minSpeed = 0.8f;
 		break;
 	case SpeedLevel::Speed3: 
-		m_maxSpeed = 15.f; 
-		m_minSpeed = 11.0f;
+		m_maxSpeed = 1.5f; 
+		m_minSpeed = 1.1f;
 		break;
 	case SpeedLevel::Speed4: 
-		m_maxSpeed = 20.f; 
-		m_minSpeed = 15.0f;
+		m_maxSpeed = 2.f; 
+		m_minSpeed = 1.5f;
 		break;
 	case SpeedLevel::Speed5: 
-		m_maxSpeed = 30.f; 
-		m_minSpeed = 20.0f;
+		m_maxSpeed = 3.f; 
+		m_minSpeed = 2.0f;
 		break;
 	case SpeedLevel::Clash:  
 		m_maxSpeed = 0.f;
-		m_minSpeed = -8.0f;
+		m_minSpeed = -0.8f;
 		break;
 	default: break;
 	}

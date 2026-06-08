@@ -51,7 +51,7 @@ void Building::Update(float dt)
 			);
 			Math::Matrix matTrans = Math::Matrix::CreateTranslation(fragVelocities[i].position);
 
-			Math::Matrix matScale = Math::Matrix::CreateScale(0.45f);
+			Math::Matrix matScale = Math::Matrix::CreateScale(0.045f);
 
 			// 破片のローカル行列を直接書き換える
 			nodes[i].m_localTransform = matScale * matRot * matTrans;
@@ -121,7 +121,7 @@ void Building::Break(KdCollider::CollisionResult result)
 		// 初期位置を現在のモデルのローカル行列から取得
 		fragVelocities[i].position = nodes[i].m_localTransform.Translation();
 		fragVelocities[i].rotation = Math::Vector3::Zero;
-		fragVelocities[i].speed = 15.0f;
+		fragVelocities[i].speed = 1.5f;
 
 		// 爆発のように四方に飛び散るランダムな速度を設定 (例)
 		fragVelocities[i].direction = Math::Vector3(
