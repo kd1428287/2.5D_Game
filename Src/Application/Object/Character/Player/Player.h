@@ -28,6 +28,7 @@ public:
 
 	void ChangeSpeedLevel(SpeedLevel level);
 	SpeedLevel GetSpeedLevel() { return m_level; }
+	float GetSpeed() { return m_speed; }
 
 	float GetSteeringInput() { return m_steering / m_maxSteerAngle; }
 	Math::Vector3 GetAngle() { return m_angle; }

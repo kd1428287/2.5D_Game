@@ -20,11 +20,12 @@ void Player::Init()
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
 	m_level = SpeedLevel::Idle;
+	m_scale = 0.1f;
 
 	ChangeSpeedLevel(SpeedLevel::Idle);
 
 	//m_acceleration = 0.05f;
-	m_acceleration = 100.0f;
+	m_acceleration = 50.0f * m_scale;
 
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
@@ -58,17 +59,15 @@ void Player::PostUpdate()
 		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.y)) *
 		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_angle.x));
 
+	// 全オブジェクトの中から自機から一定距離内のオブジェクトを取得
 	std::vector<std::shared_ptr<KdGameObject>> objList;
 	Math::Vector3 length;
-	float radius = m_gravity + 8.0f;
+	float radius = m_gravity + 15.0f * m_scale;
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
 		length = m_pos + m_amountMove - obj->GetPos();
 		if (length.Length() < radius)objList.push_back(obj);
 	}
-
-	// 当たり判定はココ！！
-	// レイ判定 (ゲロ重い)
 
 	// 当たる側の処理
 	// レイ判定用の変数を設定
@@ -80,10 +79,11 @@ void Player::PostUpdate()
 	// 段差の許容範囲を設定
 	float enableStepHigh = 0.2f;
 	ray.m_pos.y += enableStepHigh;
+	ray.m_pos.y *= m_scale;
 	// レイの発射方向を設定
 	ray.m_dir = { 0,-1,0 };
 	// レイの長さを設定
-	ray.m_range = m_gravity + enableStepHigh;
+	ray.m_range = m_gravity + enableStepHigh * m_scale;
 	// 当たり判定を行いたいタイプを設定
 	ray.m_type = KdCollider::TypeGround;
 
@@ -126,9 +126,13 @@ void Player::PostUpdate()
 	// 球(スフィア)判定=========
 
 	const int SPHERE_NUM = 3;
-	float zOffset[SPHERE_NUM] = { 0.7f,0.0f,-0.7f };
+	float zOffset[SPHERE_NUM] = { 0.7f * m_scale,0.0f,-0.7f * m_scale };
 
 	KdCollider::SphereInfo sphere[SPHERE_NUM];
+	KdCollider::SphereInfo mainSphere;
+	mainSphere.m_sphere.Center = m_pos + m_amountMove;
+	mainSphere.m_sphere.Radius = 1.2f;
+	mainSphere.m_type = KdCollider::TypeBump;
 
 	for (int i = 0; i < SPHERE_NUM; ++i)
 	{
@@ -138,11 +142,11 @@ void Player::PostUpdate()
 		Math::Vector3 rotatedOffset = Math::Vector3::TransformNormal(offset, rotMat);
 
 		// 球の中心座標 ＝ 車の中心座標 ＋ 高さ調整 ＋ 向きを考慮した前後のズレ
-		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.6f, 0.0f) + rotatedOffset;
+		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.6f, 0.0f) * m_scale + rotatedOffset * m_scale;
 
 		// 車幅の半分くらいを半径に設定
-		sphere[i].m_sphere.Radius = 0.5f;
-		sphere[i].m_type = /*KdCollider::TypeGround &*/ KdCollider::TypeBump; 
+		sphere[i].m_sphere.Radius = 0.5f * m_scale;
+		sphere[i].m_type = /*KdCollider::TypeGround |*/ KdCollider::TypeBump; 
 
 		// デバッグ描画（赤いワイヤーフレームで球を描画）
 		m_pDebugWire->AddDebugSphere(sphere[i].m_sphere.Center, sphere[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
@@ -150,47 +154,67 @@ void Player::PostUpdate()
 
 	std::list<KdCollider::CollisionResult> retSphereList;
 
-	// 全オブジェクトと当たり判定
+	// 当たり判定
+
 	for (auto& obj : objList)
 	{
 		for (int i = 0; i < SPHERE_NUM; i++)
 		{
 			if (obj->Intersects(sphere[i], &retSphereList))
 			{
-				if (!obj->OnHit(shared_from_this(), retSphereList.back()))
+				//obj->Intersects(mainSphere, &retSphereList);
+				auto ret = retSphereList.back();
+				if (!obj->OnHit(shared_from_this(), ret))
 				{
+					if (m_level != SpeedLevel::Clash);
 					ChangeSpeedLevel(SpeedLevel::Clash);
+
+					if (std::abs(m_speed) < 2.0f)m_speed = 0.0f;
 					m_speed *= -0.5;
-					m_clashCount = 1.0f;
+					m_clashCount = 0.0;
+					//m_steering = 0.0f;
 				}
-				break;
+				//break;
 			}
-				
 		}
 	}
 
 	maxOverLap = 0.0f;
 	hit = false;
-	Math::Vector3 hitDir;
+	Math::Vector3 totalPushOut = Math::Vector3::Zero; // 全ての押し出しベクトルの合計
 
 	for (auto& ret : retSphereList)
 	{
-		if (maxOverLap < ret.m_overlapDistance)
+		Math::Vector3 dir = ret.m_hitDir;
+
+		// 下向きの押し出し（床からの過剰な反発など）を無効化
+		if (dir.y < 0.0f) dir.y = 0.0f;
+
+		// 安全のため正規化（ゼロ除算防止）
+		if (dir.LengthSquared() > 0.0f)
 		{
-			maxOverLap = ret.m_overlapDistance;
-			hitDir = ret.m_hitDir;
+			dir.Normalize();
+
+			// 全てのめり込みベクトルを加算する
+			totalPushOut += dir * ret.m_overlapDistance;
 			hit = true;
 		}
 	}
 
 	if (hit)
 	{
-		if (hitDir.y < 0.0f)hitDir.y = 0.0f;
-		// ベクトルを再正規化（長さを1にする）
-		hitDir.Normalize();
+		// 合成された押し出しベクトルを適用してプレイヤーの座標を更新
+		m_amountMove += totalPushOut;
 
-		// 押し出しを実行してプレイヤーの座標を更新
-		m_amountMove += hitDir * maxOverLap;
+		Math::Vector3 pushDir = totalPushOut;
+		pushDir.Normalize();
+
+		// 移動ベクトル(m_amountMove)のうち、壁に垂直にぶつかろうとする成分を削る
+		float dotResult = m_amountMove.Dot(pushDir);
+		if (dotResult < 0.0f)
+		{
+			m_amountMove -= pushDir * dotResult;
+		}
 	}
 
 	// ----------------------------------------------------
@@ -199,7 +223,8 @@ void Player::PostUpdate()
 
 	m_pos += m_amountMove;
 
-	m_mWorld = 
+	m_mWorld =
+		Math::Matrix::CreateScale(0.1f) * 
 		rotMat * 
 		Math::Matrix::CreateTranslation(m_pos);
 }
@@ -239,7 +264,7 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 		m_minSpeed = 15.0f;
 		break;
 	case SpeedLevel::Speed5: 
-		m_maxSpeed = 25.f; 
+		m_maxSpeed = 30.f; 
 		m_minSpeed = 20.0f;
 		break;
 	case SpeedLevel::Clash:  
@@ -248,6 +273,8 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 		break;
 	default: break;
 	}
+
+	m_speed = std::max(m_speed, m_minSpeed);
 }
 
 void Player::ActiveInput()
@@ -285,8 +312,8 @@ void Player::UpdateMove(float dt)
 	// ==========================================
 	// 2. アクセルとブレーキの操作
 	// ==========================================
-	if (m_level != SpeedLevel::Clash)
-	{
+	/*if (m_level != SpeedLevel::Clash)
+	{*/
 		if (InputManager::Instance().IsPressed(VK_UP))
 		{
 			m_speed += m_acceleration * dt;
@@ -296,7 +323,7 @@ void Player::UpdateMove(float dt)
 			// ブレーキ（あるいはバック）
 			m_speed -= m_acceleration * dt;
 		}
-	}
+	//}
 
 
 	if (m_speed < m_minSpeed && m_level != SpeedLevel::Idle && m_level != SpeedLevel::Clash)ChangeSpeedLevel((SpeedLevel)((int)m_level - 1));
@@ -336,7 +363,7 @@ void Player::UpdateMove(float dt)
 	m_moveVec.Normalize();
 
 
-	// 一時的な上下移動（既存のまま）
+	// 一時的
 	if (InputManager::Instance().IsTriggered(VK_SHIFT))
 	{
 		int lv = (int)GetSpeedLevel();
@@ -357,9 +384,8 @@ void Player::UpdateMove(float dt)
 	// ==========================================
 	// 5. 速度の自然減衰（空気抵抗や摩擦）
 	// ==========================================
-	// ※ m_speed *= 0.85f * dt; だとフレームレート依存で急ブレーキがかかるため修正
 	float friction = 0.55f; 
-	m_speed -= m_speed * friction * dt;
+	m_speed *= std::exp(-friction * dt);
 
 	// 速度が微小になったら完全に停止させる
 	if (std::abs(m_speed) < 0.5f) {

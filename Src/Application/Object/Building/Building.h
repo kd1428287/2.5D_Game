@@ -27,18 +27,21 @@ public:
 	Building() {};
 	Building(Math::Vector3 pos) 
 	{
-		m_mWorld = Math::Matrix::CreateTranslation(pos);
+		m_mWorld =
+			Math::Matrix::CreateScale(0.1f) *
+			Math::Matrix::CreateTranslation(pos);
 	};
 	Building(Math::Vector3 pos, float level) :m_breakLevel(level)
 	{
-		m_mWorld = Math::Matrix::CreateTranslation(pos);
+		m_mWorld =
+			Math::Matrix::CreateScale(0.1f) *
+			Math::Matrix::CreateTranslation(pos);
 	};
 	~Building()override {};
 
 	void Init()override;
 	void Update(float dt)override;
-	void PostUpdate()override;
-
+	
 	void GenerateDepthMapFromLight()override;
 	void DrawLit()override;
 

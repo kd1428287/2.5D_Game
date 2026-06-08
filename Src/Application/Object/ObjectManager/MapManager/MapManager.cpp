@@ -10,10 +10,10 @@ void MapManager::Init()
 
 void MapManager::GenarateMap(ObjectManager& _objManager)
 {
-	int MAP_WIDTH = 30;
-	int MAP_HEIGHT = 30;
-	int width = 8;
-	int height = 8;
+	int MAP_WIDTH = 35;
+	int MAP_HEIGHT = 35;
+	float width = 0.8f;
+	float height = 0.8f;
 	Math::Vector3 pos;
 	pos.y = -5;
 

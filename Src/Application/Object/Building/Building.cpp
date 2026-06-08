@@ -22,8 +22,6 @@ void Building::Init()
 
 void Building::Update(float dt)
 {
-	
-
 	switch (m_state)
 	{
 	case BuildingState::None:
@@ -53,7 +51,7 @@ void Building::Update(float dt)
 			);
 			Math::Matrix matTrans = Math::Matrix::CreateTranslation(fragVelocities[i].position);
 
-			Math::Matrix matScale = Math::Matrix::CreateScale(0.5f);
+			Math::Matrix matScale = Math::Matrix::CreateScale(0.45f);
 
 			// 破片のローカル行列を直接書き換える
 			nodes[i].m_localTransform = matScale * matRot * matTrans;
@@ -73,9 +71,6 @@ void Building::Update(float dt)
 		break;
 	}
 }
-
-void Building::PostUpdate()
-{}
 
 void Building::GenerateDepthMapFromLight()
 {
@@ -110,10 +105,10 @@ void Building::Break(KdCollider::CollisionResult result)
 	m_state = BuildingState::Broken;
 	m_pCollider->SetEnable(KdCollider::Type::TypeBump, false);
 
-	m_fragmentModel = std::make_shared<KdModelWork>();
-	std::shared_ptr<KdModelData> fragment = nullptr;
-	fragment = RESOURCE.GetModel("Asset/Models/map_tiles/building_break.gltf");
-	if(fragment)m_fragmentModel->SetModelData(fragment);
+	m_fragmentModel = std::make_shared<KdModelWork>();			// 実体化
+	std::shared_ptr<KdModelData> fragment = nullptr;			// ModelDataで受ける
+	fragment = RESOURCE.GetModel("Asset/Models/map_tiles/building_break.gltf");	// リソース取得
+	if(fragment)m_fragmentModel->SetModelData(fragment);						// モデルが読み込めたらModelWorkにコピー
 
 	auto& nodes = m_fragmentModel->WorkNodes(); // 可変ノードリストを取得
 	fragVelocities.resize(nodes.size());
@@ -131,10 +126,10 @@ void Building::Break(KdCollider::CollisionResult result)
 		// 爆発のように四方に飛び散るランダムな速度を設定 (例)
 		fragVelocities[i].direction = Math::Vector3(
 			KdRandom::GetFloat(-1.0f, 1.0f),
-			KdRandom::GetFloat(0.2f, 0.85f), // 少し上に跳ね上がる
+			KdRandom::GetFloat(0.5f, 0.85f), // 少し上に跳ね上がる
 			KdRandom::GetFloat(-1.0f, 1.0f)
 		);
-		fragVelocities[i].direction += result.m_hitDir * -1;
+		fragVelocities[i].direction += result.m_hitDir * result.m_overlapDistance * -1;
 		fragVelocities[i].direction.Normalize();
 		
 		// ランダムな回転速度
