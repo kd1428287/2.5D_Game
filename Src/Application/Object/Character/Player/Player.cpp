@@ -16,14 +16,12 @@ void Player::Init()
 	m_model = std::make_shared<KdModelData>();
 	m_model = RESOURCE.GetModel("Asset/Models/car_van/car_van.gltf");
 	
-	//m_pos = { 0,5,0 };
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
 	m_level = SpeedLevel::Idle;
 
 	ChangeSpeedLevel(SpeedLevel::Idle);
 
-	//m_acceleration = 0.05f;
 	m_acceleration = 50.0f;
 
 	//m_suscriber = GLOBALEVENT.subscribe<Events::Player::ChangeSpeedLevel>();
@@ -146,7 +144,6 @@ void Player::PostUpdate()
 
 		// 車幅の半分くらいを半径に設定
 		sphere[i].m_sphere.Radius = 0.05f;
-		sphere[i].m_type = /*KdCollider::TypeGround |*/ KdCollider::TypeBump; 
 
 		// デバッグ描画（赤いワイヤーフレームで球を描画）
 		m_pDebugWire->AddDebugSphere(sphere[i].m_sphere.Center, sphere[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
@@ -161,7 +158,7 @@ void Player::PostUpdate()
 		for (int i = 0; i < SPHERE_NUM; i++)
 		{
 			if (obj->Intersects(sphere[i], &retSphereList))
-			{
+			{				
 				auto ret = retSphereList.back();
 				GLOBALEVENT.publish(Events::Player::OnHit(shared_from_this(), obj, ret));
 			}
@@ -169,46 +166,51 @@ void Player::PostUpdate()
 	}
 
 	maxOverLap = 0.0f;
+
 	hit = false;
 	Math::Vector3 totalPushOut = Math::Vector3::Zero; // 全ての押し出しベクトルの合計
+
+	// 【改善案1】同じ向きの押し出しベクトルを整理するためのリスト
+	std::vector<Math::Vector3> pushOutList;
+
 
 	for (auto& ret : retSphereList)
 	{
 		Math::Vector3 dir = ret.m_hitDir;
 
-		// 下向きの押し出し（床からの過剰な反発など）を無効化
+		// 下向きの押し出しを無効化
 		if (dir.y < 0.0f) dir.y = 0.0f;
 
-		// 安全のため正規化（ゼロ除算防止）
 		if (dir.LengthSquared() > 0.0f)
 		{
 			dir.Normalize();
+			Math::Vector3 currentPush = dir * ret.m_overlapDistance;
 
-			// 全てのめり込みベクトルを加算する
-			// ※ 0.75f のような妥協はせず、1.0f (100%) 押し出します
-			totalPushOut += dir * ret.m_overlapDistance;
-			hit = true;
-		}
-	}
+			bool merged = false;
+			// 既存の押し出しベクトルと「同じ壁（似た方向）」かチェックする
+			for (auto& p : pushOutList)
+			{
+				Math::Vector3 pDir = p;
+				pDir.Normalize();
 
-	if (hit)
-	{
-		// 合成された押し出しベクトルを適用してプレイヤーの座標を更新
-		m_amountMove += totalPushOut;
+				// 内積が0.9以上（ほぼ同じ向き）なら同じ壁とみなす
+				if (dir.Dot(pDir) > 0.9f)
+				{
+					// 単純加算ではなく、より深くめり込んでいる方（最大値）を採用する
+					if (currentPush.LengthSquared() > p.LengthSquared())
+					{
+						p = currentPush;
+					}
+					merged = true;
+					break;
+				}
+			}
 
-		// --- 追加のプロテクニック（壁滑り） ---
-		// 壁に押し出された後、まだ車が壁に向かおうとする速度(m_moveVecによる移動)が残っていると、
-		// 常に壁に向かって進み続けてしまいガタつきます。
-		// 押し出し方向に逆らう移動成分をカットすることで、壁に沿って綺麗に滑るようになります。
-
-		Math::Vector3 pushDir = totalPushOut;
-		pushDir.Normalize();
-
-		// 移動ベクトル(m_amountMove)のうち、壁に垂直にぶつかろうとする成分を削る
-		float dotResult = m_amountMove.Dot(pushDir);
-		if (dotResult < 0.0f)
-		{
-			m_amountMove -= pushDir * dotResult;
+			// まったく違う向き（V字谷や別の角など）なら新しい押し出しとして追加
+			if (!merged)
+			{
+				pushOutList.push_back(currentPush);
+			}
 		}
 	}
 
@@ -334,7 +336,7 @@ void Player::UpdateMove(float dt)
 	// 3. 車の向き（ヘディング）の更新 (バイシクルモデル)
 	// ==========================================
 	// 車が動いている時だけ向きが変わるようにする
-	if (std::abs(m_speed) > 0.001f)
+	if (std::abs(m_speed) > 0.5f)
 	{
 		// C++の標準数学関数はラジアンを要求するため変換
 		float steerRad = DirectX::XMConvertToRadians(m_steering);
@@ -366,9 +368,9 @@ void Player::UpdateMove(float dt)
 		lv += 1;
 		ChangeSpeedLevel((SpeedLevel)lv);
 	}
-	if (InputManager::Instance().IsPressed(VK_SPACE)) m_gravity -= 5.f * dt;
+	if (InputManager::Instance().IsTriggered(VK_SPACE)) m_gravity -= 25.f * dt;
 
-	m_gravity += 1.f * dt;
+	m_gravity += 0.5f * dt;
 
 	
 

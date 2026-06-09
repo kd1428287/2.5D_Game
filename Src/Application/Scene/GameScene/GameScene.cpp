@@ -38,7 +38,7 @@ void GameScene::Init()
 
 	auto sky = m_objectManager->CreateObject<SkySphere>();
 
-	KdAssets::Instance().m_modeldatas
+	//KdAssets::Instance().m_modeldatas
 
 	
 }

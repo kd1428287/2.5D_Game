@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.1.19",
+		"generator":"Khronos glTF Blender I/O v5.1.20",
 		"version":"2.0"
 	},
 	"extensionsUsed":[
@@ -21,10 +21,15 @@
 			"mesh":0,
 			"name":"grass_Cube.003",
 			"rotation":[
-				0.7071068286895752,
+				0.70710688829422,
 				0,
 				0,
-				0.7071068286895752
+				0.7071066498756409
+			],
+			"scale":[
+				0.5,
+				0.4999999701976776,
+				0.4999999701976776
 			]
 		}
 	],
@@ -43,7 +48,7 @@
 					"ior":1
 				}
 			},
-			"name":"basecolors",
+			"name":"basecolors.002",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0

@@ -64,7 +64,7 @@ void Building::Update(float dt)
 			);
 			Math::Matrix matTrans = Math::Matrix::CreateTranslation(fragVelocities[i].position);
 
-			Math::Matrix matScale = Math::Matrix::CreateScale(0.045f);
+			Math::Matrix matScale = Math::Matrix::CreateScale(1);
 
 			// 破片のローカル行列を直接書き換える
 			nodes[i].m_localTransform = matScale * matRot * matTrans;
@@ -103,10 +103,10 @@ void Building::Break(KdCollider::CollisionResult result)
 	m_state = BuildingState::Broken;
 	m_pCollider->SetEnable(KdCollider::Type::TypeBump, false);
 
-	m_fragmentModel = std::make_shared<KdModelWork>();			// 実体化
-	std::shared_ptr<KdModelData> fragment = nullptr;			// ModelDataで受ける
-	fragment = RESOURCE.GetModel("Asset/Models/map_tiles/building_break.gltf");	// リソース取得
-	if(fragment)m_fragmentModel->SetModelData(fragment);						// モデルが読み込めたらModelWorkにコピー
+	m_fragmentModel = std::make_shared<KdModelWork>();
+	std::shared_ptr<KdModelData> fragment = nullptr;
+	fragment = RESOURCE.GetModel("Asset/Models/map_tiles/building_fragment.gltf");
+	if(fragment)m_fragmentModel->SetModelData(fragment);
 
 	auto& nodes = m_fragmentModel->WorkNodes(); // 可変ノードリストを取得
 	fragVelocities.resize(nodes.size());
@@ -114,8 +114,6 @@ void Building::Break(KdCollider::CollisionResult result)
 	
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
-		// ノード名に "Fragment" や "COL" などが含まれているかチェックしても良い
-
 		// 初期位置を現在のモデルのローカル行列から取得
 		fragVelocities[i].position = nodes[i].m_localTransform.Translation();
 		fragVelocities[i].rotation = Math::Vector3::Zero;

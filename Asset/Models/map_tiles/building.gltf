@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.1.19",
+		"generator":"Khronos glTF Blender I/O v5.1.20",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -16,38 +16,17 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"building-office-small_Cube.130",
-			"rotation":[
-				0.70710688829422,
-				0,
-				0,
-				0.7071066498756409
-			],
-			"scale":[
-				0.10000002384185791,
-				0.10000001639127731,
-				0.10000001639127731
-			],
-			"translation":[
-				0,
-				-0.09147439897060394,
-				0
-			]
+			"name":"building-office-small_Cube.130"
 		},
 		{
 			"mesh":1,
-			"name":"COL",
-			"scale":[
-				0.09000001847743988,
-				0.10000002384185791,
-				0.08241842687129974
-			]
+			"name":"COL"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"basecolors",
+			"name":"basecolors.001",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -59,7 +38,7 @@
 	],
 	"meshes":[
 		{
-			"name":"building-office-small_Cube.130",
+			"name":"building-office-small_Cube.001",
 			"primitives":[
 				{
 					"attributes":{
@@ -73,7 +52,7 @@
 			]
 		},
 		{
-			"name":"\u7acb\u65b9\u4f53.001",
+			"name":"\u7acb\u65b9\u4f53.003",
 			"primitives":[
 				{
 					"attributes":{
@@ -105,14 +84,14 @@
 			"componentType":5126,
 			"count":700,
 			"max":[
-				3,
-				2.9999990463256836,
-				-0.8999990224838257
+				0.30000007152557373,
+				0.45164376497268677,
+				0.3000001013278961
 			],
 			"min":[
-				-3,
-				-3.0000009536743164,
-				-5.5
+				-0.30000007152557373,
+				-0.008356471545994282,
+				-0.3000001013278961
 			],
 			"type":"VEC3"
 		},
@@ -139,14 +118,14 @@
 			"componentType":5126,
 			"count":24,
 			"max":[
-				2.969183921813965,
-				4.007410049438477,
-				2.9895431995391846
+				0.26722660660743713,
+				0.40238481760025024,
+				0.2690589427947998
 			],
 			"min":[
-				-2.969183921813965,
-				-0.015934109687805176,
-				-2.9895431995391846
+				-0.26722660660743713,
+				5.030633110436611e-05,
+				-0.2690589427947998
 			],
 			"type":"VEC3"
 		},
