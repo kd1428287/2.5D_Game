@@ -119,7 +119,13 @@
 // 自作Framework
 //
 //===============================================
+
+#include "Application/System/EventBus/GlobalEventBus.h"
+
 #include "Framework/KdFramework.h"
+
+#include "Application/System/EventBus/Event/Event.h"
 
 // リソース管理
 #include "Application/System/ResourceManager/ResourceManager.h"
+

@@ -45,8 +45,6 @@ public:
 	void GenerateDepthMapFromLight()override;
 	void DrawLit()override;
 
-	bool OnHit(const std::shared_ptr<KdGameObject>& obj, KdCollider::CollisionResult result)override;
-
 protected:
 	void Break(KdCollider::CollisionResult result);
 

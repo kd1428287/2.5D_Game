@@ -26,6 +26,8 @@ void Player::Init()
 	//m_acceleration = 0.05f;
 	m_acceleration = 50.0f;
 
+	//m_suscriber = GLOBALEVENT.subscribe<Events::Player::ChangeSpeedLevel>();
+
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
 		m_model,
@@ -160,19 +162,8 @@ void Player::PostUpdate()
 		{
 			if (obj->Intersects(sphere[i], &retSphereList))
 			{
-				//obj->Intersects(mainSphere, &retSphereList);
 				auto ret = retSphereList.back();
-				if (!obj->OnHit(shared_from_this(), ret))
-				{
-					if (m_level != SpeedLevel::Clash);
-					ChangeSpeedLevel(SpeedLevel::Clash);
-
-					if (std::abs(m_speed) < 2.0f)m_speed = 0.0f;
-					m_speed *= -0.5;
-					m_clashCount = 0.0;
-					m_steering = 0.0f;
-				}
-				//break;
+				GLOBALEVENT.publish(Events::Player::OnHit(shared_from_this(), obj, ret));
 			}
 		}
 	}
@@ -278,6 +269,8 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	}
 
 	m_speed = std::max(m_speed, m_minSpeed);
+
+	GLOBALEVENT.publish(Events::Player::ChangeSpeedLevel((int)m_level));
 }
 
 void Player::ActiveInput()

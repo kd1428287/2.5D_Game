@@ -7,6 +7,7 @@ class MapManager;
 #include "Application/Object/ObjectManager/ObjectManager.h"
 #include "Application/Object/ObjectManager/MapManager/MapManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
+#include "Application/System/EventBus/LocalEventBus.h"
 
 class BaseScene
 {
@@ -41,6 +42,7 @@ protected :
 	std::unique_ptr<CameraManager> m_cameraManager = nullptr;
 	std::unique_ptr<ObjectManager> m_objectManager = nullptr;
 	std::unique_ptr<MapManager>m_mapManager = nullptr;
+	//std::unique_ptr<LocalEventBus>m_localEV = nullptr;
 
 	// オブジェクト管理をオブジェクトマネージャーに移管
 	// 全オブジェクトのアドレスをリストで管理

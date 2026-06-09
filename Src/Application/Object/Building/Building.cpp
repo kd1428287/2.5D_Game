@@ -10,6 +10,19 @@ void Building::Init()
 	m_pCollider = std::make_unique<KdCollider>();
 
 	m_breakCount = 5.0f;
+
+	m_subscriber = GLOBALEVENT.subscribe<Events::Player::OnHit>([this](const Events::Player::OnHit& e)
+		{
+			if (shared_from_this() != e.m_other.lock())return;
+			std::shared_ptr<Player> player = std::dynamic_pointer_cast<Player>(e.m_me.lock());
+			if (!player)return;
+			if ((int)player->GetSpeedLevel() >= m_breakLevel && player->GetSpeedLevel() != SpeedLevel::Clash)
+			{
+				Break(e.m_result);
+			}
+		});
+
+
 	UINT type = KdCollider::Type::TypeGround | KdCollider::Type::TypeBump;
 	// モデルの形状で当たり判定を登録
 	m_pCollider->RegisterCollisionShape
@@ -82,21 +95,6 @@ void Building::DrawLit()
 {
 	if (m_state == BuildingState::Unbroken)KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
 	else KdShaderManager::Instance().m_StandardShader.DrawModel(*m_fragmentModel, m_mWorld);
-}
-
-bool Building::OnHit(const std::shared_ptr<KdGameObject>& obj, KdCollider::CollisionResult result)
-{
-	std::shared_ptr<Player> player = std::dynamic_pointer_cast<Player>(obj);
-	if (player)
-	{
-		if ((int)player->GetSpeedLevel() >= m_breakLevel && player->GetSpeedLevel() != SpeedLevel::Clash)
-		{
-			Break(result);
-			return true;
-		}
-		else return false;
-	}
-	else return false;
 }
 
 void Building::Break(KdCollider::CollisionResult result)

@@ -121,9 +121,6 @@
     <Filter Include="Src\Application\Object\Ground">
       <UniqueIdentifier>{77fed7e7-e03d-42ad-b8d6-290897a6d73e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Src\Application\System\GameManager">
-      <UniqueIdentifier>{77030546-8671-4cbe-9a3a-3b134288833e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Src\Application\System\EventBus">
       <UniqueIdentifier>{b3b1b2fc-60bf-4e0b-a698-1146845749af}</UniqueIdentifier>
     </Filter>
