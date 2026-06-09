@@ -20,6 +20,10 @@ void Building::Init()
 			{
 				Break(e.m_result);
 			}
+			else
+			{
+				player->ChangeSpeedLevel(SpeedLevel::Clash);
+			}
 		});
 
 
@@ -49,7 +53,7 @@ void Building::Update(float dt)
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			// 重力や速度の計算
-			fragVelocities[i].direction.y -= 1.0f * dt; // 重力
+			fragVelocities[i].direction.y -= 1.5f * dt; // 重力
 			fragVelocities[i].direction.Normalize();
 			fragVelocities[i].position += fragVelocities[i].direction * fragVelocities[i].speed * dt;
 			
@@ -116,7 +120,11 @@ void Building::Break(KdCollider::CollisionResult result)
 	{
 		// 初期位置を現在のモデルのローカル行列から取得
 		fragVelocities[i].position = nodes[i].m_localTransform.Translation();
-		fragVelocities[i].rotation = Math::Vector3::Zero;
+		fragVelocities[i].rotation = Math::Vector3(
+			KdRandom::GetFloat(-1.0f, 360.0f),
+			KdRandom::GetFloat(-1.0f, 360.0f),
+			KdRandom::GetFloat(-1.0f, 360.0f)
+		);
 		fragVelocities[i].speed = 1.5f;
 
 		// 爆発のように四方に飛び散るランダムな速度を設定 (例)

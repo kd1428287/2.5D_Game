@@ -36,6 +36,8 @@ public:
 private:
 	void ActiveInput();
 	void UpdateMove(float dt);
+	void UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList);
+	void UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList, const Math::Matrix& rotMat);
 
 private:
 	std::shared_ptr<KdModelData> m_model = nullptr;
@@ -48,7 +50,11 @@ private:
 	float m_speed = 0.0f;				// 現在のスピード
 	float m_maxSpeed = 2.f;				// 最大のスピード
 	float m_minSpeed = -2.f;			// 最低のスピード
-	float m_gravity = 0.0f;				// 重力
+
+	float m_fallVelocity = 0.0f;           // 現在の垂直方向の速度（落下速度）
+	float m_fallDistance = 0.0f;		   // 現在の落下距離
+	const float GRAVITY_ACCEL = 9.8f;      // 重力加速度 (定数)
+	const float MAX_FALL_SPEED = -10.0f;   // 終端速度（落下速度の上限値）
 
 	float m_clashCount = 0.0f;
 
@@ -59,6 +65,16 @@ private:
 	float m_steerSpeed = 90.0f;			// ハンドルを切る速さ（度/秒）
 	float m_maxSteerAngle = 35.0f;		// ハンドルの最大切れ角（度）
 	float m_wheelBase = 0.2f;			// ホイールベース（前輪から後輪までの距離）
+
+	// --- 車の当たり判定用パラメータ（マジックナンバーの排除） ---
+	static constexpr int   SPHERE_NUM = 3;
+	const float            m_sphereOffsets[SPHERE_NUM] = { 0.07f, 0.0f, -0.07f }; // 前・中・後
+	const float            m_sphereRadius = 0.05f;     // 球の半径
+	const Math::Vector3    m_sphereHeightOffset = { 0.0f, 0.06f, 0.0f }; // 高さ補正
+
+	// 物理計算の安全弁
+	static constexpr int   MAX_COLLISION_ITERATIONS = 3; // コーナーハメを防ぐ最大反復回数
+	std::set<std::shared_ptr<KdGameObject>> m_previousHitObjects;
 
 	SpeedLevel m_level = SpeedLevel::Idle;
 };

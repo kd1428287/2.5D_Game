@@ -33,8 +33,10 @@ public:
 	};
 	Building(Math::Vector3 pos, float level) :m_breakLevel(level)
 	{
+		float scale = 1.f;
+		if (level == 6)scale = 1.3f;
 		m_mWorld =
-			//Math::Matrix::CreateScale(0.1f) *
+			Math::Matrix::CreateScale(scale) *
 			Math::Matrix::CreateTranslation(pos);
 	};
 	~Building()override {};

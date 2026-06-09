@@ -29,7 +29,7 @@ void Player::Init()
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
 		m_model,
-		KdCollider::Type::TypeEvent & KdCollider::Type::TypeBump
+		KdCollider::Type::TypeEvent 
 	);
 }
 
@@ -61,7 +61,7 @@ void Player::PostUpdate()
 	// 全オブジェクトの中から自機から一定距離内のオブジェクトを取得
 	std::vector<std::shared_ptr<KdGameObject>> objList;
 	Math::Vector3 length;
-	float radius = m_gravity + 5.0f;
+	float radius = std::abs(m_fallDistance) + 5.0f;
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
 		length = m_pos + m_amountMove - obj->GetPos();
@@ -69,159 +69,20 @@ void Player::PostUpdate()
 	}
 
 	// 当たる側の処理
-	// レイ判定用の変数を設定
-	KdCollider::RayInfo ray;
-	// レイの発射位置を設定
-	ray.m_pos = m_pos + m_amountMove;
-	// ちょっと上からの位置にする
-	ray.m_pos.y += 0.01f;
-	// 段差の許容範囲を設定
-	float enableStepHigh = 0.02f;
-	ray.m_pos.y += enableStepHigh;
-	// レイの発射方向を設定
-	ray.m_dir = { 0,-1,0 };
-	// レイの長さを設定
-	ray.m_range = m_gravity + enableStepHigh;
-	// 当たり判定を行いたいタイプを設定
-	ray.m_type = KdCollider::TypeGround;
+	UpdateGroundCollision(objList);
 
-	// デバッグ表示
-	m_pDebugWire->AddDebugLine(ray.m_pos, ray.m_dir, ray.m_range);
 
-	// レイに当たったオブジェクト情報を格納するリストを用意
-	std::list<KdCollider::CollisionResult> retRayList;
-
-	// 判定
-	for (auto& obj : objList)
-	{
-		//		↓当たり判定を行う関数
-		obj->Intersects(ray, &retRayList);
-	}
-
-	// レイに当たったリストから一番近いオブジェクトを探す
-	float maxOverLap = 0.0f;
-	Math::Vector3 hitPos;
-	bool hit = false;
-	for (auto& ret : retRayList)
-	{
-		// レイを遮断し、オーバーした長さが一番長いものを探す
-		if (maxOverLap < ret.m_overlapDistance)
-		{
-			maxOverLap = ret.m_overlapDistance;
-			hitPos = ret.m_hitPos;
-			hit = true;
-		}
-	}
-
-	if (hit)
-	{
-		// 当たっていたらプレイヤー座標を更新
-		if (m_amountMove.y + m_pos.y < hitPos.y)m_amountMove.y = 0.0f;
-		m_gravity = 0.0f;
-	}
-
-	
 	// 球(スフィア)判定=========
-
-	const int SPHERE_NUM = 3;
-	float zOffset[SPHERE_NUM] = { 0.07f,0.0f,-0.07f };
-
-	KdCollider::SphereInfo sphere[SPHERE_NUM];
-	KdCollider::SphereInfo mainSphere;
-	mainSphere.m_sphere.Center = m_pos + m_amountMove;
-	mainSphere.m_sphere.Radius = 0.12f;
-	mainSphere.m_type = KdCollider::TypeBump;
-
-	for (int i = 0; i < SPHERE_NUM; ++i)
-	{
-		
-		// ローカルのズレ(Z方向)を、車の現在の向き(回転行列)に合わせてワールド空間のズレに変換
-		Math::Vector3 offset = { 0.0f, 0.0f, zOffset[i] };
-		Math::Vector3 rotatedOffset = Math::Vector3::TransformNormal(offset, rotMat);
-
-		// 球の中心座標 ＝ 車の中心座標 ＋ 高さ調整 ＋ 向きを考慮した前後のズレ
-		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.06f, 0.0f) + rotatedOffset;
-
-		// 車幅の半分くらいを半径に設定
-		sphere[i].m_sphere.Radius = 0.05f;
-
-		// デバッグ描画（赤いワイヤーフレームで球を描画）
-		m_pDebugWire->AddDebugSphere(sphere[i].m_sphere.Center, sphere[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
-	}
-
-	std::list<KdCollider::CollisionResult> retSphereList;
-
-	// 当たり判定
-
-	for (auto& obj : objList)
-	{
-		for (int i = 0; i < SPHERE_NUM; i++)
-		{
-			if (obj->Intersects(sphere[i], &retSphereList))
-			{				
-				auto ret = retSphereList.back();
-				GLOBALEVENT.publish(Events::Player::OnHit(shared_from_this(), obj, ret));
-			}
-		}
-	}
-
-	maxOverLap = 0.0f;
-
-	hit = false;
-	Math::Vector3 totalPushOut = Math::Vector3::Zero; // 全ての押し出しベクトルの合計
-
-	// 【改善案1】同じ向きの押し出しベクトルを整理するためのリスト
-	std::vector<Math::Vector3> pushOutList;
-
-
-	for (auto& ret : retSphereList)
-	{
-		Math::Vector3 dir = ret.m_hitDir;
-
-		// 下向きの押し出しを無効化
-		if (dir.y < 0.0f) dir.y = 0.0f;
-
-		if (dir.LengthSquared() > 0.0f)
-		{
-			dir.Normalize();
-			Math::Vector3 currentPush = dir * ret.m_overlapDistance;
-
-			bool merged = false;
-			// 既存の押し出しベクトルと「同じ壁（似た方向）」かチェックする
-			for (auto& p : pushOutList)
-			{
-				Math::Vector3 pDir = p;
-				pDir.Normalize();
-
-				// 内積が0.9以上（ほぼ同じ向き）なら同じ壁とみなす
-				if (dir.Dot(pDir) > 0.9f)
-				{
-					// 単純加算ではなく、より深くめり込んでいる方（最大値）を採用する
-					if (currentPush.LengthSquared() > p.LengthSquared())
-					{
-						p = currentPush;
-					}
-					merged = true;
-					break;
-				}
-			}
-
-			// まったく違う向き（V字谷や別の角など）なら新しい押し出しとして追加
-			if (!merged)
-			{
-				pushOutList.push_back(currentPush);
-			}
-		}
-	}
-
+	UpdateWallCollision(objList, rotMat);
+	
 	// ----------------------------------------------------
 	// 全ての押し出しが終わった後の最終的な m_pos で m_mWorld を確定させる
 	// ----------------------------------------------------
 
 	m_pos += m_amountMove;
 
-	m_mWorld = 
-		rotMat * 
+	m_mWorld =
+		rotMat *
 		Math::Matrix::CreateTranslation(m_pos);
 }
 
@@ -266,6 +127,8 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	case SpeedLevel::Clash:  
 		m_maxSpeed = 0.f;
 		m_minSpeed = -0.8f;
+
+		m_speed *= -0.5f;
 		break;
 	default: break;
 	}
@@ -331,12 +194,21 @@ void Player::UpdateMove(float dt)
 	if (m_speed > m_maxSpeed)m_speed = m_maxSpeed;
 	if (m_speed < m_minSpeed)m_speed = m_minSpeed;
 
+	// 一時的
+	if (InputManager::Instance().IsTriggered(VK_SHIFT))
+	{
+		int lv = (int)GetSpeedLevel();
+		lv += 1;
+		ChangeSpeedLevel((SpeedLevel)lv);
+	}
+	
+
 
 	// ==========================================
 	// 3. 車の向き（ヘディング）の更新 (バイシクルモデル)
 	// ==========================================
 	// 車が動いている時だけ向きが変わるようにする
-	if (std::abs(m_speed) > 0.5f)
+	if (std::abs(m_speed) > 0.01f)
 	{
 		// C++の標準数学関数はラジアンを要求するため変換
 		float steerRad = DirectX::XMConvertToRadians(m_steering);
@@ -349,34 +221,38 @@ void Player::UpdateMove(float dt)
 
 
 	// ==========================================
-	// 4. 移動ベクトルの計算と位置の更新
-	// ==========================================
+// 4. 移動ベクトルの計算と位置の更新 (修正版)
+// ==========================================
 	float pitch_rad = DirectX::XMConvertToRadians(m_angle.x);
-	float yaw_rad = DirectX::XMConvertToRadians(m_angle.y); // すでに更新済みの向きを使う
+	float yaw_rad = DirectX::XMConvertToRadians(m_angle.y);
 
-	float x = std::cos(pitch_rad) * std::sin(yaw_rad);
-	float y = std::sin(pitch_rad);
-	float z = std::cos(pitch_rad) * std::cos(yaw_rad);
-	m_moveVec = { x, y, z };
-	m_moveVec.Normalize();
+	// ① 水平方向（車の推進力）の計算
+	// ※ここでは重力を絶対に混ぜない。純粋な車の向いている方向だけを抽出。
+	Math::Vector3 forwardVec = {
+		std::cos(pitch_rad) * std::sin(yaw_rad),
+		std::sin(pitch_rad),
+		std::cos(pitch_rad) * std::cos(yaw_rad)
+	};
+	forwardVec.Normalize(); // 推進方向だけを正規化
 
+	// 前進移動量を確定
+	m_amountMove = forwardVec * m_speed * dt;
 
-	// 一時的
-	if (InputManager::Instance().IsTriggered(VK_SHIFT))
-	{
-		int lv = (int)GetSpeedLevel();
-		lv += 1;
-		ChangeSpeedLevel((SpeedLevel)lv);
+	// ② 垂直方向（重力による落下）の計算
+	// ジャンプの処理（元コードの VK_SPACE に該当）
+	if (InputManager::Instance().IsTriggered(VK_SPACE)) {
+		m_fallVelocity = 5.0f; // 上向きの初速を与える
 	}
-	if (InputManager::Instance().IsTriggered(VK_SPACE)) m_gravity -= 25.f * dt;
 
-	m_gravity += 0.5f * dt;
+	// 毎フレーム、重力加速度を落下速度に加算 (v = v0 - at)
+	m_fallVelocity -= GRAVITY_ACCEL * dt;
 
-	
+	// 落下速度が無限に大きくならないようにクランプ（終端速度）
+	m_fallVelocity = std::max(m_fallVelocity, MAX_FALL_SPEED);
 
-	// 位置の適用
-	m_amountMove += m_moveVec * m_speed * dt;
-	m_amountMove.y -= m_gravity;
+	// ③ Y軸の移動量に落下速度を適用
+	m_fallDistance = m_fallVelocity* dt;
+	m_amountMove.y += m_fallDistance;
 
 
 	// ==========================================
@@ -387,9 +263,187 @@ void Player::UpdateMove(float dt)
 	m_speed *= std::exp(-friction * dt);
 
 	// 速度が微小になったら完全に停止させる
-	if (std::abs(m_speed) < 0.5f) {
+	if (std::abs(m_speed) < 0.01f) {
 		m_speed = 0.0f;
 
 		if(m_level != SpeedLevel::Clash)ChangeSpeedLevel(SpeedLevel::Idle);
 	}
+}
+
+void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList)
+{
+	// レイ判定用の変数を設定
+	KdCollider::RayInfo ray;
+	// レイの発射位置を設定
+	ray.m_pos = m_pos;// +m_amountMove;
+	// ちょっと上からの位置にする
+	ray.m_pos.y += 0.01f;
+	// 段差の許容範囲を設定
+	float enableStepHigh = 0.02f;
+	ray.m_pos.y += enableStepHigh;
+	// レイの発射方向を設定
+	ray.m_dir = { 0,-1,0 };
+	// レイの長さを設定
+	ray.m_range = -m_fallDistance + enableStepHigh;
+	// 当たり判定を行いたいタイプを設定
+	ray.m_type = KdCollider::TypeGround;
+
+	// デバッグ表示
+	m_pDebugWire->AddDebugLine(ray.m_pos, ray.m_dir, ray.m_range);
+
+	// レイに当たったオブジェクト情報を格納するリストを用意
+	std::list<KdCollider::CollisionResult> retRayList;
+
+	// 判定
+	for (auto& obj : objList)
+	{
+		//		↓当たり判定を行う関数
+		obj->Intersects(ray, &retRayList);
+	}
+
+	// レイに当たったリストから一番近いオブジェクトを探す
+	float maxOverLap = 0.0f;
+	Math::Vector3 hitPos;
+	bool hit = false;
+	for (auto& ret : retRayList)
+	{
+		// レイを遮断し、オーバーした長さが一番長いものを探す
+		if (maxOverLap < ret.m_overlapDistance)
+		{
+			maxOverLap = ret.m_overlapDistance;
+			hitPos = ret.m_hitPos;
+			hit = true;
+		}
+	}
+
+	if (hit)
+	{
+		// 床に当たっていたらめり込みを解消
+		if (m_amountMove.y + m_pos.y + 0.01f < hitPos.y)
+		{
+			m_amountMove.y = hitPos.y - m_pos.y - 0.01f; // ぴったり床の高さに合わせる
+		}
+
+		// 床に接地している間は落下速度をリセット（または微小なマイナス値にして接地判定を維持する）
+		m_fallVelocity = 0.0f;
+		m_fallDistance = 0.0f;
+	}
+}
+
+void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList, const Math::Matrix& rotMat)
+{
+	// 同一フレーム内で同じオブジェクトへの衝突イベントが重複するのを防ぐ
+	std::set<std::shared_ptr<KdGameObject>> hitObjectsThisFrame;
+
+	// 1. 純粋な「車の推進ベクトル」を抽出（重力などの垂直成分を除外）
+	// これを行うことで、壁に阻まれても「バックする力」や「旋回する力」が殺されなくなります。
+	Math::Vector3 slidingVelocity = m_amountMove;
+	float savedGravityY = slidingVelocity.y; // 重力を一時退避
+	slidingVelocity.y = 0.0f;                // 水平方向の移動のみ計算対象にする
+
+	bool hasCollided = false;
+
+	// 2. 反復めり込み解消ループ（これがL字コーナーでのスタックを完全に粉砕します）
+	for (int iteration = 0; iteration < MAX_COLLISION_ITERATIONS; ++iteration)
+	{
+		KdCollider::SphereInfo spheres[SPHERE_NUM];
+		std::list<KdCollider::CollisionResult> retSphereList;
+
+		// 現在の計算途中の m_amountMove を適用した仮の位置にスフィアを配置
+		for (int i = 0; i < SPHERE_NUM; ++i)
+		{
+			Math::Vector3 localOffset = { 0.0f, 0.0f, m_sphereOffsets[i] };
+			Math::Vector3 rotatedOffset = Math::Vector3::TransformNormal(localOffset, rotMat);
+
+			spheres[i].m_sphere.Center = m_pos + m_amountMove + m_sphereHeightOffset + rotatedOffset;
+			spheres[i].m_sphere.Radius = m_sphereRadius;
+			spheres[i].m_type = KdCollider::TypeBump;
+
+			// デバッグ表示（スタックが直ると、この赤い球が壁の綺麗に表面に並ぶようになります）
+			m_pDebugWire->AddDebugSphere(spheres[i].m_sphere.Center, spheres[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
+		}
+
+		// 衝突検知
+		for (auto& obj : objList)
+		{
+			for (int i = 0; i < SPHERE_NUM; ++i)
+			{
+				if (obj->Intersects(spheres[i], &retSphereList))
+				{
+					hitObjectsThisFrame.insert(obj);
+				}
+			}
+		}
+
+		// めり込みが完全になくなったら、これ以上位置を修正する必要がないので即ループ脱出（最適化）
+		if (retSphereList.empty()) break;
+
+		hasCollided = true;
+
+		// 法線（壁の向き）ごとに最大のめり込み量をまとめる
+		struct PushInfo { Math::Vector3 dir; float maxOverlap = 0.0f; };
+		std::vector<PushInfo> distinctPushes;
+
+		for (const auto& ret : retSphereList)
+		{
+			Math::Vector3 dir = ret.m_hitDir;
+			dir.y = 0.0f; // 完全な横壁判定のため垂直反発はカット
+			if (dir.LengthSquared() <= 0.0f) continue;
+			dir.Normalize();
+
+			bool isDuplicate = false;
+			for (auto& push : distinctPushes)
+			{
+				if (push.dir.Dot(dir) > 0.9f) // 約25度以内の壁は同一の壁とみなす
+				{
+					isDuplicate = true;
+					if (ret.m_overlapDistance > push.maxOverlap)
+					{
+						push.maxOverlap = ret.m_overlapDistance;
+					}
+					break;
+				}
+			}
+			if (!isDuplicate)
+			{
+				distinctPushes.push_back({ dir, ret.m_overlapDistance });
+			}
+		}
+
+		// 3. 位置の押し出しと、推進ベクトルの正確な投影（壁滑り）
+		for (const auto& push : distinctPushes)
+		{
+			// A. 位置の強制排除（めり込んでいる分だけ即座に押し出す）
+			m_amountMove += push.dir * push.maxOverlap;
+
+			// B. 正確な壁滑り
+			// 車が進もうとするベクトル（slidingVelocity）が壁に向いている（内積がマイナス）場合のみ、
+			// 壁の法線平面へベクトルを投影し、壁に沿って滑らせる
+			float dotResult = slidingVelocity.Dot(push.dir);
+			if (dotResult < 0.0f)
+			{
+				slidingVelocity -= push.dir * dotResult;
+			}
+		}
+
+		// 滑り処理が適用された推進力を全体の移動量に書き戻す
+		m_amountMove.x = slidingVelocity.x;
+		m_amountMove.z = slidingVelocity.z;
+		m_amountMove.y = savedGravityY; // 退避していた重力を維持
+	}
+
+	// 5. 重複のない安全なイベント通知
+	for (auto& obj : hitObjectsThisFrame)
+	{
+		// 前のフレームで当たっていない「新規の衝突」の場合のみ OnHit を発火する
+		// これにより、角に挟まって壁にこすり続けている間はスパム通知が飛ばなくなる
+		if (m_previousHitObjects.find(obj) == m_previousHitObjects.end())
+		{
+			KdCollider::CollisionResult dummyResult;
+			GLOBALEVENT.publish(Events::Player::OnHit(shared_from_this(), obj, dummyResult));
+		}
+	}
+
+	// 現在のフレームで接触しているオブジェクトのリストを、次のフレームの比較用に保存
+	m_previousHitObjects = hitObjectsThisFrame;
 }

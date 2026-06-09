@@ -30,11 +30,11 @@ void MapManager::GenarateMap(ObjectManager& _objManager)
 			_objManager.CreateObject<Ground>(pos, 0);
 			if (i == 0 || i == MAP_WIDTH - 1 || j == 0 || j == MAP_HEIGHT - 1)
 			{
-				_objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.5f, 0),6);
+				_objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0),6);
 				continue;
 			}
 			if (j % 2)continue;
-			_objManager.CreateObject<Building>(pos + Math::Vector3(0,0.5f,0));
+			_objManager.CreateObject<Building>(pos + Math::Vector3(0,0.1f,0));
 		
 		}
 	}
