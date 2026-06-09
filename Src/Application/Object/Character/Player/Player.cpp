@@ -16,15 +16,13 @@ void Player::Init()
 	m_model = std::make_shared<KdModelData>();
 	m_model = RESOURCE.GetModel("Asset/Models/car_van/car_van.gltf");
 	
-	//m_pos = { 0,5,0 };
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
 	m_level = SpeedLevel::Idle;
 
 	ChangeSpeedLevel(SpeedLevel::Idle);
 
-	//m_acceleration = 0.05f;
-	m_acceleration = 100.0f;
+	m_acceleration = 50.0f;
 
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
@@ -126,7 +124,7 @@ void Player::PostUpdate()
 	// 球(スフィア)判定=========
 
 	const int SPHERE_NUM = 3;
-	float zOffset[SPHERE_NUM] = { 0.7f,0.0f,-0.7f };
+	float zOffset[SPHERE_NUM] = { 0.35f,0.0f,-0.35f };
 
 	KdCollider::SphereInfo sphere[SPHERE_NUM];
 
@@ -138,11 +136,11 @@ void Player::PostUpdate()
 		Math::Vector3 rotatedOffset = Math::Vector3::TransformNormal(offset, rotMat);
 
 		// 球の中心座標 ＝ 車の中心座標 ＋ 高さ調整 ＋ 向きを考慮した前後のズレ
-		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.6f, 0.0f) + rotatedOffset;
+		sphere[i].m_sphere.Center = m_pos + m_amountMove + Math::Vector3(0.0f, 0.3f, 0.0f) + rotatedOffset;
 
 		// 車幅の半分くらいを半径に設定
-		sphere[i].m_sphere.Radius = 0.5f;
-		sphere[i].m_type = /*KdCollider::TypeGround &*/ KdCollider::TypeBump; 
+		sphere[i].m_sphere.Radius = 0.25f;
+		sphere[i].m_type = KdCollider::TypeBump; 
 
 		// デバッグ描画（赤いワイヤーフレームで球を描画）
 		m_pDebugWire->AddDebugSphere(sphere[i].m_sphere.Center, sphere[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
@@ -160,8 +158,8 @@ void Player::PostUpdate()
 				if (!obj->OnHit(shared_from_this(), retSphereList.back()))
 				{
 					ChangeSpeedLevel(SpeedLevel::Clash);
+					if (std::abs(m_speed) < 0.05f)m_speed = 0.0f;
 					m_speed *= -0.5;
-					m_clashCount = 1.0f;
 				}
 				break;
 			}
@@ -170,27 +168,75 @@ void Player::PostUpdate()
 	}
 
 	maxOverLap = 0.0f;
-	hit = false;
-	Math::Vector3 hitDir;
+	// 【改善案1】同じ向きの押し出しベクトルを整理するためのリスト
+	std::vector<Math::Vector3> pushOutList;
 
 	for (auto& ret : retSphereList)
 	{
-		if (maxOverLap < ret.m_overlapDistance)
+		Math::Vector3 dir = ret.m_hitDir;
+
+		// 下向きの押し出しを無効化
+		if (dir.y < 0.0f) dir.y = 0.0f;
+
+		if (dir.LengthSquared() > 0.0f)
 		{
-			maxOverLap = ret.m_overlapDistance;
-			hitDir = ret.m_hitDir;
-			hit = true;
+			dir.Normalize();
+			Math::Vector3 currentPush = dir * ret.m_overlapDistance;
+
+			bool merged = false;
+			// 既存の押し出しベクトルと「同じ壁（似た方向）」かチェックする
+			for (auto& p : pushOutList)
+			{
+				Math::Vector3 pDir = p;
+				pDir.Normalize();
+
+				// 内積が0.9以上（ほぼ同じ向き）なら同じ壁とみなす
+				if (dir.Dot(pDir) > 0.9f)
+				{
+					// 単純加算ではなく、より深くめり込んでいる方（最大値）を採用する
+					if (currentPush.LengthSquared() > p.LengthSquared())
+					{
+						p = currentPush;
+					}
+					merged = true;
+					break;
+				}
+			}
+
+			// まったく違う向き（V字谷や別の角など）なら新しい押し出しとして追加
+			if (!merged)
+			{
+				pushOutList.push_back(currentPush);
+			}
 		}
+	}
+
+	Math::Vector3 totalPushOut = Math::Vector3::Zero;
+	for (auto& p : pushOutList)
+	{
+		totalPushOut += p;
+		hit = true;
 	}
 
 	if (hit)
 	{
-		if (hitDir.y < 0.0f)hitDir.y = 0.0f;
-		// ベクトルを再正規化（長さを1にする）
-		hitDir.Normalize();
+		Math::Vector3 pushDir = totalPushOut;
 
-		// 押し出しを実行してプレイヤーの座標を更新
-		m_amountMove += hitDir * maxOverLap;
+		// 安全のためゼロベクトルでないか確認
+		if (pushDir.LengthSquared() > 0.0f)
+		{
+			pushDir.Normalize();
+
+			// 【改善案2】順序の修正：まず「移動力」のうち、壁にぶつかる成分だけを削る
+			float dotResult = m_amountMove.Dot(pushDir);
+			if (dotResult < 0.0f)
+			{
+				m_amountMove -= pushDir * dotResult;
+			}
+		}
+
+		// その後で、押し出しベクトルを適用する（絶対に削らない！）
+		m_amountMove += totalPushOut;
 	}
 
 	// ----------------------------------------------------
@@ -248,6 +294,8 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 		break;
 	default: break;
 	}
+
+	m_speed = std::max(m_minSpeed, m_speed);
 }
 
 void Player::ActiveInput()
@@ -311,7 +359,7 @@ void Player::UpdateMove(float dt)
 	// 3. 車の向き（ヘディング）の更新 (バイシクルモデル)
 	// ==========================================
 	// 車が動いている時だけ向きが変わるようにする
-	if (std::abs(m_speed) > 0.001f)
+	if (std::abs(m_speed) > 0.5f)
 	{
 		// C++の標準数学関数はラジアンを要求するため変換
 		float steerRad = DirectX::XMConvertToRadians(m_steering);
@@ -343,9 +391,9 @@ void Player::UpdateMove(float dt)
 		lv += 1;
 		ChangeSpeedLevel((SpeedLevel)lv);
 	}
-	if (InputManager::Instance().IsPressed(VK_SPACE)) m_gravity -= 5.f * dt;
+	if (InputManager::Instance().IsTriggered(VK_SPACE)) m_gravity -= 25.f * dt;
 
-	m_gravity += 1.f * dt;
+	m_gravity += 0.5f * dt;
 
 	
 
@@ -359,7 +407,7 @@ void Player::UpdateMove(float dt)
 	// ==========================================
 	// ※ m_speed *= 0.85f * dt; だとフレームレート依存で急ブレーキがかかるため修正
 	float friction = 0.55f; 
-	m_speed -= m_speed * friction * dt;
+	m_speed *= std::exp(-friction * dt);
 
 	// 速度が微小になったら完全に停止させる
 	if (std::abs(m_speed) < 0.5f) {

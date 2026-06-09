@@ -20,6 +20,7 @@ public:
 	Ground(Math::Vector3 pos, int type) :m_type((GroundType)type)
 	{
 		m_mWorld = Math::Matrix::CreateTranslation(pos);
+
 	};
 	~Ground()override {};
 
