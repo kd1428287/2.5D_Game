@@ -22,19 +22,30 @@ public:
 
 
 private:
+	void UpdateProjection(float dt);
+	void UpdateAngle(const std::shared_ptr<Player>& target,float dt);
+	void UpdateDistance(const std::shared_ptr<Player>& target, float dt);
 
 	std::unique_ptr<KdCamera> m_camera = nullptr;
 	const Math::Vector3 DEF_DIS = { 0.0f,0.5f,-0.5f };
-	Math::Vector3 m_camDis;
-	Math::Vector3 m_camPos;
-	Math::Vector3 m_camAng;
-	float m_projection = 0.0f;
-	float m_speed = 0.0f;
+	Math::Vector3 m_camDis;			// ターゲットからの距離
+	Math::Vector3 m_camPos;			// ワールド座標
+	Math::Vector3 m_camAng;			// 回転
+
+	float m_projection = 60.0f;		// 視野角
+	float m_targetAngle = 15.0f;	// 目標角度
+	float m_steeringOffset = 0.0f;	// 旋回オフセット
+	float m_speed = 0.0f;			// 追従速度
+
+	float m_shakeStrength = 0.0f; // 現在のシェイク強度
+	float m_shakeTime = 0.0f;     // 残りシェイク時間
+
 	std::weak_ptr<Player> m_targetObj = {};
 
 	float m_targetProj = 0.0f;
 	Math::Vector3 m_targetPos;
 	float m_targetAspectRatio = 0.0f;
 
-	ScopedSubscriber m_subscriber;
+	ScopedSubscriber m_speedSub;
+	ScopedSubscriber m_hitSub;
 };

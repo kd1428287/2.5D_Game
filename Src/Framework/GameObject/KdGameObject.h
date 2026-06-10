@@ -92,5 +92,5 @@ protected:
 	std::unique_ptr<KdDebugWireFrame> m_pDebugWire = nullptr;
 
 	// イベントバス
-	ScopedSubscriber m_subscriber;
+	std::vector<ScopedSubscriber> m_subscriber;
 };

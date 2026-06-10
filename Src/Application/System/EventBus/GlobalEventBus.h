@@ -18,14 +18,14 @@ private:
 
 	using HandlerFunction = std::function<void(const Event&)>;
 
-	// 【変更】IDと関数をペアにして保持する
+	// IDと関数をペアにして保持する
 	using IdHandlerPair = std::pair<SubscriptionId, HandlerFunction>;
 	std::unordered_map<std::type_index, std::vector<IdHandlerPair>> subscribers;
 
 	// 一意のIDを発行するためのカウンタ
 	std::atomic<SubscriptionId> nextId;
 public:
-	// 【変更】戻り値として SubscriptionId を返すようにする
+	// 戻り値として SubscriptionId を返すようにする
 	template <typename T>
 	SubscriptionId subscribe(std::function<void(const T&)> callback) {
 		auto wrapper = [callback](const Event& e) {
@@ -40,7 +40,7 @@ public:
 		return id; // 解除に必要なIDを呼び出し元に返す
 	}
 
-	// 【新規追加】購読解除
+	// 購読解除
 	void unsubscribe(SubscriptionId id) {
 		if (id == 0) return;
 
@@ -59,7 +59,7 @@ public:
 	void publish(const T& event) {
 		auto it = subscribers.find(std::type_index(typeid(T)));
 		if (it != subscribers.end()) {
-			// 【変更】ペアの2番目（関数）を呼び出す
+			// ペアの2番目（関数）を呼び出す
 			for (auto& pair : it->second) {
 				pair.second(event);
 			}

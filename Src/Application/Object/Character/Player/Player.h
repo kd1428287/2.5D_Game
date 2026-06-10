@@ -27,6 +27,7 @@ public:
 	void DrawLit()override;
 
 	void ChangeSpeedLevel(SpeedLevel level);
+
 	SpeedLevel GetSpeedLevel() { return m_level; }
 	float GetSpeed() { return m_speed; }
 
@@ -34,7 +35,6 @@ public:
 	Math::Vector3 GetAngle() { return m_angle; }
 
 private:
-	void ActiveInput();
 	void UpdateMove(float dt);
 	void UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList);
 	void UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList, const Math::Matrix& rotMat);
@@ -42,11 +42,11 @@ private:
 private:
 	std::shared_ptr<KdModelData> m_model = nullptr;
 
-	Math::Vector3 m_pos;
-	Math::Vector3 m_angle;
+	Math::Vector3 m_pos;				// 確定座標
+	Math::Vector3 m_angle;				// 車体方向
 
-	Math::Vector3 m_amountMove;
-	Math::Vector3 m_moveVec;
+	Math::Vector3 m_amountMove;			// (1Fでの)移動距離
+	Math::Vector3 m_moveVec;			// 移動方向
 	float m_speed = 0.0f;				// 現在のスピード
 	float m_maxSpeed = 2.f;				// 最大のスピード
 	float m_minSpeed = -2.f;			// 最低のスピード
@@ -66,7 +66,7 @@ private:
 	float m_maxSteerAngle = 35.0f;		// ハンドルの最大切れ角（度）
 	float m_wheelBase = 0.2f;			// ホイールベース（前輪から後輪までの距離）
 
-	// --- 車の当たり判定用パラメータ（マジックナンバーの排除） ---
+	// --- 車の当たり判定用パラメータ ---
 	static constexpr int   SPHERE_NUM = 3;
 	const float            m_sphereOffsets[SPHERE_NUM] = { 0.07f, 0.0f, -0.07f }; // 前・中・後
 	const float            m_sphereRadius = 0.05f;     // 球の半径

@@ -12,7 +12,7 @@ void Ground::Init()
 
 	if (m_type == GroundType::grass)
 	{
-		m_model = RESOURCE.GetModel("Asset/Models/map_tiles/map_grass.gltf");
+		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_grass.gltf");
 	}
 	else
 	{
@@ -37,8 +37,8 @@ void Ground::SetGroundType(GroundType type)
 {
 	switch (type)
 	{
-	case (GroundType)0:m_model = RESOURCE.GetModel("Asset/Models/map_tiles/map_grass.gltf"); break;
-	case (GroundType)1:m_model = RESOURCE.GetModel("Asset/Models/map_tiles/map_road_bridge_canal.gltf"); break;
+	case (GroundType)0:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_grass.gltf"); break;
+	case (GroundType)1:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_bridge_canal.gltf"); break;
 		
 	default:
 		break;

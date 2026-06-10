@@ -34,7 +34,7 @@ void MapManager::GenarateMap(ObjectManager& _objManager)
 				continue;
 			}
 			if (j % 2)continue;
-			_objManager.CreateObject<Building>(pos + Math::Vector3(0,0.1f,0));
+			_objManager.CreateObject<Building>(pos + Math::Vector3(0,0.1f,0),(int)(i % 6));
 		
 		}
 	}

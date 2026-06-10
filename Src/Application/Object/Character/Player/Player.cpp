@@ -14,7 +14,8 @@ void Player::Init()
 
 	// モデル
 	m_model = std::make_shared<KdModelData>();
-	m_model = RESOURCE.GetModel("Asset/Models/car_van/car_van.gltf");
+	//m_model = RESOURCE.GetModel("Asset/Models/car_van/car_van.gltf");
+	m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/car_van/car_van.gltf");
 	
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
@@ -24,7 +25,19 @@ void Player::Init()
 
 	m_acceleration = 50.0f;
 
-	//m_suscriber = GLOBALEVENT.subscribe<Events::Player::ChangeSpeedLevel>();
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
+		{
+			if (e.type != Events::Player::HitResult::HitResultType::Bounced)return;
+			int level = (int)m_level - 2;
+			if (m_level != SpeedLevel::Clash && level > 0)
+			{
+				m_speed *= -0.5f;
+				m_clashCount = (float)level * 0.1f;
+			}
+			ChangeSpeedLevel(SpeedLevel::Clash);
+		})
+	);
 
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
@@ -127,8 +140,6 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	case SpeedLevel::Clash:  
 		m_maxSpeed = 0.f;
 		m_minSpeed = -0.8f;
-
-		m_speed *= -0.5f;
 		break;
 	default: break;
 	}
@@ -390,7 +401,7 @@ void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>
 			dir.y = 0.0f; // 完全な横壁判定のため垂直反発はカット
 			if (dir.LengthSquared() <= 0.0f) continue;
 			dir.Normalize();
-
+				
 			bool isDuplicate = false;
 			for (auto& push : distinctPushes)
 			{

@@ -34,6 +34,35 @@ namespace Events
 			};
 
 			HitResultType type;
+			float speedLevel = 0.f;
+			HitResult(const HitResultType& _type, float speed) :type(_type), speedLevel(speed) {};
+		};
+
+		struct EventTouchBegin : public Event
+		{
+			std::weak_ptr<KdGameObject> m_me;
+			EventTouchBegin(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+		};
+
+		struct EventTouchEnd : public Event
+		{
+			std::weak_ptr<KdGameObject> m_me;
+			EventTouchEnd(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+		};
+
+		struct EventTouchClear :public Event
+		{
+			std::weak_ptr<KdGameObject> m_me;
+			EventTouchClear(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+		};
+	}
+
+	namespace Else
+	{
+		struct CreateObject : public Event
+		{
+			template <typename T>
+			std::shared_ptr<T> obj;
 		};
 	}
 }

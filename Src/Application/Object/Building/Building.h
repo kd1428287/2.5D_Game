@@ -31,7 +31,7 @@ public:
 			//Math::Matrix::CreateScale(0.1f) *
 			Math::Matrix::CreateTranslation(pos);
 	};
-	Building(Math::Vector3 pos, float level) :m_breakLevel(level)
+	Building(Math::Vector3 pos, int level) :m_breakLevel(level)
 	{
 		float scale = 1.f;
 		if (level == 6)scale = 1.3f;
@@ -50,6 +50,8 @@ public:
 protected:
 	void Break(KdCollider::CollisionResult result);
 
+	void SetBreakLevel(int level);
+
 	std::shared_ptr<KdModelData> m_model = nullptr;
 	std::shared_ptr<KdModelWork> m_fragmentModel = nullptr;
 	BuildingState m_state = BuildingState::Unbroken;
@@ -58,4 +60,8 @@ protected:
 
 	float m_breakCount = 0.0f;
 	int m_breakLevel = 4;
+
+	float m_buildingDissolve = 0.f;
+
+	Math::Color m_color = { 1.f,1.f,1.f,1.f };
 };
