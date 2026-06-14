@@ -25,12 +25,13 @@ class Building : public KdGameObject
 {
 public:
 	Building() {};
+
 	Building(Math::Vector3 pos) 
 	{
 		m_mWorld =
-			//Math::Matrix::CreateScale(0.1f) *
 			Math::Matrix::CreateTranslation(pos);
 	};
+
 	Building(Math::Vector3 pos, int level) :m_breakLevel(level)
 	{
 		float scale = 1.f;
@@ -39,6 +40,7 @@ public:
 			Math::Matrix::CreateScale(scale) *
 			Math::Matrix::CreateTranslation(pos);
 	};
+
 	~Building()override {};
 
 	void Init()override;
@@ -46,6 +48,8 @@ public:
 	
 	void GenerateDepthMapFromLight()override;
 	void DrawLit()override;
+
+	BuildingState GetState() { return m_state; }
 
 protected:
 	void Break(KdCollider::CollisionResult result);

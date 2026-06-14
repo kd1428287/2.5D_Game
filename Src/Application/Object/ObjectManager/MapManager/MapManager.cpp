@@ -2,6 +2,7 @@
 #include "../ObjectManager.h"
 #include "../../Ground/Ground.h"
 #include "../../Building/Building.h"
+#include "../../EventObject/DeliveryPoint.h"
 
 void MapManager::Init()
 {
@@ -27,15 +28,16 @@ void MapManager::GenarateMap(ObjectManager& _objManager)
 		{
 			pos.z = (j - MAP_HEIGHT / 2.0f) * height;
 			
-			_objManager.CreateObject<Ground>(pos, 0);
+			_objManager.CreateObject<Ground>(pos, j % 5);
 			if (i == 0 || i == MAP_WIDTH - 1 || j == 0 || j == MAP_HEIGHT - 1)
 			{
 				_objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0),6);
 				continue;
 			}
 			if (j % 2)continue;
-			_objManager.CreateObject<Building>(pos + Math::Vector3(0,0.1f,0),(int)(i % 6));
-		
+			auto building = _objManager.CreateObject<Building>(pos + Math::Vector3(0,0.1f,0),(int)(i % 6));
+			if (j % 5)continue;
+			auto event = _objManager.CreateObject<DeliveryPoint>(building, Math::Vector3(0, 0, 0), 0.5f);
 		}
 	}
 }

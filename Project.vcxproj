@@ -277,7 +277,7 @@
     <ClInclude Include="Src\Application\Object\Building\Building.h" />
     <ClInclude Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.h" />
     <ClInclude Include="Src\Application\Object\Character\Player\Player.h" />
-    <ClInclude Include="Src\Application\Object\EventObject\EventObject.h" />
+    <ClInclude Include="Src\Application\Object\EventObject\DeliveryPoint.h" />
     <ClInclude Include="Src\Application\Object\Ground\Ground.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\ObjectManager.h" />
@@ -288,11 +288,12 @@
     <ClInclude Include="Src\Application\Scene\TitleScene\TitleScene.h" />
     <ClInclude Include="Src\Application\System\CameraManager\CameraManager.h" />
     <ClInclude Include="Src\Application\System\EventBus\Event\Event.h" />
-    <ClInclude Include="Src\Application\System\EventBus\Event\PlayerEvent.h" />
     <ClInclude Include="Src\Application\System\EventBus\GlobalEventBus.h" />
     <ClInclude Include="Src\Application\System\EventBus\LocalEventBus.h" />
     <ClInclude Include="Src\Application\System\InputManager\InputManager.h" />
     <ClInclude Include="Src\Application\System\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="Src\Application\System\UIManager\UIManager.h" />
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\UIObject.h" />
     <ClInclude Include="Src\Framework\Direct3D\KdMaterial.h" />
     <ClInclude Include="Src\Framework\Direct3D\Polygon\KdPolygon.h" />
     <ClInclude Include="Src\Framework\Direct3D\Polygon\KdSquarePolygon.h" />
@@ -345,7 +346,7 @@
     <ClCompile Include="Src\Application\Object\Building\Building.cpp" />
     <ClCompile Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.cpp" />
     <ClCompile Include="Src\Application\Object\Character\Player\Player.cpp" />
-    <ClCompile Include="Src\Application\Object\EventObject\EventObject.cpp" />
+    <ClCompile Include="Src\Application\Object\EventObject\DeliveryPoint.cpp" />
     <ClCompile Include="Src\Application\Object\Ground\Ground.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\ObjectManager.cpp" />

@@ -39,6 +39,14 @@ void Player::Init()
 		})
 	);
 
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Player::DeliveryPointCompleted>([this](const Events::Player::DeliveryPointCompleted& e)
+			{
+				m_deliveryScore += 1;
+				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
+			})
+	);
+
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
 		m_model,
@@ -147,10 +155,6 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	m_speed = std::max(m_speed, m_minSpeed);
 
 	GLOBALEVENT.publish(Events::Player::ChangeSpeedLevel((int)m_level));
-}
-
-void Player::ActiveInput()
-{
 }
 
 void Player::UpdateMove(float dt)

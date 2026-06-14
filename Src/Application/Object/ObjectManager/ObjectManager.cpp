@@ -5,7 +5,7 @@
 #include "../Building/Building.h"
 #include "../Ground/Ground.h"
 #include "../SkySphere/SkySphere.h"
-#include "../EventObject/EventObject.h"
+#include "../EventObject/DeliveryPoint.h"
 
 void ObjectManager::Init()
 {}

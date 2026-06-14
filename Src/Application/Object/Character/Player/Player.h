@@ -34,6 +34,8 @@ public:
 	float GetSteeringInput() { return m_steering / m_maxSteerAngle; }
 	Math::Vector3 GetAngle() { return m_angle; }
 
+	int GetDeliveryScore() { return m_deliveryScore; }
+
 private:
 	void UpdateMove(float dt);
 	void UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList);
@@ -56,7 +58,7 @@ private:
 	const float GRAVITY_ACCEL = 9.8f;      // 重力加速度 (定数)
 	const float MAX_FALL_SPEED = -10.0f;   // 終端速度（落下速度の上限値）
 
-	float m_clashCount = 0.0f;
+	float m_clashCount = 0.0f;			// クラッシュ時操作不能時間
 
 	float m_acceleration = 0.0f;		// 加速力
 
@@ -68,13 +70,15 @@ private:
 
 	// --- 車の当たり判定用パラメータ ---
 	static constexpr int   SPHERE_NUM = 3;
-	const float            m_sphereOffsets[SPHERE_NUM] = { 0.07f, 0.0f, -0.07f }; // 前・中・後
-	const float            m_sphereRadius = 0.05f;     // 球の半径
-	const Math::Vector3    m_sphereHeightOffset = { 0.0f, 0.06f, 0.0f }; // 高さ補正
+	const float            m_sphereOffsets[SPHERE_NUM] = { 0.07f, 0.0f, -0.07f };	// 前・中・後
+	const float            m_sphereRadius = 0.05f;									// 球の半径
+	const Math::Vector3    m_sphereHeightOffset = { 0.0f, 0.06f, 0.0f };			// 高さ補正
 
 	// 物理計算の安全弁
 	static constexpr int   MAX_COLLISION_ITERATIONS = 3; // コーナーハメを防ぐ最大反復回数
 	std::set<std::shared_ptr<KdGameObject>> m_previousHitObjects;
 
-	SpeedLevel m_level = SpeedLevel::Idle;
+	SpeedLevel m_level = SpeedLevel::Idle;	// 現在のスピードレベル
+
+	int m_deliveryScore = 0;			// 配達スコア
 };

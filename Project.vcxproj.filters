@@ -136,6 +136,12 @@
     <Filter Include="Src\Application\Object\SkySphere">
       <UniqueIdentifier>{b7ded79f-5f73-41d9-a8b8-58e65801e2c7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\System\UIManager">
+      <UniqueIdentifier>{62a34854-674a-4051-922f-98112f84aa0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI">
+      <UniqueIdentifier>{f9dd569c-1e89-47d4-a609-3fc7aa772aef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -345,10 +351,7 @@
     <ClInclude Include="Src\Application\System\EventBus\Event\Event.h">
       <Filter>Src\Application\System\EventBus\Event</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Application\System\EventBus\Event\PlayerEvent.h">
-      <Filter>Src\Application\System\EventBus\Event</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Application\Object\EventObject\EventObject.h">
+    <ClInclude Include="Src\Application\Object\EventObject\DeliveryPoint.h">
       <Filter>Src\Application\Object\EventObject</Filter>
     </ClInclude>
     <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h">
@@ -356,6 +359,12 @@
     </ClInclude>
     <ClInclude Include="Src\Application\Object\SkySphere\SkySphere.h">
       <Filter>Src\Application\Object\SkySphere</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\UIObject.h">
+      <Filter>Src\Application\System\UIManager\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIManager.h">
+      <Filter>Src\Application\System\UIManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -533,7 +542,7 @@
     <ClCompile Include="Src\Application\System\EventBus\GlobalEventBus.cpp">
       <Filter>Src\Application\System\EventBus</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Application\Object\EventObject\EventObject.cpp">
+    <ClCompile Include="Src\Application\Object\EventObject\DeliveryPoint.cpp">
       <Filter>Src\Application\Object\EventObject</Filter>
     </ClCompile>
     <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp">

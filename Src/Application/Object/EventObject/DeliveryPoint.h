@@ -2,12 +2,12 @@
 
 class Building;
 
-class EventObject :public KdGameObject
+class DeliveryPoint :public KdGameObject
 {
 public:
-	EventObject() {};
-	EventObject(const std::shared_ptr<Building>& obj, Math::Vector3 pos, float radius);
-	~EventObject()override {};
+	DeliveryPoint() {};
+	DeliveryPoint(const std::shared_ptr<Building>& obj, Math::Vector3 pos, float radius);
+	~DeliveryPoint()override {};
 
 	void Init()override;
 	void Update(float dt)override;
@@ -24,6 +24,6 @@ private:
 	float m_deltaTime = 0.0f;
 
 	//static const float MAX_DURATION = 100.0f;
-	float m_durationContact = 0.0;
+	float m_durationContact = 0.0f;
 
 };

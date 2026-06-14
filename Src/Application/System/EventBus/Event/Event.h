@@ -38,22 +38,22 @@ namespace Events
 			HitResult(const HitResultType& _type, float speed) :type(_type), speedLevel(speed) {};
 		};
 
-		struct EventTouchBegin : public Event
+		struct DeliveryPointBegin : public Event
 		{
 			std::weak_ptr<KdGameObject> m_me;
-			EventTouchBegin(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+			DeliveryPointBegin(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
 		};
 
-		struct EventTouchEnd : public Event
+		struct DeliveryPointEnd : public Event
 		{
 			std::weak_ptr<KdGameObject> m_me;
-			EventTouchEnd(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+			DeliveryPointEnd(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
 		};
 
-		struct EventTouchClear :public Event
+		struct DeliveryPointCompleted :public Event
 		{
 			std::weak_ptr<KdGameObject> m_me;
-			EventTouchClear(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+			DeliveryPointCompleted(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
 		};
 	}
 
@@ -61,8 +61,11 @@ namespace Events
 	{
 		struct CreateObject : public Event
 		{
-			template <typename T>
-			std::shared_ptr<T> obj;
+			enum class ObjectType
+			{
+
+			};
+			std::shared_ptr<KdGameObject> obj;
 		};
 	}
 }
