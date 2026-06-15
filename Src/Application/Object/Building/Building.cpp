@@ -26,7 +26,7 @@ void Building::Init()
 			GLOBALEVENT.publish(Events::Player::HitResult(type, (int)player->GetSpeedLevel()));
 		}));
 
-	m_dir = 180.f;
+	//m_dir = 180.f;
 	m_scale = 1.f;
 	if (m_breakLevel == 6)m_scale = 1.3f;
 	SetDir(m_dir);

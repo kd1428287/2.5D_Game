@@ -42,7 +42,7 @@ void Ground::SetGroundType(GroundType type)
 	case (GroundType)2:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_corner.gltf"); break;
 	case (GroundType)3:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_tjunction.gltf"); break;
 	case (GroundType)4:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_crossing.gltf"); break;
-	case (GroundType)5:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_bridge_canal.gltf"); break;
+	case (GroundType)5:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_end.gltf"); break;
 	case (GroundType)6:m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_road_bridge_canal.gltf"); break;
 		
 	default:

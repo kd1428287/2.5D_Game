@@ -34,7 +34,8 @@ public:
 			Math::Matrix::CreateTranslation(pos);*/
 	};
 
-	Building(Math::Vector3 pos, int level) : m_pos(pos), m_breakLevel(level)
+	Building(Math::Vector3 pos, int level, int type, float dir) :
+		m_pos(pos), m_breakLevel(level), m_type((BuildingType)type), m_dir(dir)
 	{
 	};
 
