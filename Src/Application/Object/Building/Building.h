@@ -10,7 +10,9 @@ enum class BuildingState
 
 enum class BuildingType
 {
-
+	Building,
+	HouseCountry,
+	House,
 };
 
 struct FragmentVelocity {
@@ -26,41 +28,46 @@ class Building : public KdGameObject
 public:
 	Building() {};
 
-	Building(Math::Vector3 pos) 
+	Building(Math::Vector3 pos) :m_pos(pos)
 	{
-		m_mWorld =
-			Math::Matrix::CreateTranslation(pos);
+	/*	m_mWorld =
+			Math::Matrix::CreateTranslation(pos);*/
 	};
 
-	Building(Math::Vector3 pos, int level) :m_breakLevel(level)
+	Building(Math::Vector3 pos, int level) : m_pos(pos), m_breakLevel(level)
 	{
-		float scale = 1.f;
-		if (level == 6)scale = 1.3f;
-		m_mWorld =
-			Math::Matrix::CreateScale(scale) *
-			Math::Matrix::CreateTranslation(pos);
 	};
 
 	~Building()override {};
 
 	void Init()override;
 	void Update(float dt)override;
-	
+
 	void GenerateDepthMapFromLight()override;
 	void DrawLit()override;
 
+	void SetPos(Math::Vector3 pos);
+	void SetDir(float dir);
+
+	float GetDir() { return m_dir; }
 	BuildingState GetState() { return m_state; }
 
 protected:
 	void Break(KdCollider::CollisionResult result);
 
 	void SetBreakLevel(int level);
+	void SetModel(BuildingType type);
 
 	std::shared_ptr<KdModelData> m_model = nullptr;
 	std::shared_ptr<KdModelWork> m_fragmentModel = nullptr;
 	BuildingState m_state = BuildingState::Unbroken;
+	BuildingType m_type = BuildingType::HouseCountry;
 
 	std::vector<FragmentVelocity> fragVelocities;
+
+	Math::Vector3 m_pos;
+	float m_dir = 0.f;	// 正面方向(0で-z方向)
+	float m_scale = 1.f;
 
 	float m_breakCount = 0.0f;
 	int m_breakLevel = 4;

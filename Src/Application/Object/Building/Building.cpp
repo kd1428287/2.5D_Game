@@ -26,7 +26,12 @@ void Building::Init()
 			GLOBALEVENT.publish(Events::Player::HitResult(type, (int)player->GetSpeedLevel()));
 		}));
 
+	m_dir = 180.f;
+	m_scale = 1.f;
+	if (m_breakLevel == 6)m_scale = 1.3f;
+	SetDir(m_dir);
 	SetBreakLevel(m_breakLevel);
+	SetModel(m_type);
 
 	UINT type = KdCollider::Type::TypeGround | KdCollider::Type::TypeBump;
 	// モデルの形状で当たり判定を登録
@@ -122,6 +127,21 @@ void Building::DrawLit()
 	//KdShaderManager::Instance().m_StandardShader.DrawModel(*m_fragmentModel, m_mWorld, m_color);
 }
 
+void Building::SetPos(Math::Vector3 pos)
+{
+	m_pos = pos;
+	m_mWorld =
+		Math::Matrix::CreateScale(m_scale) *
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_dir)) *
+		Math::Matrix::CreateTranslation(m_pos);
+}
+
+void Building::SetDir(float dir)
+{
+	m_dir = dir;
+	SetPos(m_pos);
+}
+
 void Building::Break(KdCollider::CollisionResult result)
 {
 	if (m_state != BuildingState::Unbroken)return;
@@ -187,4 +207,21 @@ void Building::SetBreakLevel(int level)
 		break;
 	}
 	m_breakLevel = level;
+}
+
+void Building::SetModel(BuildingType type)
+{
+	switch (type)
+	{
+	case BuildingType::Building:
+		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/building.gltf");
+		break;
+	case BuildingType::HouseCountry:
+		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_house_country.gltf");
+		break;
+	case BuildingType::House:
+		break;
+	default:
+		break;
+	}
 }

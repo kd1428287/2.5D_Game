@@ -17,10 +17,10 @@ public:
 	{
 		m_mWorld = Math::Matrix::CreateTranslation(pos);
 	};
-	Ground(Math::Vector3 pos, int type) :m_type((GroundType)type)
+	Ground(Math::Vector3 pos, float dir,int type) :m_type((GroundType)type)
 	{
 		m_mWorld = 
-			//Math::Matrix::CreateScale(1.001f) *	// そのままだとタイルの狭間に落ちてしまうことがある	
+			Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(dir)) * 
 			Math::Matrix::CreateTranslation(pos);
 	};
 	~Ground()override {};

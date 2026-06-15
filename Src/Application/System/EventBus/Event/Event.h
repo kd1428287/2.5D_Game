@@ -55,6 +55,12 @@ namespace Events
 			std::weak_ptr<KdGameObject> m_me;
 			DeliveryPointCompleted(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
 		};
+
+		struct DeliveryPointDeleted :public Event
+		{
+			std::weak_ptr<KdGameObject> m_me;
+			DeliveryPointDeleted(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+		};
 	}
 
 	namespace Else
@@ -63,9 +69,27 @@ namespace Events
 		{
 			enum class ObjectType
 			{
-
+				
 			};
 			std::shared_ptr<KdGameObject> obj;
+		};
+
+		struct CreateParticle : public Event
+		{
+			enum class ParticleType
+			{
+
+			};
+			ParticleType m_type;
+			Math::Vector3 m_pos;
+			float m_scale = 0.f;
+			bool m_loopFlg = false;
+			CreateParticle(
+				ParticleType type,
+				Math::Vector3 pos,
+				float scale,
+				bool loopFlg) :
+				m_type(type), m_pos(pos), m_scale(scale), m_loopFlg(loopFlg) {};
 		};
 	}
 }
