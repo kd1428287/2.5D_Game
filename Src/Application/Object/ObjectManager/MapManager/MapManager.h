@@ -2,25 +2,45 @@
 
 class ObjectManager;
 
+// マップの生成・管理を担当するクラス
 class MapManager
 {
 public:
-	MapManager() {};
-	~MapManager() {};
+	MapManager() = default;
+	~MapManager() = default;
 
 	void Init();
-	void GenarateMap(ObjectManager& _objManager);
-	void PlaceEventPoints(ObjectManager& _objManager, int zoneDiv = 3, int pointsPerZone = 1);
+	std::vector<int> GenarateMap(ObjectManager& objManager);
+	void PlaceEventPoints(ObjectManager& objManager, int zoneDiv = 3, int pointsPerZone = 1);
 
 private:
+	// -------------------------------------------------------
+	// 定数
+	// -------------------------------------------------------
+	static constexpr int MAP_WIDTH = 30;
+	static constexpr int MAP_HEIGHT = 30;
+
+	// タイル幅・高さ（ワールド空間）
+	static constexpr float TILE_W = 0.8f;
+	static constexpr float TILE_H = 0.8f;
+
+	// mapType の特殊値
+	static constexpr int TILE_ROAD = 0;   // 道
+	static constexpr int TILE_START = -1;   // 開始点（道扱い）
+	static constexpr int TILE_EVENT = 2;   // イベント地点（道扱い）
+	static constexpr int TILE_WALL = -9;   // 外壁
+	// 1 以上: 建物
+
+	// -------------------------------------------------------
+	// 内部ヘルパー
+	// -------------------------------------------------------
 	bool IsValidMove(int x, int y);
 	bool WouldForm2x2(int x, int y);
-	void GenerateRandomWalk(int steps);
-	void SetUpPresetPoint();
+	void GenerateRandomWalk();
 
-	static const int MAP_WIDTH = 30;
-	static const int MAP_HEIGHT = 30;
+	// -------------------------------------------------------
+	// データメンバ
+	// -------------------------------------------------------
 	std::array<int, MAP_WIDTH* MAP_HEIGHT> mapType = {};
-	std::vector<Math::Vector3> m_presetPoint;
-	std::vector<Math::Vector3> m_eventPoints;
+	std::vector<Math::Vector3>              m_eventPoints;
 };

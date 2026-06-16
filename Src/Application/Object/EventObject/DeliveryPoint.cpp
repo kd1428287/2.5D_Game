@@ -19,6 +19,7 @@ void DeliveryPoint::Init()
 {
 	m_pCollider = std::make_unique<KdCollider>();
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
+	m_model = std::make_shared<KdModelData>();
 }
 
 void DeliveryPoint::Update(float dt)
@@ -30,6 +31,7 @@ void DeliveryPoint::Update(float dt)
 void DeliveryPoint::PostUpdate()
 {
 	KdCollider::SphereInfo sphere(KdCollider::TypeEvent, GetPos(), m_radius);
+	if (m_isDelivered)return;
 	bool isHit = false;
 	m_pDebugWire->AddDebugSphere(sphere.m_sphere.Center, sphere.m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
 	for (auto& obj : SceneManager::Instance().GetObjList())
@@ -48,7 +50,8 @@ void DeliveryPoint::PostUpdate()
 			{
 				m_durationContact = 100.f;
 				GLOBALEVENT.publish(Events::Player::DeliveryPointCompleted(shared_from_this()));
-				m_isExpired = true;
+				m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/Effect/Cardboard.gltf");
+				m_isDelivered = true;
 			}
 			isHit = true;
 			break;
@@ -75,3 +78,16 @@ void DeliveryPoint::DrawUnLit()
 
 void DeliveryPoint::UpdateHitCollision(const std::vector<std::shared_ptr<KdGameObject>>&objList)
 {}
+
+void DeliveryPoint::GenerateDepthMapFromLight()
+{
+	if (!m_isDelivered)return;
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
+}
+
+void DeliveryPoint::DrawLit()
+{
+	if (!m_isDelivered)return;
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
+}
+

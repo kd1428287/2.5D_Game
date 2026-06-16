@@ -8,6 +8,7 @@ enum class SpeedLevel
 	Speed3,
 	Speed4,
 	Speed5,
+	Speed6,
 	Clash,
 };
 

@@ -27,8 +27,8 @@ void Building::Init()
 		}));
 
 	//m_dir = 180.f;
-	m_scale = 1.f;
-	if (m_breakLevel == 6)m_scale = 1.3f;
+	m_scale = 1.15f;
+	if (m_breakLevel == 99)m_scale = 1.3f;
 	SetDir(m_dir);
 	SetBreakLevel(m_breakLevel);
 	SetModel(m_type);
@@ -190,7 +190,6 @@ void Building::Break(KdCollider::CollisionResult result)
 
 void Building::SetBreakLevel(int level)
 {
-	if (level > (int)SpeedLevel::Clash)level = 0;
 	switch (level)
 	{
 	case 0: m_color = { 1.f,1.f,1.f,1.f }; break;
@@ -199,10 +198,11 @@ void Building::SetBreakLevel(int level)
 		  m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/building1.gltf");
 		  break;
 	case 2: m_color = { 0.8f,0.8f,0.2f,1.f }; break;
-	case 3: m_color = { 0.8f,0.2f,0.2f,1.f }; break;
-	case 4: m_color = { 0.2f,0.8f,0.2f,1.f }; break;
-	case 5: m_color = { 0.2f,0.2f,0.8f,1.f }; break;
-	case 6: m_color = { 0.2f,0.2f,0.2f,1.f }; break;
+	case 3: m_color = { 0.8f,0.6f,0.6f,1.f }; break;
+	case 4: m_color = { 0.6f,0.8f,0.6f,1.f }; break;
+	case 5: m_color = { 0.6f,0.6f,0.8f,1.f }; break;
+	case 6: m_color = { 0.6f,0.6f,0.6f,1.f }; break;
+	case 99: m_color = { 0.2f,0.2f,0.2f,1.f }; break;
 	default:
 		break;
 	}
@@ -217,7 +217,7 @@ void Building::SetModel(BuildingType type)
 		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/building.gltf");
 		break;
 	case BuildingType::HouseCountry:
-		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/map_house_country.gltf");
+		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/house_country.gltf");
 		break;
 	case BuildingType::House:
 		break;

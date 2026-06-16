@@ -277,10 +277,13 @@
     <ClInclude Include="Src\Application\Object\Building\Building.h" />
     <ClInclude Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.h" />
     <ClInclude Include="Src\Application\Object\Character\Player\Player.h" />
+    <ClInclude Include="Src\Application\Object\Effect\EffectBase.h" />
     <ClInclude Include="Src\Application\Object\EventObject\DeliveryPoint.h" />
+    <ClInclude Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.h" />
     <ClInclude Include="Src\Application\Object\Ground\Ground.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\MapManager\MapManager.h" />
     <ClInclude Include="Src\Application\Object\ObjectManager\ObjectManager.h" />
+    <ClInclude Include="Src\Application\Object\ObjectManager\SpawnManager\SpawnManager.h" />
     <ClInclude Include="Src\Application\Object\SkySphere\SkySphere.h" />
     <ClInclude Include="Src\Application\Scene\BaseScene\BaseScene.h" />
     <ClInclude Include="Src\Application\Scene\GameScene\GameScene.h" />
@@ -292,6 +295,7 @@
     <ClInclude Include="Src\Application\System\EventBus\LocalEventBus.h" />
     <ClInclude Include="Src\Application\System\InputManager\InputManager.h" />
     <ClInclude Include="Src\Application\System\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="Src\Application\System\TimeManager\TimeManager.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIManager.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIObject\UIObject.h" />
     <ClInclude Include="Src\Framework\Direct3D\KdMaterial.h" />
@@ -347,9 +351,11 @@
     <ClCompile Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.cpp" />
     <ClCompile Include="Src\Application\Object\Character\Player\Player.cpp" />
     <ClCompile Include="Src\Application\Object\EventObject\DeliveryPoint.cpp" />
+    <ClCompile Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.cpp" />
     <ClCompile Include="Src\Application\Object\Ground\Ground.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\MapManager\MapManager.cpp" />
     <ClCompile Include="Src\Application\Object\ObjectManager\ObjectManager.cpp" />
+    <ClCompile Include="Src\Application\Object\ObjectManager\SpawnManager\SpawnManager.cpp" />
     <ClCompile Include="Src\Application\Object\SkySphere\SkySphere.cpp" />
     <ClCompile Include="Src\Application\Scene\BaseScene\BaseScene.cpp" />
     <ClCompile Include="Src\Application\Scene\GameScene\GameScene.cpp" />

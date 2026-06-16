@@ -88,9 +88,6 @@
     <Filter Include="Src\Application\System\AudioManager">
       <UniqueIdentifier>{49661077-28ba-410a-994b-df06aa5ed71b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Src\Application\System\RenderManager">
-      <UniqueIdentifier>{87999c75-b08d-45d0-a9af-edd651b01cce}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Src\Application\System\InputManager">
       <UniqueIdentifier>{79959514-6113-40e4-87db-37943cf36bf1}</UniqueIdentifier>
     </Filter>
@@ -141,6 +138,15 @@
     </Filter>
     <Filter Include="Src\Application\System\UIManager\UI">
       <UniqueIdentifier>{f9dd569c-1e89-47d4-a609-3fc7aa772aef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Effect">
+      <UniqueIdentifier>{d018a189-9edb-459b-a525-dfab20af04b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\EventObject\SpeedUpObject">
+      <UniqueIdentifier>{b53c5acd-da55-48a4-9f70-2d9bea576fae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\ObjectManager\SpawnManager">
+      <UniqueIdentifier>{2cd4ef7f-e061-4d91-93a7-f71438eb95f9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -366,6 +372,18 @@
     <ClInclude Include="Src\Application\System\UIManager\UIManager.h">
       <Filter>Src\Application\System\UIManager</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\System\TimeManager\TimeManager.h">
+      <Filter>Src\Application\System\TimeManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Effect\EffectBase.h">
+      <Filter>Src\Application\Object\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.h">
+      <Filter>Src\Application\Object\EventObject\SpeedUpObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\ObjectManager\SpawnManager\SpawnManager.h">
+      <Filter>Src\Application\Object\ObjectManager\SpawnManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -550,6 +568,12 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\SkySphere\SkySphere.cpp">
       <Filter>Src\Application\Object\SkySphere</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.cpp">
+      <Filter>Src\Application\Object\EventObject\SpeedUpObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\ObjectManager\SpawnManager\SpawnManager.cpp">
+      <Filter>Src\Application\Object\ObjectManager\SpawnManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

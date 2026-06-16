@@ -28,7 +28,7 @@ void GameScene::Init()
 {
 	BaseScene::Init();
 	
-	Math::Vector3 pos = { 0,2,0 };
+	Math::Vector3 pos = { 0,1,0 };
 
 	auto player = m_objectManager->CreateObject<Player>(pos);
 
@@ -37,8 +37,4 @@ void GameScene::Init()
 	m_mapManager->GenarateMap(*m_objectManager);
 
 	auto sky = m_objectManager->CreateObject<SkySphere>();
-
-	//KdAssets::Instance().m_modeldatas
-
-	
 }

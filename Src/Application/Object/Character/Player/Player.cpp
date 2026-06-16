@@ -6,16 +6,12 @@
 
 void Player::Init()
 {
-	// デバッグワイヤ
-	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
-
 	// 当たり判定
 	m_pCollider = std::make_unique<KdCollider>();
 
 	// モデル
 	m_model = std::make_shared<KdModelData>();
-	//m_model = RESOURCE.GetModel("Asset/Models/car_van/car_van.gltf");
-	m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/car_van/car_van.gltf");
+	m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/car_van/car_van2.gltf");
 	
 	m_speed = 0.0f;
 	m_angle = { 0,0,0 };
@@ -23,7 +19,9 @@ void Player::Init()
 
 	ChangeSpeedLevel(SpeedLevel::Idle);
 
-	m_acceleration = 50.0f;
+	
+
+	m_acceleration = 5.0f;
 
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
@@ -62,6 +60,7 @@ void Player::PreUpdate()
 void Player::Update(float dt)
 {
 	UpdateMove(dt);
+
 	if (m_level == SpeedLevel::Clash)
 	{
 		m_clashCount -= dt;
@@ -71,6 +70,13 @@ void Player::Update(float dt)
 			m_clashCount = 0.0f;
 		}
 	}
+
+	//KdShaderManager::Instance().WorkAmbientController().AddPointLight
+	//(
+	//	{ 3,3,3 },							//色
+	//	5.f,								//半径
+	//	m_pos + Math::Vector3(0.2f,0.1f,0.f)		//座標
+	//);
 }
 
 void Player::PostUpdate()
@@ -127,7 +133,7 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	case SpeedLevel::Idle:
 	case SpeedLevel::Speed1: 
 		m_maxSpeed = 0.8f;
-		m_minSpeed = -0.8f;
+		m_minSpeed = -0.4f;
 		break;
 	case SpeedLevel::Speed2: 
 		m_maxSpeed = 1.1f; 
@@ -144,6 +150,10 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 	case SpeedLevel::Speed5: 
 		m_maxSpeed = 3.f; 
 		m_minSpeed = 2.0f;
+		break;
+	case SpeedLevel::Speed6:
+		m_maxSpeed = 4.5f;
+		m_minSpeed = 3.0f;
 		break;
 	case SpeedLevel::Clash:  
 		m_maxSpeed = 0.f;
@@ -197,7 +207,7 @@ void Player::UpdateMove(float dt)
 		if (InputManager::Instance().IsPressed(VK_DOWN))
 		{
 			// ブレーキ（あるいはバック）
-			m_speed -= m_acceleration * dt;
+			m_speed -= m_acceleration * dt * 0.5f;
 		}
 	}
 
@@ -275,6 +285,7 @@ void Player::UpdateMove(float dt)
 	// ==========================================
 	
 	float friction = 0.55f; 
+	if (m_speed < 0)friction = 0.995f;
 	m_speed *= std::exp(-friction * dt);
 
 	// 速度が微小になったら完全に停止させる
@@ -302,10 +313,6 @@ void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObjec
 	ray.m_range = -m_fallDistance + enableStepHigh;
 	// 当たり判定を行いたいタイプを設定
 	ray.m_type = KdCollider::TypeGround;
-
-	// デバッグ表示
-	m_pDebugWire->AddDebugLine(ray.m_pos, ray.m_dir, ray.m_range);
-
 	// レイに当たったオブジェクト情報を格納するリストを用意
 	std::list<KdCollider::CollisionResult> retRayList;
 
@@ -373,9 +380,6 @@ void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>
 			spheres[i].m_sphere.Center = m_pos + m_amountMove + m_sphereHeightOffset + rotatedOffset;
 			spheres[i].m_sphere.Radius = m_sphereRadius;
 			spheres[i].m_type = KdCollider::TypeBump;
-
-			// デバッグ表示（スタックが直ると、この赤い球が壁の綺麗に表面に並ぶようになります）
-			m_pDebugWire->AddDebugSphere(spheres[i].m_sphere.Center, spheres[i].m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
 		}
 
 		// 衝突検知

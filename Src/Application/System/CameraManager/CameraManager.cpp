@@ -5,13 +5,9 @@
 
 void CameraManager::Init()
 {
-	m_camDis = DEF_DIS;
-	m_camAng.x = 25.0f;
-	m_projection = 60.0f;
-	m_targetAngle = -20.f;
-	m_targetProj = m_projection;
-	m_targetPos = m_camDis;
-	m_speed = 1.5f;
+	m_state = CameraState::Title;
+	m_state = CameraState::Game;
+	SetUp(m_state);
 
 	m_camera = std::make_unique<KdCamera>();
 	m_camera->SetProjectionMatrix(m_projection,2000.f,0.05f);
@@ -52,7 +48,85 @@ void CameraManager::Init()
 		});
 }
 
+void CameraManager::SetUp(CameraState state)
+{
+	switch (state)
+	{
+	case CameraState::Title:
+		m_camDis = { -0.01f,0.055f,-0.1f };
+		m_camAng.x = 0.f;
+		m_camAng.y = 270.f;
+		m_projection = 60.0f;
+		break;
+	case CameraState::TitletoGame:
+		break;
+	case CameraState::Game:
+		m_camDis = DEF_DIS;
+		m_camAng.x = 25.0f;
+		m_projection = 60.0f;
+		m_targetAngle = -20.f;
+		m_targetProj = m_projection;
+		m_targetPos = m_camDis;
+		m_speed = 3.0f;
+		break;
+	default:
+		break;
+	}
+}
+
 void CameraManager::Update(float dt)
+{
+	switch (m_state)
+	{
+	case CameraState::Title:
+		UpdateTitle(dt);
+		break;
+	case CameraState::TitletoGame:
+		UpdateTitletoGame(dt);
+		break;
+	case CameraState::Game:
+		UpdateGame(dt);
+		break;
+	default:
+		break;
+	}
+	m_camera->SetToShader();
+}
+
+void CameraManager::UpdateTitle(float dt)
+{
+	std::shared_ptr<Player> _targetObj = nullptr;
+	if (!m_targetObj.expired()) _targetObj = m_targetObj.lock();
+
+	Math::Matrix targetMat = _targetObj->GetMatrix();
+
+	// シェイクの減衰処理
+	Math::Vector3 shakeOffset = Math::Vector3::Zero;
+	if (m_shakeTime > 0.0f)
+	{
+		m_shakeTime -= dt;
+		// ランダムな方向に揺らす
+		shakeOffset.x = KdRandom::GetFloat(-1.f, 1.f) * m_shakeStrength;
+		shakeOffset.y = KdRandom::GetFloat(-1.f, 1.f) * m_shakeStrength;
+
+		// 時間経過とともに弱める
+		m_shakeStrength *= 0.9f;
+	}
+
+	Math::Matrix mat =
+		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_camAng.x)) *
+		Math::Matrix::CreateTranslation(m_camDis + shakeOffset) *
+		// ここで (カメラの基本Y回転 + ステアリングによるYオフセット) を計算
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_camAng.y)) *
+		targetMat;
+
+	m_camera->SetCameraMatrix(mat);
+}
+
+void CameraManager::UpdateTitletoGame(float dt)
+{}
+
+void CameraManager::UpdateGame(float dt)
 {
 	std::shared_ptr<Player> _targetObj = nullptr;
 	if (!m_targetObj.expired()) _targetObj = m_targetObj.lock();
@@ -60,9 +134,12 @@ void CameraManager::Update(float dt)
 	UpdateProjection(dt);
 	UpdateAngle(_targetObj, dt);
 	UpdateDistance(_targetObj, dt);
-	
+
 	Math::Matrix targetMat = _targetObj->GetMatrix();
-	m_camPos = targetMat.Translation();
+	m_camPos.y = std::lerp(m_camPos.y, targetMat.Translation().y, m_speed * 2.f * dt);
+	m_camPos.x = targetMat.Translation().x;
+	m_camPos.z = targetMat.Translation().z;
+	targetMat.Translation(m_camPos);
 
 	// シェイクの減衰処理
 	Math::Vector3 shakeOffset = Math::Vector3::Zero;
@@ -87,7 +164,6 @@ void CameraManager::Update(float dt)
 		targetMat;
 
 	m_camera->SetCameraMatrix(mat);
-	m_camera->SetToShader();
 }
 
 void CameraManager::UpdateProjection(float dt)

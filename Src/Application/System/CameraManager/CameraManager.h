@@ -2,6 +2,13 @@
 
 class Player;
 
+enum class CameraState
+{
+	Title,
+	TitletoGame,
+	Game
+};
+
 class CameraManager
 {
 public:
@@ -9,7 +16,12 @@ public:
 	~CameraManager() {};
 
 	void Init();
+	void SetUp(CameraState state);
 	void Update(float dt);
+
+	void UpdateTitle(float dt);
+	void UpdateTitletoGame(float dt);
+	void UpdateGame(float dt);
 
 	void SetCameraTarget(std::shared_ptr<Player> targetObj) { m_targetObj = targetObj; };
 	void SetCameraPos(Math::Vector3 camPos) { m_camPos = camPos; }
@@ -48,4 +60,6 @@ private:
 
 	ScopedSubscriber m_speedSub;
 	ScopedSubscriber m_hitSub;
+
+	CameraState m_state = CameraState::Title;
 };
