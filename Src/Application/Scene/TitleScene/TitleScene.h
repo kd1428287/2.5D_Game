@@ -11,6 +11,6 @@ public :
 
 private :
 
-	void Event() override;
+	void Event(float dt) override;
 	void Init()  override;
 };

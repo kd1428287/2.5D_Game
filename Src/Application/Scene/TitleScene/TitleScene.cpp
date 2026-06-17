@@ -1,7 +1,7 @@
 ﻿#include "TitleScene.h"
 #include "../SceneManager.h"
 
-void TitleScene::Event()
+void TitleScene::Event(float dt)
 {
 	if (GetAsyncKeyState(VK_RETURN) & 0x8000)
 	{

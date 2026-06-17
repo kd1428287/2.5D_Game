@@ -6,6 +6,7 @@ class MapManager;
 
 #include "Application/Object/ObjectManager/ObjectManager.h"
 #include "Application/Object/ObjectManager/MapManager/MapManager.h"
+#include "Application/Object/ObjectManager/SpawnManager/SpawnManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
 #include "Application/System/EventBus/LocalEventBus.h"
 
@@ -35,7 +36,7 @@ public :
 protected :
 
 	// 継承先シーンで必要ならオーバーライドする
-	virtual void Event();
+	virtual void Event(float dt);
 	virtual void Init();
 
 	// マネージャーを各シーンで保持

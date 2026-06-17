@@ -16,6 +16,12 @@ namespace Events
 			ChangeSpeedLevel(int i) :level(i) {}
 		};
 
+		struct GetSpeedUp : public Event
+		{
+			std::weak_ptr<KdGameObject> m_me;
+			GetSpeedUp(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
+		};
+
 		struct OnHit : public Event
 		{
 			std::weak_ptr<KdGameObject> m_me;
@@ -65,6 +71,12 @@ namespace Events
 
 	namespace Else
 	{
+		struct GameStart : public Event
+		{};
+
+		struct GameEnd : public Event
+		{};
+
 		struct CreateObject : public Event
 		{
 			enum class ObjectType

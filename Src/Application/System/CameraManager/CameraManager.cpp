@@ -1,7 +1,7 @@
 ﻿#include "CameraManager.h"
 
 #include "Application/Object/Character/Player/Player.h"
-
+#include "../Reader/Reader.h"
 
 void CameraManager::Init()
 {
@@ -91,6 +91,11 @@ void CameraManager::Update(float dt)
 		break;
 	}
 	m_camera->SetToShader();
+
+	CameraData data;
+	data.pos = m_camPos;
+	data.angle = m_camAng;
+	Reader::Instance().WriteCamera(data);
 }
 
 void CameraManager::UpdateTitle(float dt)

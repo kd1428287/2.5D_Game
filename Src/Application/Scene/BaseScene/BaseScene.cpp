@@ -14,11 +14,8 @@ void BaseScene::Update()
 	float deltaTime = Application::Instance().GetDeltaTime();
 
 	// シーン毎のイベント処理
-	Event();
-
+	Event(deltaTime);
 	m_objectManager->Update(deltaTime);
-
-	//m_cameraManager->Update(deltaTime);
 }
 
 void BaseScene::PostUpdate()
@@ -108,7 +105,7 @@ void BaseScene::AddObject(const std::shared_ptr<KdGameObject>& _obj)
 	m_objectManager->AddObject(_obj);
 }
 
-void BaseScene::Event()
+void BaseScene::Event(float dt)
 {
 	// 各シーンで必要な内容を実装(オーバーライド)する
 }

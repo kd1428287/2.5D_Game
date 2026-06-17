@@ -27,7 +27,9 @@ private:
 	// mapType の特殊値
 	static constexpr int TILE_ROAD = 0;   // 道
 	static constexpr int TILE_START = -1;   // 開始点（道扱い）
-	static constexpr int TILE_EVENT = 2;   // イベント地点（道扱い）
+	static constexpr int TILE_HOME = -2;   // 開始点
+	static constexpr int TILE_EVENT = -3;   // イベント地点
+	static constexpr int TILE_BUILDING = -7;   // 道/空き地を建物化（孤立タイル）
 	static constexpr int TILE_WALL = -9;   // 外壁
 	// 1 以上: 建物
 
@@ -37,6 +39,11 @@ private:
 	bool IsValidMove(int x, int y);
 	bool WouldForm2x2(int x, int y);
 	void GenerateRandomWalk();
+
+	// タイプ分け確定フェーズ
+	// ・四方すべてが道（ROAD/START/EVENT）の道タイル → TILE_BUILDING
+	// ・四方すべてが非正数（道/空き地系）の空き地（tile <= 0 かつ道でない）→ TILE_BUILDING
+	void ClassifyTiles();
 
 	// -------------------------------------------------------
 	// データメンバ

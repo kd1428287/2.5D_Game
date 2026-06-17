@@ -19,8 +19,6 @@ void Player::Init()
 
 	ChangeSpeedLevel(SpeedLevel::Idle);
 
-	
-
 	m_acceleration = 5.0f;
 
 	m_subscriber.push_back(
@@ -42,6 +40,15 @@ void Player::Init()
 			{
 				m_deliveryScore += 1;
 				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
+			})
+	);
+
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Player::GetSpeedUp>([this](const Events::Player::GetSpeedUp& e)
+			{
+				if (m_level >= SpeedLevel::Speed6)return;
+				int level = (int)m_level + 1;
+				ChangeSpeedLevel((SpeedLevel)level);
 			})
 	);
 
