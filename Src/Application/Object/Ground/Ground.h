@@ -3,10 +3,11 @@
 enum class GroundType
 {
 	grass = 0,
-	a,
-	b,
-	c,
-	d,
+	road_straight,
+	road_carb,
+	road_junction,
+	road_cross,
+	road_end,
 
 };
 class Ground : public KdGameObject

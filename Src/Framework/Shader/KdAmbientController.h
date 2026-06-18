@@ -46,6 +46,7 @@ public:
 
 	void AddPointLight(const Math::Vector3& Color, float Radius, const Math::Vector3& Pos, bool IsBright = true);
 	void AddPointLight(const PointLight& pointLight);
+	void ClearPointLight() { m_pointLights.clear(); }
 
 	// 平行光の影生成用の射影行列設定：エリアを指定 x:幅 y:奥行
 	void SetDirLightShadowArea(const Math::Vector2& lightingArea, float dirLightHeight);

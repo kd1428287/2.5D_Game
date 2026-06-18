@@ -45,6 +45,8 @@ private:
 private:
 	std::shared_ptr<KdModelData> m_model = nullptr;
 
+	bool m_isControllable = false;
+
 	Math::Vector3 m_pos;				// 確定座標
 	Math::Vector3 m_angle;				// 車体方向
 
@@ -82,4 +84,5 @@ private:
 	SpeedLevel m_level = SpeedLevel::Idle;	// 現在のスピードレベル
 
 	int m_deliveryScore = 0;			// 配達スコア
+	int m_destroyScore = 0;				// 破壊スコア
 };

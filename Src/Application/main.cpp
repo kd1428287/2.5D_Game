@@ -1,6 +1,10 @@
 ﻿#include "main.h"
 
 #include "Scene/SceneManager.h"
+#include "System/FadeManager/FadeManager.h"
+#include "System/InputManager/InputManager.h"
+#include "System/UIManager/UIManager.h"
+
 
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 // エントリーポイント
@@ -143,6 +147,7 @@ void Application::DrawSprite()
 	KdShaderManager::Instance().m_spriteShader.Begin();
 	{
 		SceneManager::Instance().DrawSprite();
+		FadeManager::Instance().DrawSprite();
 	}
 	KdShaderManager::Instance().m_spriteShader.End();
 }
@@ -222,6 +227,9 @@ bool Application::Init(int w, int h)
 	//===================================================================
 	// 例えばカーソルを消したい場合
 	//ShowCursor(false);
+	FadeManager::Instance().Init(w, h);
+	UIManager::Instance().Init();
+
 
 	return true;
 }
@@ -253,6 +261,9 @@ void Application::Execute()
 	{
 		// 処理開始時間Get
 		m_fpsController.UpdateStartTime();
+
+		std::string str = "Breakneck Delivery FPS: " + std::to_string(Application::Instance().GetNowFPS());
+		SetWindowTextA(m_window.GetWndHandle(), str.c_str());
 
 		// ゲーム終了指定があるときはループ終了
 		if (m_endFlag)
@@ -292,6 +303,9 @@ void Application::Execute()
 
 		KdBeginUpdate();
 		{
+			InputManager::Instance().Update();
+			FadeManager::Instance().Update(m_fpsController.GetDeltaTime());
+
 			PreUpdate();
 
 			Update();

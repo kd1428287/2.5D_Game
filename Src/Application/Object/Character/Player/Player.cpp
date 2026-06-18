@@ -24,7 +24,12 @@ void Player::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
 		{
-			if (e.type != Events::Player::HitResult::HitResultType::Bounced)return;
+			if (e.type == Events::Player::HitResult::HitResultType::Ignored)return;
+			if (e.type == Events::Player::HitResult::HitResultType::Destroyed)
+			{
+				m_destroyScore += 1000;
+				return;
+			}
 			int level = (int)m_level - 2;
 			if (m_level != SpeedLevel::Clash && level > 0)
 			{
@@ -52,6 +57,13 @@ void Player::Init()
 			})
 	);
 
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Else::GameStart>([this](const Events::Else::GameStart& e)
+			{
+				m_isControllable = true;
+			})
+	);
+
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
 		m_model,
@@ -66,6 +78,8 @@ void Player::PreUpdate()
 
 void Player::Update(float dt)
 {
+	if (!m_isControllable)return;
+
 	UpdateMove(dt);
 
 	if (m_level == SpeedLevel::Clash)
@@ -77,13 +91,6 @@ void Player::Update(float dt)
 			m_clashCount = 0.0f;
 		}
 	}
-
-	//KdShaderManager::Instance().WorkAmbientController().AddPointLight
-	//(
-	//	{ 3,3,3 },							//色
-	//	5.f,								//半径
-	//	m_pos + Math::Vector3(0.2f,0.1f,0.f)		//座標
-	//);
 }
 
 void Player::PostUpdate()
@@ -104,7 +111,6 @@ void Player::PostUpdate()
 
 	// 当たる側の処理
 	UpdateGroundCollision(objList);
-
 
 	// 球(スフィア)判定=========
 	UpdateWallCollision(objList, rotMat);
@@ -308,9 +314,7 @@ void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObjec
 	// レイ判定用の変数を設定
 	KdCollider::RayInfo ray;
 	// レイの発射位置を設定
-	ray.m_pos = m_pos;// +m_amountMove;
-	// ちょっと上からの位置にする
-	ray.m_pos.y += 0.01f;
+	ray.m_pos = m_pos;
 	// 段差の許容範囲を設定
 	float enableStepHigh = 0.02f;
 	ray.m_pos.y += enableStepHigh;
@@ -348,9 +352,9 @@ void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObjec
 	if (hit)
 	{
 		// 床に当たっていたらめり込みを解消
-		if (m_amountMove.y + m_pos.y + 0.01f < hitPos.y)
+		if (m_amountMove.y + m_pos.y < hitPos.y)
 		{
-			m_amountMove.y = hitPos.y - m_pos.y - 0.01f; // ぴったり床の高さに合わせる
+			m_amountMove.y = hitPos.y - m_pos.y; // ぴったり床の高さに合わせる
 		}
 
 		// 床に接地している間は落下速度をリセット（または微小なマイナス値にして接地判定を維持する）

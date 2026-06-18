@@ -157,6 +157,12 @@
     <Filter Include="Src\Application\System\UIManager\UI\Game\Meter">
       <UniqueIdentifier>{509c2709-c423-43a0-a9eb-9442db90ca72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Effect\Exprosion">
+      <UniqueIdentifier>{c1a2a770-db82-49f7-a521-3147c45f9562}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\FadeManager">
+      <UniqueIdentifier>{dde9d3db-733e-45ab-ab35-73e888d42102}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -399,6 +405,12 @@
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Game\Meter\Meter.h">
       <Filter>Src\Application\System\UIManager\UI\Game\Meter</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Effect\Exprosion\Exprosion.h">
+      <Filter>Src\Application\Object\Effect\Exprosion</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\FadeManager\FadeManager.h">
+      <Filter>Src\Application\System\FadeManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -602,6 +614,9 @@
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Game\Meter\Meter.cpp">
       <Filter>Src\Application\System\UIManager\UI\Game\Meter</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Application\System\FadeManager\FadeManager.cpp">
+      <Filter>Src\Application\System\FadeManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Framework\Shader\inc_KdCommon.hlsli">
@@ -653,6 +668,9 @@
     </FxCompile>
     <FxCompile Include="Src\Framework\Shader\StandardShader\KdStandardShader_VS_UnLit.hlsl">
       <Filter>Src\Framework\Shader\StandardShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Framework\Shader\PostProcessShader\KdPostProcessShader_PS_SpeedBlur.hlsl">
+      <Filter>Src\Framework\Shader\PostProcessShader</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

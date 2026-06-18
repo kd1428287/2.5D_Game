@@ -58,8 +58,23 @@ private:
 	Math::Vector3 m_targetPos;
 	float m_targetAspectRatio = 0.0f;
 
+	// ブラー用変数
+	float m_blurIntensity = 0.f;
+	float m_blurMinRange = 0.f;
+	float m_blurMaxRange = 0.f;
+
+	// --- TitleToGame 遷移用変数 ---
+	float m_transitionProgress = 0.0f;
+	const float TRANSITION_TIME = 2.0f; // 遷移にかかる時間（秒）。好みの速度に調整してください
+	Math::Vector3 m_startDis;
+	Math::Vector3 m_startAng;
+	float m_startProj = 60.0f;
+
+	float m_ambientLight = 0.f;
+
 	ScopedSubscriber m_speedSub;
 	ScopedSubscriber m_hitSub;
+	ScopedSubscriber m_toGameSub;
 
 	CameraState m_state = CameraState::Title;
 };

@@ -14,7 +14,6 @@
 
 void GameScene::Event(float dt)
 {
-	InputManager::Instance().Update();
 	m_spawnManager->Update(dt);
 	m_timeManager->Update(dt);
 
@@ -24,6 +23,11 @@ void GameScene::Event(float dt)
 		(
 			SceneManager::SceneType::Title
 		);
+	}
+
+	if (InputManager::Instance().IsTriggered(VK_RETURN))
+	{
+		GLOBALEVENT.publish(Events::Else::TitleToGameBegin());
 	}
 }
 
@@ -36,7 +40,7 @@ void GameScene::Init()
 	m_timeManager = std::make_unique<TimeManager>();
 	m_timeManager->Init();
 
-	Math::Vector3 pos = { 0,1,0 };
+	Math::Vector3 pos = { 0,0.1f,0 };
 
 	auto player = m_objectManager->CreateObject<Player>(pos);
 

@@ -71,11 +71,26 @@ bool KdPostProcessShader::Init()
 		}
 	}
 
+	{
+#include "KdPostProcessShader_PS_SpeedBlur.shaderInc"
+
+		if (FAILED(KdDirect3D::Instance().WorkDev()->CreatePixelShader(
+			compiledBuffer, sizeof(compiledBuffer), nullptr, &m_PS_SpeedBlur))) 
+		{
+			assert(0 && "ピクセルシェーダー作成失敗");
+			Release();
+
+			return false;
+		}
+	}
+
 	m_cb0_BlurInfo.Create();
 
 	m_cb0_DoFInfo.Create();
 
 	m_cb0_BrightInfo.Create();
+
+	m_cb0_SpeedBlurInfo.Create();
 
 	const std::shared_ptr<KdTexture>& backBuffer = KdDirect3D::Instance().GetBackBuffer();
 	
@@ -88,6 +103,9 @@ bool KdPostProcessShader::Init()
 
 	// 被写界深度画像
 	m_depthOfFieldRTPack.CreateRenderTarget(backBuffer->GetWidth(), backBuffer->GetHeight());
+
+	// 速度ブラー画像
+	m_speedBlurRTPack.CreateRenderTarget(backBuffer->GetWidth(), backBuffer->GetHeight());
 	
 	m_brightEffectRTPack.CreateRenderTarget(backBuffer->GetWidth(), backBuffer->GetHeight());
 
@@ -126,10 +144,12 @@ void KdPostProcessShader::Release()
 	KdSafeRelease(m_PS_Blur);
 	KdSafeRelease(m_PS_DoF);
 	KdSafeRelease(m_PS_Bright);
+	KdSafeRelease(m_PS_SpeedBlur);
 
 	m_cb0_BlurInfo.Release();
 	m_cb0_DoFInfo.Release();
 	m_cb0_BrightInfo.Release();
+	m_cb0_SpeedBlurInfo.Release();
 }
 
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
@@ -182,8 +202,9 @@ void KdPostProcessShader::PostEffectProcess()
 	LightBloomProcess();
 	BlurProcess();
 	DepthOfFieldProcess();
+	SpeedBlurProcess();
 
-	KdShaderManager::Instance().m_spriteShader.DrawTex(m_depthOfFieldRTPack.m_RTTexture.get(), 0, 0);
+	KdShaderManager::Instance().m_spriteShader.DrawTex(m_speedBlurRTPack.m_RTTexture.get(), 0, 0);
 }
 
 void KdPostProcessShader::LightBloomProcess()
@@ -251,6 +272,22 @@ void KdPostProcessShader::DepthOfFieldProcess()
 	};
 
 	DrawTexture(srcTexList, 4, m_depthOfFieldRTPack.m_RTTexture, &m_depthOfFieldRTPack.m_viewPort);
+}
+
+// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+// 高速移動時に画面外周へかけるラジアルブラー(速度ブラー)
+// Intensityが0の場合はシェーダー側で早期returnし、ほぼ素通しになる
+// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+void KdPostProcessShader::SpeedBlurProcess()
+{
+	SetSpeedBlurToDevice();
+
+	std::shared_ptr<KdTexture> srcTexList[1] =
+	{
+		m_depthOfFieldRTPack.m_RTTexture
+	};
+
+	DrawTexture(srcTexList, 1, m_speedBlurRTPack.m_RTTexture, &m_speedBlurRTPack.m_viewPort);
 }
 
 void KdPostProcessShader::CreateBlurOffsetList(std::vector<Math::Vector3>& dstInfo, const std::shared_ptr<KdTexture>& spSrcTex, int samplingRadius, const Math::Vector2& dir)
@@ -437,4 +474,23 @@ void KdPostProcessShader::SetBrightToDevice()
 	}
 
 	shaderMgr.SetPixelShader(m_PS_Bright);
+}
+
+void KdPostProcessShader::SetSpeedBlurToDevice()
+{
+	ID3D11DeviceContext* DevCon = KdDirect3D::Instance().WorkDevContext();
+	if (!DevCon) { return; }
+
+	m_cb0_SpeedBlurInfo.Write();
+
+	KdDirect3D::Instance().WorkDevContext()->PSSetConstantBuffers(0, 1, m_cb0_SpeedBlurInfo.GetAddress());
+
+	KdShaderManager& shaderMgr = KdShaderManager::Instance();
+
+	if (shaderMgr.SetVertexShader(m_VS))
+	{
+		DevCon->IASetInputLayout(m_inputLayout);
+	}
+
+	shaderMgr.SetPixelShader(m_PS_SpeedBlur);
 }

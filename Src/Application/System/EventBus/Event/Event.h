@@ -71,6 +71,9 @@ namespace Events
 
 	namespace Else
 	{
+		struct TitleToGameBegin : public Event {};
+		struct TitleToGameEnd : public Event {};
+
 		struct GameStart : public Event
 		{};
 
