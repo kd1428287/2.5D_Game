@@ -9,7 +9,7 @@ enum class CameraState
 	Game
 };
 
-class CameraManager
+class CameraManager : public std::enable_shared_from_this<CameraManager>
 {
 public:
 	CameraManager() {};
@@ -22,6 +22,8 @@ public:
 	void UpdateTitle(float dt);
 	void UpdateTitletoGame(float dt);
 	void UpdateGame(float dt);
+
+	void DrawSprite();
 
 	void SetCameraTarget(std::shared_ptr<Player> targetObj) { m_targetObj = targetObj; };
 	void SetCameraPos(Math::Vector3 camPos) { m_camPos = camPos; }

@@ -2,6 +2,7 @@
 
 #include "Application/Object/Character/Player/Player.h"
 #include "../Reader/Reader.h"
+#include "../ConvertScreen/ConvertScreen.h"
 
 void CameraManager::Init()
 {
@@ -129,8 +130,7 @@ void CameraManager::Update(float dt)
 	m_camera->SetToShader();
 
 	CameraData data;
-	data.pos = m_camPos;
-	data.angle = m_camAng;
+	data.mat = m_camera->GetCameraMatrix();
 	Reader::Instance().WriteCamera(data);
 }
 
@@ -243,8 +243,16 @@ void CameraManager::UpdateGame(float dt)
 	m_camPos.y = std::lerp(m_camPos.y, targetMat.Translation().y, m_speed * 2.f * dt);
 	m_camPos.x = targetMat.Translation().x;
 	m_camPos.z = targetMat.Translation().z;
-	//m_camPos = Math::Vector3::Lerp(m_camPos, targetMat.Translation(), m_speed * 2.f * dt);
-	targetMat.Translation(m_camPos);
+	//targetMat.Translation(m_camPos);
+
+	// スケール・回転・位置を分解する
+	Math::Vector3 scale, translation;
+	Math::Quaternion rotation;
+	targetMat.Decompose(scale, rotation, translation);
+
+	// スケールなしで行列を再構築
+	Math::Matrix _mat = Math::Matrix::CreateFromQuaternion(rotation)
+		* Math::Matrix::CreateTranslation(m_camPos);
 
 	// シェイクの減衰処理
 	Math::Vector3 shakeOffset = Math::Vector3::Zero;
@@ -266,12 +274,43 @@ void CameraManager::UpdateGame(float dt)
 		Math::Matrix::CreateTranslation(m_camDis + shakeOffset) *
 		// ここで (カメラの基本Y回転 + ステアリングによるYオフセット) を計算
 		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_camAng.y + m_steeringOffset)) *
-		targetMat;
+		//targetMat;
+		_mat;
 
 	m_camera->SetCameraMatrix(mat);
 
 	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(m_blurIntensity);      // 0.0~1.0で強度を直接指定
 	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(m_blurMinRange, m_blurMaxRange);    // ブラーがかかり始める/最大になる範囲
+}
+
+void CameraManager::DrawSprite()
+{
+	auto sprites = ConvertScreen::Instance().AcceptConvertScreen();
+	Math::Vector3 screenPos;
+
+	for (auto& sprite : sprites)
+	{
+		Math::Vector3 screenPos;
+
+		// カメラ後ろ判定のみ自前で行う
+		Math::Matrix vp = m_camera->GetCameraViewMatrix() * m_camera->GetProjMatrix();
+		Math::Vector4 clip = Math::Vector4::Transform(
+			Math::Vector4(
+				sprite.mat.Translation().x,
+				sprite.mat.Translation().y,
+				sprite.mat.Translation().z,
+				1.0f), vp);
+
+		// カメラ後ろはスキップ
+		if (clip.w <= 0.0f) continue;
+
+		// スクリーン座標変換はそのまま既存処理に任せる
+		m_camera->ConvertWorldToScreenDetail(sprite.mat.Translation(), screenPos);
+		KdShaderManager::Instance().m_spriteShader.DrawTex(
+			sprite.tex,
+			static_cast<int>(screenPos.x),
+			static_cast<int>(screenPos.y));
+	}
 }
 
 void CameraManager::UpdateProjection(float dt)

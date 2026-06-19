@@ -290,7 +290,9 @@
     <ClInclude Include="Src\Application\Scene\GameScene\GameScene.h" />
     <ClInclude Include="Src\Application\Scene\SceneManager.h" />
     <ClInclude Include="Src\Application\Scene\TitleScene\TitleScene.h" />
+    <ClInclude Include="Src\Application\System\AudioManager\AudioManager.h" />
     <ClInclude Include="Src\Application\System\CameraManager\CameraManager.h" />
+    <ClInclude Include="Src\Application\System\ConvertScreen\ConvertScreen.h" />
     <ClInclude Include="Src\Application\System\EventBus\Event\Event.h" />
     <ClInclude Include="Src\Application\System\EventBus\GlobalEventBus.h" />
     <ClInclude Include="Src\Application\System\EventBus\LocalEventBus.h" />
@@ -354,6 +356,7 @@
     <ClCompile Include="Src\Application\Object\Building\Building.cpp" />
     <ClCompile Include="Src\Application\Object\Character\Enemy\BaseEnemy\BaseEnemy.cpp" />
     <ClCompile Include="Src\Application\Object\Character\Player\Player.cpp" />
+    <ClCompile Include="Src\Application\Object\Effect\Exprosion\Exprosion.cpp" />
     <ClCompile Include="Src\Application\Object\EventObject\DeliveryPoint.cpp" />
     <ClCompile Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.cpp" />
     <ClCompile Include="Src\Application\Object\Ground\Ground.cpp" />
@@ -365,7 +368,9 @@
     <ClCompile Include="Src\Application\Scene\GameScene\GameScene.cpp" />
     <ClCompile Include="Src\Application\Scene\SceneManager.cpp" />
     <ClCompile Include="Src\Application\Scene\TitleScene\TitleScene.cpp" />
+    <ClCompile Include="Src\Application\System\AudioManager\AudioManager.cpp" />
     <ClCompile Include="Src\Application\System\CameraManager\CameraManager.cpp" />
+    <ClCompile Include="Src\Application\System\ConvertScreen\ConvertScreen.cpp" />
     <ClCompile Include="Src\Application\System\EventBus\GlobalEventBus.cpp" />
     <ClCompile Include="Src\Application\System\EventBus\LocalEventBus.cpp" />
     <ClCompile Include="Src\Application\System\FadeManager\FadeManager.cpp" />

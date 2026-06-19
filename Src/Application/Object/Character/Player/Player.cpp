@@ -20,6 +20,7 @@ void Player::Init()
 	ChangeSpeedLevel(SpeedLevel::Idle);
 
 	m_acceleration = 5.0f;
+	m_scale = { 1,1,1 };
 
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
@@ -44,6 +45,8 @@ void Player::Init()
 		GLOBALEVENT.subscribe<Events::Player::DeliveryPointCompleted>([this](const Events::Player::DeliveryPointCompleted& e)
 			{
 				m_deliveryScore += 1;
+				m_isDeliveryAnime = true;
+				m_deliveryAnimeTime = 0.f;
 				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
 			})
 	);
@@ -81,6 +84,26 @@ void Player::Update(float dt)
 	if (!m_isControllable)return;
 
 	UpdateMove(dt);
+
+	// 案1: 正規化した位相で制御（終了条件を明確に）
+	if(m_isDeliveryAnime)
+	{
+		m_deliveryAnimeTime += dt;
+		float duration = (2.0f * M_PI) / m_deliveryAnimeSpeed; // 1フルサイクルの時間
+
+		if (m_deliveryAnimeTime >= duration)
+		{
+			m_scale = { 1, 1, 1 };
+			m_isDeliveryAnime = false;
+		}
+		else
+		{
+			// sin(0→2π) で 0→1→0→-1→0 の1周
+			float wave = sinf(m_deliveryAnimeTime * m_deliveryAnimeSpeed);
+			m_scale.x = 1.0f + wave * m_deliveryAnimeAmplitude;
+			m_scale.y = 1.0f - wave * m_deliveryAnimeAmplitude;
+		}
+	}
 
 	if (m_level == SpeedLevel::Clash)
 	{
@@ -122,6 +145,7 @@ void Player::PostUpdate()
 	m_pos += m_amountMove;
 
 	m_mWorld =
+		Math::Matrix::CreateScale(m_scale) * 
 		rotMat *
 		Math::Matrix::CreateTranslation(m_pos);
 }

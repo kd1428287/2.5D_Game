@@ -163,6 +163,9 @@
     <Filter Include="Src\Application\System\FadeManager">
       <UniqueIdentifier>{dde9d3db-733e-45ab-ab35-73e888d42102}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\System\ConvertScreen">
+      <UniqueIdentifier>{ccf4408c-a182-4e0c-930f-74e7654a2d0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -411,6 +414,12 @@
     <ClInclude Include="Src\Application\System\FadeManager\FadeManager.h">
       <Filter>Src\Application\System\FadeManager</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\System\AudioManager\AudioManager.h">
+      <Filter>Src\Application\System\AudioManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\ConvertScreen\ConvertScreen.h">
+      <Filter>Src\Application\System\ConvertScreen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -616,6 +625,15 @@
     </ClCompile>
     <ClCompile Include="Src\Application\System\FadeManager\FadeManager.cpp">
       <Filter>Src\Application\System\FadeManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Effect\Exprosion\Exprosion.cpp">
+      <Filter>Src\Application\Object\Effect\Exprosion</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\AudioManager\AudioManager.cpp">
+      <Filter>Src\Application\System\AudioManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\ConvertScreen\ConvertScreen.cpp">
+      <Filter>Src\Application\System\ConvertScreen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,6 +10,7 @@
 #include "Application/System/CameraManager/CameraManager.h"
 #include "Application/Object/ObjectManager/ObjectManager.h"
 #include "Application/Object/ObjectManager/MapManager/MapManager.h"
+#include "Application/Object/Effect/Exprosion/Exprosion.h"
 
 
 void GameScene::Event(float dt)
@@ -19,16 +20,18 @@ void GameScene::Event(float dt)
 
 	if (GetAsyncKeyState('T') & 0x8000)
 	{
-		SceneManager::Instance().SetNextScene
+		/*SceneManager::Instance().SetNextScene
 		(
 			SceneManager::SceneType::Title
-		);
+		);*/
+
+		m_objectManager->CreateObject<Exprosion>(Math::Vector3{ 0,0.2f,0 },1.f,false);
 	}
 
-	if (InputManager::Instance().IsTriggered(VK_RETURN))
+	/*if (InputManager::Instance().IsTriggered(VK_RETURN))
 	{
 		GLOBALEVENT.publish(Events::Else::TitleToGameBegin());
-	}
+	}*/
 }
 
 void GameScene::Init()
@@ -50,4 +53,6 @@ void GameScene::Init()
 	m_spawnManager->SetMapData(map);
 
 	auto sky = m_objectManager->CreateObject<SkySphere>();
+
+	GLOBALEVENT.publish(Events::Else::TitleToGameBegin());
 }

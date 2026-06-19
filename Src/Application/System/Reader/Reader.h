@@ -2,8 +2,8 @@
 
 struct CameraData
 {
-	Math::Vector3 pos;
-	Math::Vector3 angle;
+	Math::Matrix mat;
+	std::weak_ptr<KdCamera> m_camera;
 };
 
 
@@ -18,7 +18,7 @@ public:
 	void Init();
 	void WriteCamera(CameraData data){ m_cameraData = data; }
 	void WriteTime(float time) { m_time = time; }
-	CameraData ReadCamera() { return m_cameraData; }
+	CameraData& ReadCamera() { return m_cameraData; }
 	float ReadTime() { return m_time; }
 
 private:

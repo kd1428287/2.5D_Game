@@ -79,7 +79,9 @@ void BaseScene::DrawSprite()
 	// 2Dの描画はこの間で行う
 	KdShaderManager::Instance().m_spriteShader.Begin();
 	{
+		m_cameraManager->DrawSprite();
 		m_objectManager->DrawSprite();
+		KdShaderManager::Instance().m_spriteShader.SetMatrix(Math::Matrix::Identity);
 	}
 	KdShaderManager::Instance().m_spriteShader.End();
 }

@@ -46,9 +46,15 @@ private:
 	std::shared_ptr<KdModelData> m_model = nullptr;
 
 	bool m_isControllable = false;
+	bool m_isDeliveryAnime = false;
+
+	float m_deliveryAnimeTime = 0.f;				// 配達アニメーション用タイマー
+	float m_deliveryAnimeAmplitude = 0.5f;			// 振れ幅
+	float m_deliveryAnimeSpeed = 7.0f;				// 速度
 
 	Math::Vector3 m_pos;				// 確定座標
 	Math::Vector3 m_angle;				// 車体方向
+	Math::Vector3 m_scale;				// 車体の大きさ
 
 	Math::Vector3 m_amountMove;			// (1Fでの)移動距離
 	Math::Vector3 m_moveVec;			// 移動方向
