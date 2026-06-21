@@ -1,4 +1,5 @@
 ﻿#include "KdFont.h"
+#include <cmath>
 
 // 日本語判定
 static bool isSJIS(char a)
@@ -28,7 +29,7 @@ static HFONT MakeFont(const std::string& fontName, int h, int angle)
 	return hFont;
 }
 
-void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiAliasing, std::array<std::shared_ptr<KdFontData>, 65536>* pFontDataArray, bool bAdd)
+void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiAliasing, std::array<std::shared_ptr<KdFontData>, 65536>* pFontDataArray, bool bAdd, int outlineSize)
 {
 	if (bAdd == false)		Release();
 	if (text.size() == 0)	return;
@@ -42,16 +43,16 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 		m_TexList.reserve(text.size());
 	}
 
-	while(1)
+	while (1)
 	{
 		uint16_t code = 0;
 
 		// 文字の最後
-		if(pT[0] == '\0')break;
+		if (pT[0] == '\0')break;
 
 		// 日本語判定
 		bool b2byte = false;
-		if(isSJIS(pT[0]))
+		if (isSJIS(pT[0]))
 		{
 			b2byte = true;
 			code = (BYTE)pT[0] << 8 | (BYTE)pT[1];
@@ -84,70 +85,70 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 
 			int grad = 0; // 階調の最大値
 			int gradFlag = GGO_BITMAP;
-			switch(antiAliasing)
+			switch (antiAliasing)
 			{
-				case 0:
-					gradFlag = GGO_BITMAP;
-					break;
-				case 1:
-					gradFlag = GGO_GRAY2_BITMAP;
-					break;
-				case 2:
-					gradFlag = GGO_GRAY4_BITMAP;
-					break;
-				case 3:
-					gradFlag = GGO_GRAY8_BITMAP;
-					break;
+			case 0:
+				gradFlag = GGO_BITMAP;
+				break;
+			case 1:
+				gradFlag = GGO_GRAY2_BITMAP;
+				break;
+			case 2:
+				gradFlag = GGO_GRAY4_BITMAP;
+				break;
+			case 3:
+				gradFlag = GGO_GRAY8_BITMAP;
+				break;
 			}
 
-			switch(gradFlag)
+			switch (gradFlag)
 			{
-				case GGO_GRAY2_BITMAP:
-					grad =  4;
-					break;
-				case GGO_GRAY4_BITMAP:
-					grad = 16;
-					break;
-				case GGO_GRAY8_BITMAP:
-					grad = 64;
-					break;
+			case GGO_GRAY2_BITMAP:
+				grad = 4;
+				break;
+			case GGO_GRAY4_BITMAP:
+				grad = 16;
+				break;
+			case GGO_GRAY8_BITMAP:
+				grad = 64;
+				break;
 			}
 
 			//-------------------------------
 			// フォントビットマップ取得
 			//-------------------------------
 			TEXTMETRIC TM;
-			GetTextMetrics(hdc , &TM );
+			GetTextMetrics(hdc, &TM);
 			GLYPHMETRICS GM;
-			CONST MAT2 Mat = {{0,1},{0,0},{0,0},{0,1}};
+			CONST MAT2 Mat = { {0,1},{0,0},{0,0},{0,1} };
 			DWORD size = GetGlyphOutline(hdc, code, gradFlag, &GM, 0, NULL, &Mat);	// アンチエイリアスの時に、spaceとか0が返るのはなぜ…
 			std::unique_ptr<BYTE[]> ptr(new BYTE[size]);
 			GetGlyphOutline(hdc, code, gradFlag, &GM, size, ptr.get(), &Mat);
 
 
 			int addX = 0;
-			if(GM.gmptGlyphOrigin.x < 0)
+			if (GM.gmptGlyphOrigin.x < 0)
 			{
 				addX = -GM.gmptGlyphOrigin.x;
 				GM.gmptGlyphOrigin.x = 0;
 			}
 
 			// 文字サイズ
-			int texWidth				= GM.gmCellIncX;
-			int texHeight				= TM.tmHeight;
-			int fontWidth_Alignment4	= (GM.gmBlackBoxX + 3) / 4 * 4;
+			int texWidth = GM.gmCellIncX;
+			int texHeight = TM.tmHeight;
+			int fontWidth_Alignment4 = (GM.gmBlackBoxX + 3) / 4 * 4;
 
 			// 文字のバイト数
-			if(b2byte)data->Bytes		= 2;
-			else data->Bytes			= 1;
+			if (b2byte)data->Bytes = 2;
+			else data->Bytes = 1;
 
 			// 総幅加算
 			m_TotalWidth += texWidth;
 
 			static const int PIXEL_BYTES = 4;
 			// バッファ作成
-			std::unique_ptr<UINT> buf(new UINT[texWidth*texHeight]);
-			ZeroMemory(buf.get(), texWidth*texHeight*4);
+			std::unique_ptr<UINT> buf(new UINT[texWidth * texHeight]);
+			ZeroMemory(buf.get(), texWidth * texHeight * 4);
 
 			// フォント画像コピー
 			if (size > 0)
@@ -161,7 +162,7 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 				if (gradFlag == GGO_BITMAP)
 				{
 					int iUseBYTEparLine = (1 + (GM.gmBlackBoxX / 32)) * 4; // 元絵の1行のバイト数
-					int total = GM.gmBlackBoxY*iUseBYTEparLine;
+					int total = GM.gmBlackBoxY * iUseBYTEparLine;
 					// 半分になってる場合
 					if ((unsigned)(total / 2) == size)
 					{
@@ -191,7 +192,7 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 								int num = sx / 8;		// 何バイト目か
 								BYTE bit = sx % 8;		// 何ビット目か
 								BYTE mask = ((BYTE)1) << (7 - bit);
-								bytePos = num + sy*iUseBYTEparLine;
+								bytePos = num + sy * iUseBYTEparLine;
 								if (bytePos < (int)size)
 								{
 									BYTE Cur = ptr[bytePos];
@@ -203,7 +204,7 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 								dy = (y + (TM.tmAscent - GM.gmptGlyphOrigin.y));
 								if (dx >= 0 && dx < texWidth && dy >= 0 && dy < texHeight)
 								{
-									buf.get()[dx + dy*texWidth] = (alpha << 24) | 0x00ffffff;
+									buf.get()[dx + dy * texWidth] = (alpha << 24) | 0x00ffffff;
 								}
 							}
 						}
@@ -223,7 +224,7 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 							{
 								alpha = 0;
 
-								bytePos = sy*fontWidth_Alignment4 + sx;
+								bytePos = sy * fontWidth_Alignment4 + sx;
 								if (bytePos < (int)size)
 								{
 									alpha = ptr[bytePos] * 255 / grad;
@@ -233,7 +234,7 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 								dy = (y + (TM.tmAscent - GM.gmptGlyphOrigin.y));
 								if (dx >= 0 && dx < texWidth && dy >= 0 && dy < texHeight)
 								{
-									buf.get()[dx + dy*texWidth] = (alpha << 24) | 0x00ffffff;
+									buf.get()[dx + dy * texWidth] = (alpha << 24) | 0x00ffffff;
 								}
 							}
 						}
@@ -246,6 +247,78 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 			data->FontTex->Create(texWidth, texHeight, DXGI_FORMAT_B8G8R8A8_UNORM);
 			KdDirect3D::Instance().WorkDevContext()->UpdateSubresource(data->FontTex->WorkResource(), 0, nullptr, buf.get(), data->FontTex->GetInfo().Width * 4, 0);
 
+			//-------------------------------
+			// アウトラインテクスチャ生成
+			//-------------------------------
+			if (outlineSize > 0)
+			{
+				int outTexWidth = texWidth + outlineSize * 2;
+				int outTexHeight = texHeight + outlineSize * 2;
+
+				std::unique_ptr<UINT> outBuf(new UINT[outTexWidth * outTexHeight]);
+				ZeroMemory(outBuf.get(), outTexWidth * outTexHeight * 4);
+
+				// 【距離場方式】
+				// 「文字ピクセルから外側に塗る」のではなく
+				// 「出力ピクセルから周囲の文字ピクセルを探す」方式にすることで
+				// 境界のアルファが正確に計算されジャギーが出なくなる
+				for (int oy = 0; oy < outTexHeight; oy++)
+				{
+					for (int ox = 0; ox < outTexWidth; ox++)
+					{
+						// 元テクスチャ上の対応座標
+						int bx = ox - outlineSize;
+						int by = oy - outlineSize;
+
+						// 既に文字ピクセルがある場所はスキップ（後で元文字を上書きするため）
+						if (bx >= 0 && bx < texWidth && by >= 0 && by < texHeight)
+						{
+							if ((buf.get()[bx + by * texWidth] >> 24) > 0) continue;
+						}
+
+						// 周囲 outlineSize の範囲を探索し最大の寄与を求める
+						float maxAlpha = 0.0f;
+						for (int dy = -outlineSize; dy <= outlineSize; dy++)
+						{
+							for (int dx = -outlineSize; dx <= outlineSize; dx++)
+							{
+								float distSq = (float)(dx * dx + dy * dy);
+								if (distSq > (float)(outlineSize * outlineSize)) continue;
+
+								int sx = bx + dx;
+								int sy = by + dy;
+								if (sx < 0 || sx >= texWidth || sy < 0 || sy >= texHeight) continue;
+
+								UINT srcAlpha = (buf.get()[sx + sy * texWidth] >> 24) & 0xFF;
+								if (srcAlpha == 0) continue;
+
+								// 距離が近いほど・元アルファが高いほど強いアウトラインになる
+								float dist = sqrtf(distSq);
+								float factor = (1.0f - dist / ((float)outlineSize + 1.0f)) * (srcAlpha / 255.0f);
+								if (factor > maxAlpha) maxAlpha = factor;
+							}
+						}
+
+						if (maxAlpha > 0.0f)
+						{
+							UINT outAlpha = (UINT)(maxAlpha * 255.0f);
+							if (outAlpha > 255) outAlpha = 255;
+							outBuf.get()[ox + oy * outTexWidth] = (outAlpha << 24) | 0x00000000;
+						}
+					}
+				}
+
+				// OutlineTex はアウトライン部分のみを持つ
+				// 元文字(FontTex)は描画側で別途重ねるため、ここでは上書きしない
+
+				// アウトラインテクスチャ作成
+				data->OutlineTex = std::make_shared<KdTexture>();
+				data->OutlineTex->Create(outTexWidth, outTexHeight, DXGI_FORMAT_B8G8R8A8_UNORM);
+				KdDirect3D::Instance().WorkDevContext()->UpdateSubresource(
+					data->OutlineTex->WorkResource(), 0, nullptr,
+					outBuf.get(), outTexWidth * 4, 0);
+			}
+
 			// 登録
 			if (pFontDataArray)
 			{
@@ -255,7 +328,7 @@ void KdFontSprite::CreateFontTexture(HDC hdc, const std::string& text, int antiA
 		}
 
 		// 進める
-		if(b2byte)
+		if (b2byte)
 		{
 			pT += 2;
 		}
@@ -271,20 +344,20 @@ void KdFontManager::Init(HWND hWnd)
 {
 	m_LoadedFontMap.clear();
 
-	m_hWnd	= hWnd;
-	m_hDC	= GetDC(m_hWnd);
+	m_hWnd = hWnd;
+	m_hDC = GetDC(m_hWnd);
 }
 
 void KdFontManager::Release()
 {
-	for(auto& font : m_FontTbl)
+	for (auto& font : m_FontTbl)
 	{
 		DeleteObject(font.hFont);
 		font.hFont = nullptr;
 		font.CreatedFontDataTbl.fill(nullptr);
 	}
 
-	if(m_hDC)
+	if (m_hDC)
 	{
 		ReleaseDC(m_hWnd, m_hDC);
 	}
@@ -298,14 +371,14 @@ void KdFontManager::AddFont(int fontNo, const std::string& fontName, int h)
 	m_FontTbl[fontNo].CreatedFontDataTbl.fill(nullptr);
 }
 
-std::shared_ptr<KdFontSprite> KdFontManager::CreateFontTexture(int fontNo, const std::string& text, int antiAliasingFlag)
+std::shared_ptr<KdFontSprite> KdFontManager::CreateFontTexture(int fontNo, const std::string& text, int antiAliasingFlag, int outlineSize)
 {
 	std::shared_ptr<KdFontSprite> add = std::make_shared<KdFontSprite>();
 
 	// フォント選択
 	HFONT hFontOld = (HFONT)SelectObject(m_hDC, (HGDIOBJ)m_FontTbl[fontNo].hFont);
 	// フォントテクスチャ作成
-	add->CreateFontTexture(m_hDC, text, antiAliasingFlag, &m_FontTbl[fontNo].CreatedFontDataTbl, false);
+	add->CreateFontTexture(m_hDC, text, antiAliasingFlag, &m_FontTbl[fontNo].CreatedFontDataTbl, false, outlineSize);
 	// フォント選択を基に戻す
 	SelectObject(m_hDC, hFontOld);
 
@@ -316,7 +389,7 @@ void KdFontManager::AddFontResource(const std::string& ttfFileName)
 {
 	// すでに存在
 	auto itFound = m_LoadedFontMap.find(ttfFileName);
-	if(itFound != m_LoadedFontMap.end())
+	if (itFound != m_LoadedFontMap.end())
 	{
 		return;
 	}
@@ -328,7 +401,7 @@ void KdFontManager::AddFontResource(const std::string& ttfFileName)
 
 void KdFontManager::RemoveAllFontResource()
 {
-	for(auto& node : m_LoadedFontMap)
+	for (auto& node : m_LoadedFontMap)
 	{
 		RemoveFontResourceEx(node.first.c_str(), FR_PRIVATE, NULL);
 	}

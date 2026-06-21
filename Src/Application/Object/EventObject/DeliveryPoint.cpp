@@ -23,12 +23,21 @@ void DeliveryPoint::Init()
 	m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/Effect/Circle.gltf");
 	m_texture = std::make_shared<KdTexture>();
 	m_texture = KdAssets::Instance().m_textures.GetData("Asset/Textures/Effect/Arrow.png");
+
+	m_startSub = GLOBALEVENT.subscribe<Events::Else::GameStart>([this](const Events::Else::GameStart& e)
+		{
+			m_isSpriteDraw = true;
+		});
 }
 
 void DeliveryPoint::Update(float dt)
 {
 	m_deltaTime = dt;
-	if (m_wpParent.lock()->GetState() != BuildingState::Unbroken)m_isExpired = true;
+	if (m_wpParent.lock()->GetState() != BuildingState::Unbroken)
+	{
+		GLOBALEVENT.publish(Events::Player::DeliveryPointDeleted(shared_from_this()));
+		m_isExpired = true;
+	}
 
 	// 放物線アニメーション
 	if (m_isAnimating)
@@ -52,7 +61,7 @@ void DeliveryPoint::Update(float dt)
 		m_cardboardScale = 0.2f + 0.8f * t;
 	}
 
-	if (m_isDelivered)return;
+	if (m_isDelivered || !m_isSpriteDraw)return;
 	ConvertData data;
 	data.mat = 
 		Math::Matrix::CreateTranslation(m_mWorld.Translation() + m_arrowDistance);

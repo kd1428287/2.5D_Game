@@ -11,7 +11,7 @@ enum class UIPaturn
 
 class UIManager
 {
-public :
+public:
 	static UIManager& Instance()
 	{
 		static UIManager instance;
@@ -21,12 +21,17 @@ public :
 	void Init();
 	void Update(float dt);
 	void DrawSprite();
+	void Release();
 
 	void CreateUI(UIPaturn paturn);
 private:
 	std::vector<std::shared_ptr<UIObject>> m_UIobjList;
 
+	ScopedSubscriber m_titleSub;
+	ScopedSubscriber m_gameSub;
+	ScopedSubscriber m_resultSub;
+
 private:
 	UIManager() {};
-	~UIManager() {};
+	~UIManager() { Release(); };
 };

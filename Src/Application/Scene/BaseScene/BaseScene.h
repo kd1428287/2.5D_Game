@@ -1,14 +1,21 @@
 ﻿#pragma once
 
-class CameraManager;
-class ObjectManager;
-class MapManager;
-
 #include "Application/Object/ObjectManager/ObjectManager.h"
 #include "Application/Object/ObjectManager/MapManager/MapManager.h"
 #include "Application/Object/ObjectManager/SpawnManager/SpawnManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
 #include "Application/System/EventBus/LocalEventBus.h"
+#include "Application/System/AudioManager/AudioManager.h"
+
+// GameScene 内部の進行フェーズ
+enum class InScene
+{
+	Title,          // タイトル表示中（ゲーム開始待ち）
+	Game,           // ゲームプレイ中
+	GameToResult,   // 結果画面への遷移待ち（暗転中）
+	Result,
+	ResultToTitle,
+};
 
 class BaseScene
 {
@@ -40,12 +47,7 @@ protected :
 	virtual void Init();
 
 	// マネージャーを各シーンで保持
-	std::unique_ptr<CameraManager> m_cameraManager = nullptr;
-	std::unique_ptr<ObjectManager> m_objectManager = nullptr;
-	std::unique_ptr<MapManager>m_mapManager = nullptr;
-	//std::unique_ptr<LocalEventBus>m_localEV = nullptr;
-
-	// オブジェクト管理をオブジェクトマネージャーに移管
-	// 全オブジェクトのアドレスをリストで管理
-	//std::list<std::shared_ptr<KdGameObject>> m_objList;
+	std::unique_ptr<CameraManager>	m_cameraManager = nullptr;
+	std::unique_ptr<ObjectManager>	m_objectManager = nullptr;
+	std::unique_ptr<MapManager>		m_mapManager = nullptr;
 };

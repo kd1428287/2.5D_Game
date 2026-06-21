@@ -3,6 +3,7 @@
 #include "Application/System/InputManager/InputManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
 #include "Application/Scene/SceneManager.h"
+#include "Application/System/Reader/Reader.h"
 
 void Player::Init()
 {
@@ -44,7 +45,7 @@ void Player::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::DeliveryPointCompleted>([this](const Events::Player::DeliveryPointCompleted& e)
 			{
-				m_deliveryScore += 1;
+				m_deliveryScore += 10000;
 				m_isDeliveryAnime = true;
 				m_deliveryAnimeTime = 0.f;
 				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
@@ -67,6 +68,13 @@ void Player::Init()
 			})
 	);
 
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Else::GameEnd>([this](const Events::Else::GameEnd& e)
+			{
+				Reader::Instance().WriteScore({(float)m_deliveryScore,(float)m_destroyScore});
+			})
+	);
+
 	m_pCollider->RegisterCollisionShape(
 		"PlayerCollision",
 		m_model,
@@ -85,7 +93,7 @@ void Player::Update(float dt)
 
 	UpdateMove(dt);
 
-	// 案1: 正規化した位相で制御（終了条件を明確に）
+	// 正規化した位相で制御
 	if(m_isDeliveryAnime)
 	{
 		m_deliveryAnimeTime += dt;
@@ -114,6 +122,8 @@ void Player::Update(float dt)
 			m_clashCount = 0.0f;
 		}
 	}
+
+	KdAudioManager::Instance().SetListnerMatrix(m_mWorld);
 }
 
 void Player::PostUpdate()

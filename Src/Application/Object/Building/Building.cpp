@@ -23,7 +23,7 @@ void Building::Init()
 				Break(e.m_result);
 				type = Events::Player::HitResult::HitResultType::Destroyed;
 			}
-			GLOBALEVENT.publish(Events::Player::HitResult(type, (int)player->GetSpeedLevel()));
+			GLOBALEVENT.publish(Events::Player::HitResult(type, GetPos(), (int)player->GetSpeedLevel()));
 		}));
 
 	//m_dir = 180.f;
@@ -193,20 +193,44 @@ void Building::SetBreakLevel(int level)
 	switch (level)
 	{
 	case 0: m_color = { 1.f,1.f,1.f,1.f }; break;
-	case 1: //m_color = { 0.2f,0.8f,0.8f,1.f }; 
-		  m_model = nullptr;
-		  m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/building1.gltf");
-		  break;
+	case 1:  m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/building1.gltf");  break;
+
 	case 2: m_color = { 0.8f,0.8f,0.2f,1.f }; break;
-	case 3: m_color = { 0.8f,0.6f,0.6f,1.f }; break;
-	case 4: m_color = { 0.6f,0.8f,0.6f,1.f }; break;
-	case 5: m_color = { 0.6f,0.6f,0.8f,1.f }; break;
-	case 6: m_color = { 0.6f,0.6f,0.6f,1.f }; break;
+
+	case 3: m_color = { 0.6f,0.6f,0.8f,1.f }; break;	// 黄
+
+	case 4: m_color = { 0.6f,0.8f,0.6f,1.f }; break;	// オレンジ
+
+	case 5: m_color = { 0.8f,0.6f,0.6f,1.f }; break;	// 赤
+
+	case 6: m_color = { 0.6f,0.4f,0.6f,1.f }; break;	// 紫
+
 	case 99: m_color = { 0.2f,0.2f,0.2f,1.f }; break;
 	default:
 		break;
 	}
 	m_breakLevel = level;
+
+	//switch (level)
+	//{
+	//case 0: m_color = { 1.f,1.f,1.f,1.f }; break;
+	//case 1:  m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/building1.gltf");  break;
+
+	//case 2: m_color = { 0.8f,0.8f,0.2f,1.f }; break;
+
+	//case 3: m_color = { 0.7f,0.8f,0.0f,1.f }; break;	// 黄
+
+	//case 4: m_color = { 0.8f,0.6f,0.0f,1.f }; break;	// オレンジ
+
+	//case 5: m_color = { 0.8f,0.6f,0.6f,1.f }; break;	// 赤
+
+	//case 6: m_color = { 0.6f,0.3f,0.6f,1.f }; break;	// 紫
+
+	//case 99: m_color = { 0.2f,0.2f,0.2f,1.f }; break;
+	//default:
+	//	break;
+	//}
+	//m_breakLevel = level;
 }
 
 void Building::SetModel(BuildingType type)

@@ -40,8 +40,9 @@ namespace Events
 			};
 
 			HitResultType type;
+			Math::Vector3 m_pos;
 			float speedLevel = 0.f;
-			HitResult(const HitResultType& _type, float speed) :type(_type), speedLevel(speed) {};
+			HitResult(const HitResultType& _type, Math::Vector3 pos, float speed) :type(_type), m_pos(pos), speedLevel(speed) {};
 		};
 
 		struct DeliveryPointBegin : public Event
@@ -71,14 +72,28 @@ namespace Events
 
 	namespace Else
 	{
+		struct TitleBegin : public Event {};
+		struct TitleEnd : public Event {};
+
 		struct TitleToGameBegin : public Event {};
 		struct TitleToGameEnd : public Event {};
 
-		struct GameStart : public Event
-		{};
+		struct GameStart : public Event{};
+		struct GameEnd : public Event{};
 
-		struct GameEnd : public Event
-		{};
+		struct GameToResultBegin : public Event {};
+		struct GameToResultEnd : public Event {};
+
+		struct ResultBegin : public Event {};
+		struct ResultEnd : public Event {};
+
+		struct ResultToTitleBegin : public Event {};
+		struct ResultToTitleEnd : public Event {};
+
+		struct DeliveryScoreRollBegin :public Event {};
+		struct DeliveryScoreRollEnd :public Event {};
+		struct DestroyScoreRollEnd :public Event {};
+		struct DestroyScoreRollBegin :public Event {};
 
 		struct CreateObject : public Event
 		{

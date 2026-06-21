@@ -166,6 +166,36 @@
     <Filter Include="Src\Application\System\ConvertScreen">
       <UniqueIdentifier>{ccf4408c-a182-4e0c-930f-74e7654a2d0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result">
+      <UniqueIdentifier>{c9b3b758-3aef-400b-ae6d-98d458d9b99c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Game\Time">
+      <UniqueIdentifier>{523912b0-6a2d-41fe-8246-973d95b9de7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Scene\ResultScene">
+      <UniqueIdentifier>{1e756184-85f8-4e29-8ca4-081e2906f18c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result\DeliveryScore">
+      <UniqueIdentifier>{2ba3a796-0397-4fbb-85a5-9df572073f33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result\Back">
+      <UniqueIdentifier>{b373d9aa-41c2-435f-9171-026bac7fd48c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result\DestroyScore">
+      <UniqueIdentifier>{37780daf-1ca4-4530-a77d-5b42a64e689f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Title">
+      <UniqueIdentifier>{a66044cc-b469-4e6f-94d3-813237c93f27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Title\TitleText">
+      <UniqueIdentifier>{b59bc27a-133a-4363-881a-9e73c6294470}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result\ResultText">
+      <UniqueIdentifier>{8ea4f47a-74be-4081-9ba3-e99f8f169873}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result\ResultTItle">
+      <UniqueIdentifier>{1d70c5a2-315c-4f43-8402-29032e6afaa9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -405,7 +435,7 @@
     <ClInclude Include="Src\Application\System\Reader\Reader.h">
       <Filter>Src\Application\System\Reader</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Application\System\UIManager\UIObject\Game\Meter\Meter.h">
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Game\Meter\MeterUI.h">
       <Filter>Src\Application\System\UIManager\UI\Game\Meter</Filter>
     </ClInclude>
     <ClInclude Include="Src\Application\Object\Effect\Exprosion\Exprosion.h">
@@ -419,6 +449,30 @@
     </ClInclude>
     <ClInclude Include="Src\Application\System\ConvertScreen\ConvertScreen.h">
       <Filter>Src\Application\System\ConvertScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Game\Time\TimeUI.h">
+      <Filter>Src\Application\System\UIManager\UI\Game\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Scene\ResultScene\ResultScene.h">
+      <Filter>Src\Application\Scene\ResultScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\DeliveryScore\DeliveryScoreUI.h">
+      <Filter>Src\Application\System\UIManager\UI\Result\DeliveryScore</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\Back\BackUI.h">
+      <Filter>Src\Application\System\UIManager\UI\Result\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\DestroyScore\DestroyScoreUI.h">
+      <Filter>Src\Application\System\UIManager\UI\Result\DestroyScore</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Title\TitleText\TitleTextUI.h">
+      <Filter>Src\Application\System\UIManager\UI\Title\TitleText</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\ResultText\ResultTextUI.h">
+      <Filter>Src\Application\System\UIManager\UI\Result\ResultText</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\ResultTitle\ResultTitle.h">
+      <Filter>Src\Application\System\UIManager\UI\Result\ResultTItle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -593,9 +647,6 @@
     <ClCompile Include="Src\Application\System\EventBus\LocalEventBus.cpp">
       <Filter>Src\Application\System\EventBus</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Application\System\EventBus\GlobalEventBus.cpp">
-      <Filter>Src\Application\System\EventBus</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Application\Object\EventObject\DeliveryPoint.cpp">
       <Filter>Src\Application\Object\EventObject</Filter>
     </ClCompile>
@@ -620,7 +671,7 @@
     <ClCompile Include="Src\Application\System\UIManager\UIManager.cpp">
       <Filter>Src\Application\System\UIManager</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Application\System\UIManager\UIObject\Game\Meter\Meter.cpp">
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Game\Meter\MeterUI.cpp">
       <Filter>Src\Application\System\UIManager\UI\Game\Meter</Filter>
     </ClCompile>
     <ClCompile Include="Src\Application\System\FadeManager\FadeManager.cpp">
@@ -634,6 +685,24 @@
     </ClCompile>
     <ClCompile Include="Src\Application\System\ConvertScreen\ConvertScreen.cpp">
       <Filter>Src\Application\System\ConvertScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Game\Time\TimeUI.cpp">
+      <Filter>Src\Application\System\UIManager\UI\Game\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Scene\ResultScene\ResultScene.cpp">
+      <Filter>Src\Application\Scene\ResultScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\DeliveryScore\DeliveryScoreUI.cpp">
+      <Filter>Src\Application\System\UIManager\UI\Result\DeliveryScore</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\DestroyScore\DestroyScoreUI.cpp">
+      <Filter>Src\Application\System\UIManager\UI\Result\DestroyScore</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Title\TitleText\TitleTextUI.cpp">
+      <Filter>Src\Application\System\UIManager\UI\Title\TitleText</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\ResultText\ResultTextUI.cpp">
+      <Filter>Src\Application\System\UIManager\UI\Result\ResultText</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

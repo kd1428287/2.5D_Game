@@ -18,4 +18,10 @@ void TimeManager::Update(float dt)
 	if (!m_isCounting)return;
 	m_time += dt;
 	Reader::Instance().WriteTime(m_time);
+	if ((int)m_time >= GAME_LIMIT)
+	{
+		GLOBALEVENT.publish(Events::Else::GameEnd());
+		GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+		m_isCounting = false;
+	}
 }

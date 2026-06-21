@@ -48,4 +48,7 @@ private:
 	float m_durationContact = 0.0f;
 
 	bool m_isDelivered = false;
+	bool m_isSpriteDraw = false;
+
+	ScopedSubscriber m_startSub;
 };

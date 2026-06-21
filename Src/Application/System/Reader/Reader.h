@@ -15,17 +15,20 @@ public:
 		static Reader instance;
 		return instance;
 	}
-	void Init();
+	void Init() {};
 	void WriteCamera(CameraData data){ m_cameraData = data; }
 	void WriteTime(float time) { m_time = time; }
+	void WriteScore(Math::Vector2 score) { m_score = score; }
+
 	CameraData& ReadCamera() { return m_cameraData; }
 	float ReadTime() { return m_time; }
+	Math::Vector2 ReadScore() { return m_score; }
 
 private:
 	Reader() {};
 	~Reader() {};
 private:
-
-	CameraData m_cameraData;
+	CameraData m_cameraData = {};
 	float m_time = 0.f;
+	Math::Vector2 m_score = {};
 };

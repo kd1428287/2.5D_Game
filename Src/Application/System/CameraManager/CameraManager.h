@@ -13,8 +13,9 @@ class CameraManager : public std::enable_shared_from_this<CameraManager>
 {
 public:
 	CameraManager() {};
-	~CameraManager() {};
+	~CameraManager() { Release(); };
 
+	void Release();
 	void Init();
 	void SetUp(CameraState state);
 	void Update(float dt);

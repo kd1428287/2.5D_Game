@@ -4,6 +4,7 @@
 #include "System/FadeManager/FadeManager.h"
 #include "System/InputManager/InputManager.h"
 #include "System/UIManager/UIManager.h"
+#include "System/AudioManager/AudioManager.h"
 
 
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
@@ -72,6 +73,7 @@ void Application::PreUpdate()
 void Application::Update()
 {
 	SceneManager::Instance().Update();
+	UIManager::Instance().Update(m_fpsController.GetDeltaTime());
 }
 
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
@@ -147,6 +149,7 @@ void Application::DrawSprite()
 	KdShaderManager::Instance().m_spriteShader.Begin();
 	{
 		SceneManager::Instance().DrawSprite();
+		UIManager::Instance().DrawSprite();
 		FadeManager::Instance().DrawSprite();
 	}
 	KdShaderManager::Instance().m_spriteShader.End();
@@ -221,6 +224,18 @@ bool Application::Init(int w, int h)
 	// フォント初期化
 	//===================================================================
 	KdFontManager::Instance().Init(GetWindowHandle());
+	KdFontManager::Instance().AddFont(0, "デフォルト", 32);
+	KdFontManager::Instance().AddFontResource("Asset/Data/Fonts/03SmartFontUI.ttf");
+	KdFontManager::Instance().AddFont(1, "03スマートフォントUI", 24);
+	KdFontManager::Instance().AddFontResource("Asset/Data/Fonts/NotoSansJP-VariableFont_wght.ttf");
+	KdFontManager::Instance().AddFont(2, "Noto Sans JP Thin", 64);
+	KdFontManager::Instance().AddFontResource("Asset/Data/Fonts/GenShinGothic - Monospace - Medium.ttf");
+	KdFontManager::Instance().AddFont(3, "源真ゴシック等幅 Medium", 64);
+	KdFontManager::Instance().AddFontResource("Asset/Data/Fonts/JosefinSans - VariableFont_wght.ttf");
+	KdFontManager::Instance().AddFont(4, "Josefin Sans Thin", 64);
+	KdFontManager::Instance().AddFontResource("Asset/Data/Fonts/zerotime - eye - fs.otf");
+	KdFontManager::Instance().AddFont(5, "zerotime eYe/FS", 64);
+	
 	
 	//===================================================================
 	// ゲーム固有の初期化
@@ -229,6 +244,7 @@ bool Application::Init(int w, int h)
 	//ShowCursor(false);
 	FadeManager::Instance().Init(w, h);
 	UIManager::Instance().Init();
+	AudioManager::Instance().Init();
 
 
 	return true;
@@ -311,6 +327,9 @@ void Application::Execute()
 			Update();
 
 			PostUpdate();
+
+			AudioManager::Instance().Update(m_fpsController.GetDeltaTime());
+			UIManager::Instance().Update(m_fpsController.GetDeltaTime());
 		}
 		KdPostUpdate();
 
@@ -352,11 +371,17 @@ void Application::Release()
 {
 	KdInputManager::Instance().Release();
 
+	UIManager::Instance().Release();
+
 	KdShaderManager::Instance().Release();
+
+	AudioManager::Instance().Release();
 
 	KdAudioManager::Instance().Release();
 
 	KdDirect3D::Instance().Release();
+
+	GLOBALEVENT.Release();
 
 	// ウィンドウ削除
 	m_window.Release();

@@ -30,8 +30,6 @@ public:
 
 	Building(Math::Vector3 pos) :m_pos(pos)
 	{
-	/*	m_mWorld =
-			Math::Matrix::CreateTranslation(pos);*/
 	};
 
 	Building(Math::Vector3 pos, int level, int type, float dir) :

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <typeindex>
+//#include <Framework/Shader/PostProcessShader/KdPostProcessShader.h>
 
 using SubscriptionId = uint64_t;
 class Event;
@@ -12,9 +13,14 @@ public:
 		static GlobalEventBus instance;
 		return instance;
 	}
+
 private:
+	bool m_destroyed = false;  // 追加
 	GlobalEventBus() : nextId(1) {}; // IDは1から開始
-	~GlobalEventBus() {};
+	~GlobalEventBus() {
+		m_destroyed = true;    // 破棄前にフラグを立てる
+		subscribers.clear();
+	}
 
 	using HandlerFunction = std::function<void(const Event&)>;
 
@@ -24,6 +30,7 @@ private:
 
 	// 一意のIDを発行するためのカウンタ
 	std::atomic<SubscriptionId> nextId;
+
 public:
 	// 戻り値として SubscriptionId を返すようにする
 	template <typename T>
@@ -40,10 +47,10 @@ public:
 		return id; // 解除に必要なIDを呼び出し元に返す
 	}
 
-	// 購読解除
-	void unsubscribe(SubscriptionId id) {
-		if (id == 0) return;
+	bool IsDestroyed() const { return m_destroyed; }
 
+	void unsubscribe(SubscriptionId id) {
+		if (id == 0 || m_destroyed) return;  // フラグチェック追加
 		// すべてのイベント型のリストから、指定されたIDを持つものを探して削除
 		for (auto& [type, handlerList] : subscribers) {
 			for (auto it = handlerList.begin(); it != handlerList.end(); ++it) {
@@ -58,12 +65,25 @@ public:
 	template <typename T>
 	void publish(const T& event) {
 		auto it = subscribers.find(std::type_index(typeid(T)));
-		if (it != subscribers.end()) {
-			// ペアの2番目（関数）を呼び出す
-			for (auto& pair : it->second) {
+		if (it == subscribers.end()) return;
+
+		// コピーしてからイテレート
+		auto handlerList = it->second;
+
+		for (auto& pair : handlerList) {
+			// 実行前に購読がまだ有効か確認
+			auto& current = subscribers[std::type_index(typeid(T))];
+			bool stillValid = std::any_of(current.begin(), current.end(),
+				[&](const IdHandlerPair& p) { return p.first == pair.first; });
+
+			if (stillValid) {
 				pair.second(event);
 			}
 		}
+	}
+
+	void Release() {
+		subscribers.clear();
 	}
 };
 

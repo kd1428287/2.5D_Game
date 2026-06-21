@@ -4,10 +4,15 @@
 #include "../Reader/Reader.h"
 #include "../ConvertScreen/ConvertScreen.h"
 
+void CameraManager::Release()
+{
+	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(0); 
+	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(0,1);   
+}
+
 void CameraManager::Init()
 {
 	m_state = CameraState::Title;
-	//m_state = CameraState::Game;
 	SetUp(m_state);
 
 	m_camera = std::make_unique<KdCamera>();
@@ -136,10 +141,13 @@ void CameraManager::Update(float dt)
 
 void CameraManager::UpdateTitle(float dt)
 {
+	Math::Matrix targetMat = Math::Matrix::Identity;
 	std::shared_ptr<Player> _targetObj = nullptr;
-	if (!m_targetObj.expired()) _targetObj = m_targetObj.lock();
-
-	Math::Matrix targetMat = _targetObj->GetMatrix();
+	if (!m_targetObj.expired())
+	{
+		_targetObj = m_targetObj.lock();
+		targetMat = _targetObj->GetMatrix();
+	}
 
 	// シェイクの減衰処理
 	Math::Vector3 shakeOffset = Math::Vector3::Zero;

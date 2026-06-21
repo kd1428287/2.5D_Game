@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+namespace Math = DirectX::SimpleMath;
+
+
 class KdPostProcessShader
 {
 public:
