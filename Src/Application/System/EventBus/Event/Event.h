@@ -95,13 +95,10 @@ namespace Events
 		struct DestroyScoreRollEnd :public Event {};
 		struct DestroyScoreRollBegin :public Event {};
 
-		struct CreateObject : public Event
-		{
-			enum class ObjectType
-			{
-				
-			};
-			std::shared_ptr<KdGameObject> obj;
+		struct CreateObjectEvent {
+			std::string m_objectType; // "Player", "Enemy" など
+			Math::Vector3 m_pos;
+			CreateObjectEvent(const std::string& type, Math::Vector3 pos) :m_objectType(type), m_pos(pos) {};
 		};
 
 		struct CreateParticle : public Event

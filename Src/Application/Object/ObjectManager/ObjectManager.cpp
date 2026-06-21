@@ -8,7 +8,17 @@
 #include "../EventObject/DeliveryPoint.h"
 
 void ObjectManager::Init()
-{}
+{
+	m_factory["Player"] = [this](Math::Vector3 pos) { return this->CreateObject<Player>(); };
+
+	// イベントのサブスクライブ
+	m_createSub = GLOBALEVENT.subscribe<Events::Else::CreateObjectEvent>([this](const Events::Else::CreateObjectEvent& e) {
+		auto it = m_factory.find(e.m_objectType);
+		if (it != m_factory.end()) {
+			it->second(e.m_pos); // マップに登録された関数を起動
+		}
+		});
+}
 
 void ObjectManager::PreUpdate()
 {
