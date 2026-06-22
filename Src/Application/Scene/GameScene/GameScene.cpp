@@ -67,6 +67,13 @@ void GameScene::Event(float dt)
 	{
 		UpdateGameToResult(dt);
 	}
+
+	if (InputManager::Instance().IsTriggered('T'))
+	{
+		GLOBALEVENT.publish(Events::Else::GameEnd());
+		GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+	}
+	
 }
 
 void GameScene::UpdateGameToResult(float dt)

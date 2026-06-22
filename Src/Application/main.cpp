@@ -235,6 +235,8 @@ bool Application::Init(int w, int h)
 	KdFontManager::Instance().AddFont(4, "Josefin Sans Thin", 64);
 	KdFontManager::Instance().AddFontResource("Asset/Data/Fonts/zerotime - eye - fs.otf");
 	KdFontManager::Instance().AddFont(5, "zerotime eYe/FS", 64);
+	KdFontManager::Instance().AddFont(6, "zerotime eYe/FS", 128);
+	KdFontManager::Instance().AddFont(7, "zerotime eYe/FS", 48);
 	
 	
 	//===================================================================

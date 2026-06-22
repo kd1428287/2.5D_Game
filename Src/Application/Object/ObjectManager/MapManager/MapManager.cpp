@@ -3,6 +3,7 @@
 #include "../../Ground/Ground.h"
 #include "../../Building/Building.h"
 #include "../../EventObject/DeliveryPoint.h"
+#include "../../../System/Reader/Reader.h"
 
 // -------------------------------------------------------
 // 初期化
@@ -101,7 +102,8 @@ std::vector<int> MapManager::GenarateMap(ObjectManager& objManager)
 {
 	// ── フェーズ 1〜3: タイプ分け確定 ───────────────────
 	GenerateRandomWalk();
-	PlaceEventPoints(objManager, 3, 1);
+	//PlaceEventPoints(objManager, 3, 1);
+	PlaceEventPoints(objManager, 1, 1);
 	ClassifyTiles();   // ★ここ以降 mapType は読み取り専用として扱う
 
 	std::random_device rd;
@@ -357,6 +359,8 @@ void MapManager::PlaceEventPoints(ObjectManager& /*objManager*/, int zoneDiv, in
 			}
 		}
 	}
+
+	Reader::Instance().WriteScore({ 0,0,(float)m_eventPoints.size() });
 }
 
 // -------------------------------------------------------

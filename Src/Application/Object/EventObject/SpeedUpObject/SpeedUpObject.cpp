@@ -32,7 +32,6 @@ void SpeedUpObject::PostUpdate()
 	KdCollider::SphereInfo sphere(KdCollider::TypeEvent, GetPos(), m_radius);
 	if (m_isDelivered)return;
 	bool isHit = false;
-	//m_pDebugWire->AddDebugSphere(sphere.m_sphere.Center, sphere.m_sphere.Radius, { 1.0f, 0.0f, 0.0f, 1.0f });
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
 		if (obj->Intersects(sphere, nullptr))

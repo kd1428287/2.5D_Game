@@ -11,6 +11,13 @@ void TimeManager::Init()
 				m_isCounting = true;
 			}
 		);
+
+	m_endSub = GLOBALEVENT.subscribe<Events::Else::GameEnd>
+		([this](const Events::Else::GameEnd& e)
+			{
+				m_isCounting = false;
+			}
+		);
 }
 
 void TimeManager::Update(float dt)

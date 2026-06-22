@@ -49,6 +49,30 @@ void Player::Init()
 				m_isDeliveryAnime = true;
 				m_deliveryAnimeTime = 0.f;
 				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
+
+				Math::Vector3 score = Reader::Instance().ReadScore();
+				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
+				{
+					score = { (float)m_deliveryScore, (float)m_destroyScore,score.z };
+					Reader::Instance().WriteScore(score);
+					GLOBALEVENT.publish(Events::Else::GameEnd());
+					GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+				}
+			})
+	);
+
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Player::DeliveryPointDeleted>([this](const Events::Player::DeliveryPointDeleted& e)
+			{
+				m_deliveryDestroy++;
+				Math::Vector3 score = Reader::Instance().ReadScore();
+				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
+				{
+					score = { (float)m_deliveryScore, (float)m_destroyScore,score.z };
+					Reader::Instance().WriteScore(score);
+					GLOBALEVENT.publish(Events::Else::GameEnd());
+					GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+				}
 			})
 	);
 
@@ -71,7 +95,9 @@ void Player::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Else::GameEnd>([this](const Events::Else::GameEnd& e)
 			{
-				Reader::Instance().WriteScore({(float)m_deliveryScore,(float)m_destroyScore});
+				Math::Vector3 score = Reader::Instance().ReadScore();
+				score = { (float)m_deliveryScore, (float)m_destroyScore,score.z };
+				Reader::Instance().WriteScore(score);
 			})
 	);
 

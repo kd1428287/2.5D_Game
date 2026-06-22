@@ -10,8 +10,9 @@ public:
 	void Update(float dt);
 private:
 	float m_time = 0.f;
-	static const int GAME_LIMIT = 3;
+	static const int GAME_LIMIT = 180;
 
 	bool m_isCounting = false;
 	ScopedSubscriber m_startSub;
+	ScopedSubscriber m_endSub;
 };

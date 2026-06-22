@@ -90,5 +90,6 @@ private:
 	SpeedLevel m_level = SpeedLevel::Idle;	// 現在のスピードレベル
 
 	int m_deliveryScore = 0;			// 配達スコア
+	int m_deliveryDestroy = 0;			// 配達破壊数
 	int m_destroyScore = 0;				// 破壊スコア
 };
