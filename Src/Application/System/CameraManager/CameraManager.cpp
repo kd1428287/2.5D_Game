@@ -73,7 +73,7 @@ void CameraManager::Init()
 
 	m_toGameSub = GLOBALEVENT.subscribe<Events::Else::TitleToGameBegin>([this](const Events::Else::TitleToGameBegin& e)
 		{
-			SetUp(CameraState::TitletoGame);
+			SetUp(CameraState::TitleToGame);
 		});
 }
 
@@ -92,7 +92,7 @@ void CameraManager::SetUp(CameraState state)
 		KdShaderManager::Instance().WorkAmbientController().SetAmbientLight(Math::Vector4(1.f, 1.f, 1.f, m_ambientLight));
 		return;
 	}
-	case CameraState::TitletoGame:
+	case CameraState::TitleToGame:
 		m_transitionProgress = 0.0f;
 		m_startDis = m_camDis;
 		m_startAng = m_camAng;
@@ -123,7 +123,7 @@ void CameraManager::Update(float dt)
 	case CameraState::Title:
 		UpdateTitle(dt);
 		break;
-	case CameraState::TitletoGame:
+	case CameraState::TitleToGame:
 		UpdateTitletoGame(dt);
 		break;
 	case CameraState::Game:
