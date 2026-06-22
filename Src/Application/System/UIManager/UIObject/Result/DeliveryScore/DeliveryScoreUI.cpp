@@ -1,307 +1,125 @@
 ﻿#include "DeliveryScoreUI.h"
 #include "../../../../Reader/Reader.h"
-#include <cstdio>
-#include <string>
-#include <cstdlib>
-#include <algorithm>
 
-// ----------------------------------------------------------------
-// ヘルパー
-// ----------------------------------------------------------------
-void DeliveryScoreUI::SetupDigits(int value)
+void DeliveryScoreUI::RebuildMatrix()
 {
-	m_digitCount = 0;
-	int calc = value;
-	do { m_digitCount++; calc /= 10; } while (calc > 0);
+	Math::Matrix mat =
+		Math::Matrix::CreateScale(m_animScale) *
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_dir + m_animExtraDir)) *
+		Math::Matrix::CreateTranslation(m_pos + m_animOffset);
 
-	int tmp = value;
-	for (int i = m_digitCount - 1; i >= 0; --i)
-	{
-		m_digits[i] = tmp % 10;
-		tmp /= 10;
-	}
+	m_mWorld = mat;
 }
 
-// ----------------------------------------------------------------
-// Init
-// ----------------------------------------------------------------
 void DeliveryScoreUI::Init()
 {
-	m_score = static_cast<int>(Reader::Instance().ReadScore().x);
-	SetupDigits(m_score);
+	m_number = std::make_shared<Number>(m_pos, m_score, m_dir);
+	m_number->Init();
 
-	
+	m_resPrbSub =
+		GLOBALEVENT.subscribe<Events::Else::ResultPlayerProduction>([this](const Events::Else::ResultPlayerProduction& e)
+			{
+				switch (e.m_state)
+				{
+				case Events::Else::ResultPlayerProduction::State::Delivery:
+					// 演出1 : カクっと下げて数字を変え、戻ってくる
+					m_pendingScore = Reader::Instance().ReadScoreForPrd();
+					m_dropState = DropState::DroppingDown;
+					m_dropTimer = 0.f;
+					break;
 
-	m_fixedFromRight = 0;
-	m_digitTimer = 0.f;
-	m_rollTimer = 0.f;
-	m_phaseWait = 0.f;
-	m_bonusTimer = 0.f;
-	m_bonusScale = 0.f;
-	m_bonusAlpha = 0.f;
-	for (int i = 0; i < MAX_DIGITS; ++i)
-		m_currentRand[i] = 0;
+				case Events::Else::ResultPlayerProduction::State::Completed:
+					// 演出2 : くるっと回って一瞬大きくなる
+					m_spinState = SpinState::Spinning;
+					m_spinTimer = 0.f;
+					break;
 
-	m_phase = RollPhase::Waiting;
-
-	m_pos = { -400,0,0 };
-	m_scorePos = { 300,0,0 };
-
-	m_rollSub = GLOBALEVENT.subscribe<Events::Else::DeliveryScoreRollBegin>(
-		[this](const Events::Else::DeliveryScoreRollBegin&)
-		{
-			m_phase = RollPhase::FirstRoll;
-			for (int i = 0; i < MAX_DIGITS; ++i)
-				m_currentRand[i] = rand() % 10;
-		}
-	);
+				default:
+					break;
+				}
+			});
 }
 
-// ----------------------------------------------------------------
-// Update
-// ----------------------------------------------------------------
 void DeliveryScoreUI::Update(float dt)
 {
-	switch (m_phase)
+	// ---- 演出1 : ドロップ ----
+	switch (m_dropState)
 	{
-	case RollPhase::Waiting:
-		break;
-
-		// --------------------------------------------------
-	case RollPhase::FirstRoll:
+	case DropState::DroppingDown:
 	{
-		m_rollTimer += dt;
-		if (m_rollTimer >= m_rollInterval)
-		{
-			m_rollTimer -= m_rollInterval;
-			for (int i = 0; i < MAX_DIGITS; ++i)
-				if ((MAX_DIGITS - 1 - i) >= m_fixedFromRight)
-					m_currentRand[i] = rand() % 10;
-		}
+		m_dropTimer += dt;
+		float t = std::min(m_dropTimer / DROP_DURATION, 1.f);
+		// イーズイン : 加速しながら落ちる
+		m_animOffset.y = -DROP_AMOUNT * (t * t);
 
-		m_digitTimer += dt;
-		if (m_digitTimer >= m_digitDelay)
+		if (t >= 1.f)
 		{
-			m_digitTimer -= m_digitDelay;
-			m_fixedFromRight++;
-			if (m_fixedFromRight >= MAX_DIGITS)
-			{
-				m_fixedFromRight = MAX_DIGITS;
-				m_phaseWait = 0.f;
-				m_phase = RollPhase::WaitBetween;
-			}
+			m_number->SetNumber(m_pendingScore);
+			m_score = m_pendingScore;
+			m_dropState = DropState::WaitBottom;
+			m_dropTimer = 0.f;
 		}
 		break;
 	}
-
-	// --------------------------------------------------
-	case RollPhase::WaitBetween:
+	case DropState::WaitBottom:
 	{
-		m_phaseWait += dt;
-		if (m_phaseWait >= m_phaseWaitMax)
+		m_dropTimer += dt;
+		if (m_dropTimer >= DROP_HOLD)
 		{
-			m_bonusTimer = 0.f;
-			m_bonusScale = 0.f;
-			m_bonusAlpha = 0.f;
-			m_phase = RollPhase::ShowTimeBonus;
+			m_dropState = DropState::RisingUp;
+			m_dropTimer = 0.f;
 		}
 		break;
 	}
-
-	// --------------------------------------------------
-	case RollPhase::ShowTimeBonus:
+	case DropState::RisingUp:
 	{
-		m_bonusTimer += dt;
+		m_dropTimer += dt;
+		float t = std::min(m_dropTimer / RISE_DURATION, 1.f);
+		// イーズアウト : 減速しながら戻る
+		float inv = 1.f - t;
+		m_animOffset.y = -DROP_AMOUNT * (inv * inv);
 
-		const float scaleUpEnd = 0.4f;
-		const float holdEnd = 1.4f;
-		const float fadeEnd = m_bonusDuration; // 1.8f
-
-		if (m_bonusTimer < scaleUpEnd)
+		if (t >= 1.f)
 		{
-			// スケールアップ： 0→1
-			float t = m_bonusTimer / scaleUpEnd;
-			m_bonusScale = t;
-			m_bonusAlpha = t;
-		}
-		else if (m_bonusTimer < holdEnd)
-		{
-			// 静止
-			m_bonusScale = 1.f;
-			m_bonusAlpha = 1.f;
-		}
-		else if (m_bonusTimer < fadeEnd)
-		{
-			// フェードアウト
-			float t = 1.f - (m_bonusTimer - holdEnd) / (fadeEnd - holdEnd);
-			m_bonusScale = 1.f + (1.f - t) * 0.3f; // 少し膨張させながら消す
-			m_bonusAlpha = t;
-		}
-		else
-		{
-			// 演出終了 → time取得・最終スコア計算
-			m_bonusAlpha = 0.f;
-			float time = 1.f + (180.f - Reader::Instance().ReadTime()) * 0.1f;
-			m_finalScore = static_cast<int>(m_score * time);
-			SetupDigits(m_finalScore);
-
-			m_phaseWait = 0.f;
-			m_phase = RollPhase::WaitBetween2;
+			m_animOffset.y = 0.f;
+			m_dropState = DropState::Idle;
 		}
 		break;
 	}
+	default:
+		break;
+	}
 
-	// --------------------------------------------------
-	case RollPhase::WaitBetween2:
+	// ---- 演出2 : スピン ----
+	if (m_spinState == SpinState::Spinning)
 	{
-		m_phaseWait += dt;
-		if (m_phaseWait >= m_phaseWaitMax)
+		m_spinTimer += dt;
+		float t = std::min(m_spinTimer / SPIN_DURATION, 1.f);
+
+		// Y軸を 0→360° 回す
+		m_animExtraDir = 360.f * t;
+
+		// スケール : sin カーブで 1 → PEAK → 1 と変化
+		m_animScale = 1.f + (SPIN_PEAK_SCALE - 1.f) * std::sin(DirectX::XM_PI * t);
+
+		if (t >= 1.f)
 		{
-			m_fixedFromRight = 0;
-			m_digitTimer = 0.f;
-			m_rollTimer = 0.f;
-			for (int i = 0; i < MAX_DIGITS; ++i)
-				m_currentRand[i] = rand() % 10;
-			m_phase = RollPhase::SecondRoll;
+			m_animExtraDir = 0.f;
+			m_animScale = 1.f;
+			m_spinState = SpinState::Idle;
 		}
-		break;
 	}
 
-	// --------------------------------------------------
-	case RollPhase::SecondRoll:
-	{
-		m_rollTimer += dt;
-		if (m_rollTimer >= m_rollInterval)
-		{
-			m_rollTimer -= m_rollInterval;
-			for (int i = 0; i < MAX_DIGITS; ++i)
-				if ((MAX_DIGITS - 1 - i) >= m_fixedFromRight)
-					m_currentRand[i] = rand() % 10;
-		}
-
-		m_digitTimer += dt;
-		if (m_digitTimer >= m_digitDelay)
-		{
-			m_digitTimer -= m_digitDelay;
-			m_fixedFromRight++;
-			if (m_fixedFromRight >= MAX_DIGITS)
-			{
-				m_fixedFromRight = MAX_DIGITS;
-				m_phase = RollPhase::Done;
-				GLOBALEVENT.publish(Events::Else::DeliveryScoreRollEnd());
-				GLOBALEVENT.publish(Events::Else::DestroyScoreRollBegin());
-			}
-		}
-		break;
-	}
-
-	case RollPhase::Done:
-		break;
-	}
+	// アニメーション変数を反映して m_number の行列を更新
+	RebuildMatrix();
 }
 
-// ----------------------------------------------------------------
-// DrawSprite
-// ----------------------------------------------------------------
-void DeliveryScoreUI::DrawSprite()
+void DeliveryScoreUI::GenerateDepthMapFromLight()
 {
-	// --- スコア行 ---
-	{
-		char scoreBuf[MAX_DIGITS + 1] = {};
-		for (int i = 0; i < MAX_DIGITS; ++i)
-		{
-			int scoreIndex = i - (MAX_DIGITS - m_digitCount);
-			int fromRight = MAX_DIGITS - 1 - i;
+	m_number->GenerateDepthMapFromLight();
+}
 
-			if (fromRight < m_fixedFromRight)
-				scoreBuf[i] = (scoreIndex < 0) ? '0' : ('0' + m_digits[scoreIndex]);
-			else
-				scoreBuf[i] = '0' + m_currentRand[i];
-		}
-		scoreBuf[MAX_DIGITS] = '\0';
-
-		std::string s = "配達スコア :";
-
-		int outlineSize = 7;
-		auto sprite1 = KdFontManager::Instance().CreateFontTexture(7, s, 1, outlineSize);
-		auto sprite2 = KdFontManager::Instance().CreateFontTexture(6, scoreBuf, 1, outlineSize);
-
-		int totalWidth = 0;
-		{
-			for (auto& charData : sprite1->GetTexList())
-				if (charData->FontTex)
-					totalWidth += charData->FontTex->GetInfo().Width;
-
-			int offsetX = -totalWidth / 2;
-			for (auto& charData : sprite1->GetTexList())
-			{
-				if (!charData->FontTex) continue;
-				if (charData->OutlineTex)
-					KdShaderManager::Instance().m_spriteShader.DrawTex(
-						charData->OutlineTex, m_pos.x + offsetX, m_pos.y);
-				KdShaderManager::Instance().m_spriteShader.DrawTex(
-					charData->FontTex, m_pos.x + offsetX, m_pos.y);
-				offsetX += charData->FontTex->GetInfo().Width;
-			}
-		}
-		{
-			for (auto& charData : sprite2->GetTexList())
-				if (charData->FontTex)
-					totalWidth += charData->FontTex->GetInfo().Width;
-
-			int offsetX = -totalWidth / 2;
-			for (auto& charData : sprite2->GetTexList())
-			{
-				if (!charData->FontTex) continue;
-				if (charData->OutlineTex)
-					KdShaderManager::Instance().m_spriteShader.DrawTex(
-						charData->OutlineTex, m_scorePos.x + offsetX, m_scorePos.y);
-				KdShaderManager::Instance().m_spriteShader.DrawTex(
-					charData->FontTex, m_scorePos.x + offsetX, m_scorePos.y);
-				offsetX += charData->FontTex->GetInfo().Width;
-			}
-		}
-	}
-
-	// --- TimeBonus 演出 ---
-	if (m_phase == RollPhase::ShowTimeBonus && m_bonusAlpha > 0.f)
-	{
-		std::string bonusStr = "Time Bonus!!";
-		int outlineSize = 10;
-		auto sprite = KdFontManager::Instance().CreateFontTexture(5, bonusStr, 1, outlineSize);
-
-		int totalWidth = 0;
-		for (auto& charData : sprite->GetTexList())
-			if (charData->FontTex)
-				totalWidth += charData->FontTex->GetInfo().Width;
-
-		// スケール行列を適用
-		Math::Matrix scaleMat = Math::Matrix::CreateScale(m_bonusScale, m_bonusScale, 1.f);
-		KdShaderManager::Instance().m_spriteShader.SetMatrix(scaleMat);
-
-		Math::Color color = { 1.f, 0.9f, 0.2f, m_bonusAlpha }; // 黄色
-		int offsetX = -static_cast<int>(totalWidth * m_bonusScale) / 2;
-
-		for (auto& charData : sprite->GetTexList())
-		{
-			if (!charData->FontTex) continue;
-			if (charData->OutlineTex)
-				KdShaderManager::Instance().m_spriteShader.DrawTex(
-					charData->OutlineTex,
-					m_scorePos.x + offsetX,
-					m_scorePos.y + 80.f, // スコア行の少し上
-					nullptr,
-					&color);
-			KdShaderManager::Instance().m_spriteShader.DrawTex(
-				charData->FontTex,
-				m_scorePos.x + offsetX,
-				m_scorePos.y + 80.f,
-				nullptr,
-				&color);
-			offsetX += charData->FontTex->GetInfo().Width;
-		}
-
-		// 行列をリセット
-		KdShaderManager::Instance().m_spriteShader.SetMatrix(Math::Matrix::Identity);
-	}
+void DeliveryScoreUI::DrawLit()
+{
+	m_number->DrawLit();
 }

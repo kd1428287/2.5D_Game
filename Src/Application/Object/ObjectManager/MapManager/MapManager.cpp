@@ -4,43 +4,95 @@
 #include "../../Building/Building.h"
 #include "../../EventObject/DeliveryPoint.h"
 #include "../../../System/Reader/Reader.h"
+#include <random>
+#include <algorithm>
+#include <cmath>
 
-// -------------------------------------------------------
-// 初期化
-// -------------------------------------------------------
+// ── ファイル内共通定数 ──────────────────────────────────
+namespace
+{
+	struct DirInfo { int dx, dy; float angle; };
+	constexpr DirInfo kDirections[4] = {
+		{  0, -1,   0.0f },
+		{ -1,  0,  90.0f },
+		{  0,  1, 180.0f },
+		{  1,  0, 270.0f },
+	};
+}
+
 void MapManager::Init() {}
 
-// -------------------------------------------------------
-// 道タイル判定ヘルパー（重複定義を排除）
-//
-// ROAD / START は「プレイヤーが走る道」。
-// EVENT は建物タイルに付与される特殊値なので道扱いしない。
-// -------------------------------------------------------
 bool MapManager::IsRoadTile(int t) const
 {
 	return t == TILE_ROAD || t == TILE_START;
 }
 
-// -------------------------------------------------------
-// タイプ分け確定フェーズ
-//
-// 呼び出しタイミング: GenerateRandomWalk() の直後。
-//                     PlaceEventPoints() より前に実行すること。
-//
-// 変換ルール:
-//   空き地タイル（>= 1）で、上下左右 4 方向がすべて非正数の場合
-//   → TILE_BUILDING（孤立した空き地を建物で埋める）
-//
-// ※ TILE_WALL(-9) および既確定の建物タイルは変換対象外。
-// -------------------------------------------------------
+// ── 道の接続・形状計算ヘルパー（共通化） ─────────────────────
+MapManager::RoadConnect MapManager::GetRoadConnect(int i, int j, const int* mapData, int width, int height) const
+{
+	auto isRoad = [&](int ni, int nj) -> bool
+		{
+			if (ni < 0 || ni >= width || nj < 0 || nj >= height) return false;
+			return IsRoadTile(mapData[nj * width + ni]);
+		};
+	return {
+		isRoad(i + 1, j),
+		isRoad(i - 1, j),
+		isRoad(i, j + 1),
+		isRoad(i, j - 1),
+	};
+}
+
+std::pair<MapManager::RoadType, float> MapManager::GetRoadTypeAndDir(const RoadConnect& c) const
+{
+	const int n = c.count();
+	if (n == 4) return { RoadType::Cross, 0.0f };
+	if (n == 3)
+	{
+		if (!c.pz) return { RoadType::Junction,   0.0f };
+		if (!c.mz) return { RoadType::Junction, 180.0f };
+		if (!c.mx) return { RoadType::Junction, 270.0f };
+		if (!c.px) return { RoadType::Junction,  90.0f };
+	}
+	if (n == 2)
+	{
+		if (c.px && c.mx) return { RoadType::Straight,  0.0f };
+		if (c.pz && c.mz) return { RoadType::Straight, 90.0f };
+		if (c.mx && c.mz) return { RoadType::Curve,    0.0f };
+		if (c.px && c.mz) return { RoadType::Curve,  270.0f };
+		if (c.px && c.pz) return { RoadType::Curve,  180.0f };
+		if (c.mx && c.pz) return { RoadType::Curve,   90.0f };
+	}
+	if (n == 1)
+	{
+		if (c.pz) return { RoadType::End, 180.0f };
+		if (c.mz) return { RoadType::End,   0.0f };
+		if (c.mx) return { RoadType::End,  90.0f };
+		if (c.px) return { RoadType::End, 270.0f };
+	}
+	return { RoadType::None, 0.0f };
+}
+
+int MapManager::GetRoadVariant(RoadType type) const
+{
+	switch (type)
+	{
+	case RoadType::Straight:  return 1;
+	case RoadType::Curve:     return 2;
+	case RoadType::Junction:  return 3;
+	case RoadType::Cross:     return 4;
+	case RoadType::End:       return 5;
+	default:                  return 0;
+	}
+}
+
+// ── タイル自動分類 ──────────────────────────────────────
 void MapManager::ClassifyTiles()
 {
 	constexpr int NDX[4] = { 0,  0,  1, -1 };
 	constexpr int NDY[4] = { -1,  1,  0,  0 };
 
-	// mapType を走査中に書き換えないよう、変換対象を収集してから一括適用する
 	std::vector<int> toBuilding;
-
 	for (int j = 0; j < MAP_HEIGHT; ++j)
 	{
 		for (int i = 0; i < MAP_WIDTH; ++i)
@@ -48,8 +100,6 @@ void MapManager::ClassifyTiles()
 			const int idx = j * MAP_WIDTH + i;
 			const int tile = mapType[idx];
 
-			// 外壁・道タイル・特殊タイル（負値）は対象外
-			// 空き地候補は tile >= 1 のみ
 			if (tile < 1) continue;
 
 			bool allNonPos = true;
@@ -60,7 +110,6 @@ void MapManager::ClassifyTiles()
 
 				if (ni < 0 || ni >= MAP_WIDTH || nj < 0 || nj >= MAP_HEIGHT)
 				{
-					// マップ外は「非正数ではない」として扱う（境界を建物化しない）
 					allNonPos = false;
 					break;
 				}
@@ -81,21 +130,205 @@ void MapManager::ClassifyTiles()
 		mapType[idx] = TILE_BUILDING;
 }
 
-// -------------------------------------------------------
-// イベント地点をゾーン分割で配置
-//
-// 呼び出しタイミング: ClassifyTiles() の後。
-//                     タイル確定済みの mapType を参照するため、
-//                     必ず ClassifyTiles() より後に呼ぶこと。
-//
-// 候補条件:
-//   ・タイル値が >= 1（空き地：建物になる予定だが未配置）
-//   ・かつ、上下左右 4 方向のいずれかに道タイル（ROAD / START）が隣接している
-//
-// 選ばれたタイルは TILE_EVENT に変更され、GenarateMap() の
-// オブジェクト生成ループで DeliveryPoint 付き建物として生成される。
-// -------------------------------------------------------
-void MapManager::PlaceEventPoints(ObjectManager& /*objManager*/, int zoneDiv, int pointsPerZone)
+// ── メインマップのオブジェクト生成 ────────────────────────
+std::vector<int> MapManager::GenerateMapForMapData(ObjectManager& objManager)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::vector<int> result(mapType.size());
+
+	for (int j = 0; j < MAP_HEIGHT; ++j)
+	{
+		for (int i = 0; i < MAP_WIDTH; ++i)
+		{
+			const int idx = j * MAP_WIDTH + i;
+			const int tile = mapType[idx];
+			const Math::Vector3 pos(
+				(i - MAP_WIDTH / 2.0f) * TILE_W,
+				0.0f,
+				(j - MAP_HEIGHT / 2.0f) * TILE_H
+			);
+
+			// 道タイル
+			if (IsRoadTile(tile))
+			{
+				const auto [roadType, roadDir] = GetRoadTypeAndDir(GetRoadConnect(i, j, mapType.data(), MAP_WIDTH, MAP_HEIGHT));
+				if (roadType == RoadType::None)
+					objManager.CreateObject<Ground>(pos, 0.0f, 0);
+				else
+					objManager.CreateObject<Ground>(pos, roadDir, GetRoadVariant(roadType));
+
+				result[idx] = tile;
+				continue;
+			}
+
+			// 外壁
+			if (tile == TILE_WALL)
+			{
+				objManager.CreateObject<Ground>(pos, 0.0f, 0);
+				objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0), 99, 0, 0.0f);
+				result[idx] = tile;
+				continue;
+			}
+
+			// 建物タイル全般
+			{
+				objManager.CreateObject<Ground>(pos, 0.0f, 0);
+
+				if (tile == TILE_HOME)
+				{
+					objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0), 10, 2, 0.0f);
+					result[idx] = tile;
+					continue;
+				}
+
+				if (tile == TILE_BUILDING)
+				{
+					objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0), 6, 0, 0.0f);
+					result[idx] = tile;
+					continue;
+				}
+
+				std::vector<float> roadDirs;
+				for (const auto& d : kDirections)
+				{
+					const int ni = i + d.dx;
+					const int nj = j + d.dy;
+					if (ni >= 0 && ni < MAP_WIDTH && nj >= 0 && nj < MAP_HEIGHT)
+					{
+						if (IsRoadTile(mapType[nj * MAP_WIDTH + ni]))
+							roadDirs.push_back(d.angle);
+					}
+				}
+
+				float dir = 0.0f;
+				if (!roadDirs.empty())
+				{
+					std::uniform_int_distribution<> dist(0, static_cast<int>(roadDirs.size()) - 1);
+					dir = roadDirs[dist(gen)];
+				}
+
+				auto building = objManager.CreateObject<Building>(
+					pos + Math::Vector3(0, 0.1f, 0),
+					static_cast<int>(KdRandom::GetFloat(3.0f, 6.9f)),
+					1,
+					dir
+				);
+
+				if (tile == TILE_EVENT)
+				{
+					const float rad = dir * (M_PI / 180.0f);
+					const Math::Vector3 frontOffset(-std::sin(rad) * 0.4f, 0.0f, -std::cos(rad) * 0.4f);
+					objManager.CreateObject<DeliveryPoint>(building, frontOffset, 0.4f);
+				}
+
+				result[idx] = tile;
+			}
+		}
+	}
+	return result;
+}
+
+// ── リザルト画面用：決め打ちマップ生成（★大幅改善） ────────────────
+void MapManager::GenerateResultMap(ObjectManager& objManager)
+{
+	// マップサイズ定義
+	constexpr int RESULT_W = 10;
+	constexpr int RESULT_H = 10;
+
+	// 可読性のための定数エイリアス
+	constexpr int G = 1;
+	constexpr int R = TILE_ROAD;
+	constexpr int B = TILE_BUILDING;
+	constexpr int W = TILE_WALL;
+	constexpr int H = 2;
+
+	// リザルト用の決め打ち配置データ (タイル定数を直接使えるので編集が超簡単)
+	const std::vector<int> resultMap =
+	{
+		H, H, H, H, H, H, H, H, H, H,
+		H, H, H, H, H, H, H, H, H, H,
+		H, H, H, H, H, H, H, H, H, H,
+		H, H, H, H, H, H, H, H, H, H,
+		H, H, H, H, H, H, H, H, H, H,
+		H, H, H, H, H, H, H, H, H, H,
+		H, H, H, H, H, H, R, R, R, R,
+		H, H, H, H, H, H, R, G, G, G,
+		H, H, H, H, H, H, R, G, G, G,
+		H, H, H, H, H, H, R, G, G, G,
+	};
+
+	for (int j = 0; j < RESULT_H; ++j)
+	{
+		for (int i = 0; i < RESULT_W; ++i)
+		{
+			const int idx = j * RESULT_W + i;
+			const int tile = resultMap[idx];
+
+			// リザルトマップの中心を基準とした座標計算
+			const Math::Vector3 pos(
+				(i - RESULT_W / 2.0f) * TILE_W,
+				0.0f,
+				(j - RESULT_H / 2.0f) * TILE_H
+			);
+
+	/*		const Math::Vector3 pos(
+				i * TILE_W,
+				0.0f,
+				j * TILE_H
+			);*/
+
+			// ── 1. 道タイルの配置 ─────────────────────────
+			if (IsRoadTile(tile))
+			{
+				const auto [roadType, roadDir] = GetRoadTypeAndDir(GetRoadConnect(i, j, resultMap.data(), RESULT_W, RESULT_H));
+				if (roadType != RoadType::None)
+				{
+					// 適切なパーツと回転で道オブジェクトを上書き生成
+					objManager.CreateObject<Ground>(pos, roadDir, GetRoadVariant(roadType));
+				}
+				continue;
+			}
+
+			// すべてのマスのベースに地面(Ground)を敷く
+			objManager.CreateObject<Ground>(pos, 0.0f, 0);
+
+			// ── 3. 建物タイルの配置（TILE_BUILDING / TILE_HOME / 空き地） ──
+			if (tile == TILE_BUILDING || tile == TILE_HOME || tile >= 2)
+			{
+				// 隣接する道を探して建物の正面の向きを決める
+				std::vector<float> roadDirs;
+				for (const auto& d : kDirections)
+				{
+					const int ni = i + d.dx;
+					const int nj = j + d.dy;
+					if (ni >= 0 && ni < RESULT_W && nj >= 0 && nj < RESULT_H)
+					{
+						if (IsRoadTile(resultMap[nj * RESULT_W + ni]))
+							roadDirs.push_back(d.angle);
+					}
+				}
+
+				// リザルトは固定画面なので、ランダムではなく最初に見つかった道を正面とする
+				float dir = roadDirs.empty() ? 0.0f : roadDirs[0];
+
+				// タイルに応じた建物パラメータの設定
+				int type = 6;
+				int variant = 0;
+				if (tile == 2)
+				{
+					type = 0;
+					variant = 1;
+				}
+
+				objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0), type, variant, dir);
+			}
+		}
+	}
+}
+
+// ── 以下、既存の自動生成アルゴリズム（変更なし） ─────────────────────
+void MapManager::PlaceEventPoints(ObjectManager&, int zoneDiv, int pointsPerZone)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -103,7 +336,6 @@ void MapManager::PlaceEventPoints(ObjectManager& /*objManager*/, int zoneDiv, in
 	constexpr int NDX[4] = { 0,  0,  1, -1 };
 	constexpr int NDY[4] = { -1,  1,  0,  0 };
 
-	// 外壁 1 マスを除いた有効範囲
 	const int validW = MAP_WIDTH - 2;
 	const int validH = MAP_HEIGHT - 2;
 	const int zoneW = validW / zoneDiv;
@@ -118,17 +350,14 @@ void MapManager::PlaceEventPoints(ObjectManager& /*objManager*/, int zoneDiv, in
 			const int xEnd = (zx == zoneDiv - 1) ? MAP_WIDTH - 2 : xStart + zoneW - 1;
 			const int yEnd = (zy == zoneDiv - 1) ? MAP_HEIGHT - 2 : yStart + zoneH - 1;
 
-			// ゾーン内で「道に隣接した空き地タイル（>= 1）」を列挙
-			// ※ TILE_BUILDING(-7) は ClassifyTiles() で孤立確定済みのため除外
 			std::vector<std::pair<int, int>> candidates;
 			for (int y = yStart; y <= yEnd; ++y)
 			{
 				for (int x = xStart; x <= xEnd; ++x)
 				{
 					const int tile = mapType[y * MAP_WIDTH + x];
-					if (tile < 1) continue; // 道・壁・特殊タイルは除外
+					if (tile < 1) continue;
 
-					// 四方いずれかに道タイルがあれば候補とする
 					bool adjacentToRoad = false;
 					for (int d = 0; d < 4; ++d)
 					{
@@ -157,11 +386,7 @@ void MapManager::PlaceEventPoints(ObjectManager& /*objManager*/, int zoneDiv, in
 			for (int k = 0; k < placeCount; ++k)
 			{
 				const auto [x, y] = candidates[k];
-				const Math::Vector3 pos(
-					(x - MAP_WIDTH / 2.0f) * TILE_W,
-					0.1f,
-					(y - MAP_HEIGHT / 2.0f) * TILE_H
-				);
+				const Math::Vector3 pos((x - MAP_WIDTH / 2.0f) * TILE_W, 0.1f, (y - MAP_HEIGHT / 2.0f) * TILE_H);
 				mapType[y * MAP_WIDTH + x] = TILE_EVENT;
 				m_eventPoints.push_back(pos);
 			}
@@ -171,222 +396,15 @@ void MapManager::PlaceEventPoints(ObjectManager& /*objManager*/, int zoneDiv, in
 	Reader::Instance().WriteScore({ 0, 0, static_cast<float>(m_eventPoints.size()) });
 }
 
-// -------------------------------------------------------
-// マップ全体の生成
-//
-// フロー:
-//   1. GenerateRandomWalk()  … 道・空き地の基本配置
-//   2. ClassifyTiles()       … 孤立タイルを TILE_BUILDING に確定
-//   3. PlaceEventPoints()    … 道に隣接した空き地を TILE_EVENT に設定
-//                              （★タイル確定後に行うことで配置品質を保証）
-//   4. タイル配置ループ       … 確定した mapType を元にオブジェクト生成
-// -------------------------------------------------------
 std::vector<int> MapManager::GenerateMap(ObjectManager& objManager)
 {
-	// ── フェーズ 1〜3: タイプ分け確定 ───────────────────────
 	GenerateRandomWalk();
-	ClassifyTiles();                        // ★先にタイルを確定
-	PlaceEventPoints(objManager, 3, 1);    // ★確定後にイベント配置
+	ClassifyTiles();
+	PlaceEventPoints(objManager, 3, 1);
 
-	std::random_device rd;
-	std::mt19937 gen(rd());
-
-	// -------------------------------------------------------
-	// 道パーツの接続フラグ
-	// -------------------------------------------------------
-	struct RoadConnect
-	{
-		bool px, mx, pz, mz; // 接続方向: +X, -X, +Z, -Z
-		int count() const { return px + mx + pz + mz; }
-	};
-
-	auto getRoadConnect = [&](int i, int j) -> RoadConnect
-		{
-			auto isRoad = [&](int ni, int nj) -> bool
-				{
-					if (ni < 0 || ni >= MAP_WIDTH || nj < 0 || nj >= MAP_HEIGHT) return false;
-					return IsRoadTile(mapType[nj * MAP_WIDTH + ni]);
-				};
-			return {
-				isRoad(i + 1, j),
-				isRoad(i - 1, j),
-				isRoad(i, j + 1),
-				isRoad(i, j - 1),
-			};
-		};
-
-	// -------------------------------------------------------
-	// 道パーツ種別
-	// -------------------------------------------------------
-	enum class RoadType { Straight, Curve, Junction, Cross, End, None };
-
-	auto getRoadTypeAndDir = [](const RoadConnect& c) -> std::pair<RoadType, float>
-		{
-			const int n = c.count();
-			if (n == 4) return { RoadType::Cross, 0.0f };
-			if (n == 3)
-			{
-				if (!c.pz) return { RoadType::Junction,   0.0f };
-				if (!c.mz) return { RoadType::Junction, 180.0f };
-				if (!c.mx) return { RoadType::Junction, 270.0f };
-				if (!c.px) return { RoadType::Junction,  90.0f };
-			}
-			if (n == 2)
-			{
-				if (c.px && c.mx) return { RoadType::Straight,  0.0f };
-				if (c.pz && c.mz) return { RoadType::Straight, 90.0f };
-				if (c.mx && c.mz) return { RoadType::Curve,    0.0f };
-				if (c.px && c.mz) return { RoadType::Curve,  270.0f };
-				if (c.px && c.pz) return { RoadType::Curve,  180.0f };
-				if (c.mx && c.pz) return { RoadType::Curve,   90.0f };
-			}
-			if (n == 1)
-			{
-				if (c.pz) return { RoadType::End, 180.0f };
-				if (c.mz) return { RoadType::End,   0.0f };
-				if (c.mx) return { RoadType::End,  90.0f };
-				if (c.px) return { RoadType::End, 270.0f };
-			}
-			return { RoadType::None, 0.0f };
-		};
-
-	auto roadVariantOf = [](RoadType type) -> int
-		{
-			switch (type)
-			{
-			case RoadType::Straight:  return 1;
-			case RoadType::Curve:     return 2;
-			case RoadType::Junction:  return 3;
-			case RoadType::Cross:     return 4;
-			case RoadType::End:       return 5;
-			default:                  return 0;
-			}
-		};
-
-	// -------------------------------------------------------
-	// 建物の向き計算用: 隣接する道の方向リスト
-	// -------------------------------------------------------
-	struct DirInfo { int dx, dy; float angle; };
-	static constexpr DirInfo kDirections[4] = {
-		{  0, -1,   0.0f },
-		{ -1,  0,  90.0f },
-		{  0,  1, 180.0f },
-		{  1,  0, 270.0f },
-	};
-
-	std::vector<int> result(mapType.size());
-
-	// ── フェーズ 4: オブジェクト生成 ────────────────────────
-	for (int i = 0; i < MAP_WIDTH; ++i)
-	{
-		for (int j = 0; j < MAP_HEIGHT; ++j)
-		{
-			const int idx = j * MAP_WIDTH + i;
-			const int tile = mapType[idx];
-			const Math::Vector3 pos(
-				(i - MAP_WIDTH / 2.0f) * TILE_W,
-				0.0f,
-				(j - MAP_HEIGHT / 2.0f) * TILE_H
-			);
-
-			// ── 道タイル ──────────────────────────────────────
-			if (IsRoadTile(tile))
-			{
-				const auto [roadType, roadDir] = getRoadTypeAndDir(getRoadConnect(i, j));
-				if (roadType == RoadType::None)
-					objManager.CreateObject<Ground>(pos, 0.0f, 0);
-				else
-					objManager.CreateObject<Ground>(pos, roadDir, roadVariantOf(roadType));
-
-				result[idx] = tile;
-				continue;
-			}
-
-			// ── 外壁 ──────────────────────────────────────────
-			if (tile == TILE_WALL)
-			{
-				objManager.CreateObject<Ground>(pos, 0.0f, 0);
-				objManager.CreateObject<Building>(pos + Math::Vector3(0, 0.1f, 0), 99, 0, 0.0f);
-				result[idx] = tile;
-				continue;
-			}
-
-			// ── 建物タイル（空き地 >= 1、TILE_BUILDING、TILE_EVENT） ──
-			// Ground を敷いてから建物を生成する
-			{
-				objManager.CreateObject<Ground>(pos, 0.0f, 0);
-
-				if (tile == TILE_HOME)
-				{
-					objManager.CreateObject<Building>(
-						pos + Math::Vector3(0, 0.1f, 0),
-						10, 2, 0.0f
-					);
-					result[idx] = tile;
-					continue;
-				}
-
-				if (tile == TILE_BUILDING)
-				{
-					objManager.CreateObject<Building>(
-						pos + Math::Vector3(0, 0.1f, 0),
-						6, 0, 0.0f
-					);
-					result[idx] = tile;
-					continue;
-				}
-
-				// 隣接する道方向を収集してランダムに正面を決定
-				std::vector<float> roadDirs;
-				for (const auto& d : kDirections)
-				{
-					const int ni = i + d.dx;
-					const int nj = j + d.dy;
-					if (ni >= 0 && ni < MAP_WIDTH && nj >= 0 && nj < MAP_HEIGHT)
-					{
-						if (IsRoadTile(mapType[nj * MAP_WIDTH + ni]))
-							roadDirs.push_back(d.angle);
-					}
-				}
-
-				float dir = 0.0f;
-				if (!roadDirs.empty())
-				{
-					std::uniform_int_distribution<> dist(0, static_cast<int>(roadDirs.size()) - 1);
-					dir = roadDirs[dist(gen)];
-				}
-
-				auto building = objManager.CreateObject<Building>(
-					pos + Math::Vector3(0, 0.1f, 0),
-					static_cast<int>(KdRandom::GetFloat(3.0f, 6.9f)),
-					1,
-					dir
-				);
-
-				// TILE_EVENT のみ DeliveryPoint を正面にオフセットして配置
-				if (tile == TILE_EVENT)
-				{
-					const float rad = dir * (M_PI / 180.0f);
-					const Math::Vector3 frontOffset(
-						-std::sin(rad) * 0.4f,
-						0.0f,
-						-std::cos(rad) * 0.4f
-					);
-					objManager.CreateObject<DeliveryPoint>(building, frontOffset, 0.4f);
-				}
-
-				result[idx] = tile;
-			}
-		}
-	}
-
-	return result;
+	return GenerateMapForMapData(objManager);
 }
 
-// -------------------------------------------------------
-// 2x2 の道ブロック形成チェック
-// （(x,y) を道にすると 2x2 道エリアが生まれるか）
-// -------------------------------------------------------
 bool MapManager::WouldForm2x2(int x, int y)
 {
 	const int corners[4][2] = {
@@ -415,10 +433,6 @@ bool MapManager::WouldForm2x2(int x, int y)
 	return false;
 }
 
-// -------------------------------------------------------
-// 移動可能チェック
-// （壁・2x2 形成・隣接道数の上限を判定）
-// -------------------------------------------------------
 bool MapManager::IsValidMove(int x, int y)
 {
 	if (mapType[y * MAP_WIDTH + x] < 0) return false;
@@ -441,9 +455,6 @@ bool MapManager::IsValidMove(int x, int y)
 	return adjacentRoadCount <= 2;
 }
 
-// -------------------------------------------------------
-// フロンティア展開によるランダムマップ生成
-// -------------------------------------------------------
 void MapManager::GenerateRandomWalk()
 {
 	std::fill(mapType.begin(), mapType.end(), 1);
@@ -498,7 +509,6 @@ void MapManager::GenerateRandomWalk()
 		}
 	}
 
-	// ループ生成（事後的に壁を一部破壊してループを作る）
 	std::uniform_real_distribution<float> prob(0.0f, 1.0f);
 	for (int y = 1; y < MAP_HEIGHT - 1; ++y)
 	{
@@ -506,10 +516,8 @@ void MapManager::GenerateRandomWalk()
 		{
 			if (mapType[y * MAP_WIDTH + x] != 1) continue;
 
-			const bool horizontal = (mapType[y * MAP_WIDTH + (x - 1)] <= 0
-				&& mapType[y * MAP_WIDTH + (x + 1)] <= 0);
-			const bool vertical = (mapType[(y - 1) * MAP_WIDTH + x] <= 0
-				&& mapType[(y + 1) * MAP_WIDTH + x] <= 0);
+			const bool horizontal = (mapType[y * MAP_WIDTH + (x - 1)] <= 0 && mapType[y * MAP_WIDTH + (x + 1)] <= 0);
+			const bool vertical = (mapType[(y - 1) * MAP_WIDTH + x] <= 0 && mapType[(y + 1) * MAP_WIDTH + x] <= 0);
 
 			if ((horizontal || vertical) && prob(gen) < 0.15f && !WouldForm2x2(x, y))
 				mapType[y * MAP_WIDTH + x] = TILE_ROAD;

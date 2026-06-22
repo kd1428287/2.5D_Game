@@ -26,6 +26,7 @@ public:
 	void UpdateTitle(float dt);
 	void UpdateTitletoGame(float dt);
 	void UpdateGame(float dt);
+	void UpdateResult(float dt);
 
 	void DrawSprite();
 
@@ -81,6 +82,7 @@ private:
 	ScopedSubscriber m_speedSub;
 	ScopedSubscriber m_hitSub;
 	ScopedSubscriber m_toGameSub;
+	ScopedSubscriber m_toResultSub;
 
 	CameraState m_state = CameraState::Title;
 };

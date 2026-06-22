@@ -75,6 +75,12 @@ void CameraManager::Init()
 		{
 			SetUp(CameraState::TitleToGame);
 		});
+
+	m_toResultSub = GLOBALEVENT.subscribe<Events::Else::ResultBegin>([this](const Events::Else::ResultBegin& e)
+		{
+			SetUp(CameraState::Result);
+			//SetUp(CameraState::TitleToGame);
+		});
 }
 
 void CameraManager::SetUp(CameraState state)
@@ -111,6 +117,17 @@ void CameraManager::SetUp(CameraState state)
 		m_blurMinRange = 0.f;
 		KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurSamplingNum(8);       // サンプリング数(品質)
 		return;
+	case CameraState::Result:
+		m_camPos = { 1.2f, 0.f, 1.2f };
+		m_camDis = { 0,1.5f,-1.5f };
+		m_camDis = { 0,2.5f,-2.5f };
+		m_camAng = { 45.f,225.f,-45.f };
+
+		//m_camAng = { 0,0,0 };
+
+		m_projection = 60.f;
+		m_targetObj.reset();
+		return;
 	default:
 		return;
 	}
@@ -128,6 +145,9 @@ void CameraManager::Update(float dt)
 		break;
 	case CameraState::Game:
 		UpdateGame(dt);
+		break;
+	case CameraState::Result:
+		UpdateResult(dt);
 		break;
 	default:
 		break;
@@ -289,6 +309,31 @@ void CameraManager::UpdateGame(float dt)
 
 	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(m_blurIntensity);      // 0.0~1.0で強度を直接指定
 	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(m_blurMinRange, m_blurMaxRange);    // ブラーがかかり始める/最大になる範囲
+}
+
+void CameraManager::UpdateResult(float dt)
+{
+	// シェイクの減衰処理
+	Math::Vector3 shakeOffset = Math::Vector3::Zero;
+	if (m_shakeTime > 0.0f)
+	{
+		m_shakeTime -= dt;
+		// ランダムな方向に揺らす
+		shakeOffset.x = KdRandom::GetFloat(-1.f, 1.f) * m_shakeStrength;
+		shakeOffset.y = KdRandom::GetFloat(-1.f, 1.f) * m_shakeStrength;
+
+		// 時間経過とともに弱める
+		m_shakeStrength *= 0.9f;
+	}
+
+	// カメラの姿勢を計算
+	Math::Matrix mat =
+		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_camAng.x)) *
+		Math::Matrix::CreateTranslation(m_camDis + shakeOffset) *
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_camAng.y + m_steeringOffset)) *
+		Math::Matrix::CreateTranslation(m_camPos);
+
+	m_camera->SetCameraMatrix(mat);
 }
 
 void CameraManager::DrawSprite()

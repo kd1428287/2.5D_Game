@@ -1,31 +1,40 @@
-﻿#include "Player.h"
+﻿#include "AutoPlayer.h"
 
-#include "Application/System/InputManager/InputManager.h"
 #include "Application/System/CameraManager/CameraManager.h"
 #include "Application/Scene/SceneManager.h"
 #include "Application/System/Reader/Reader.h"
+
 
 // =============================================================
 // 初期化
 // =============================================================
 
-void Player::Init()
+AutoPlayer::~AutoPlayer()
+{
+	Reader::Instance().WriteScoreForPrd(0);
+}
+
+void AutoPlayer::Init()
 {
 	m_pCollider = std::make_unique<KdCollider>();
 
 	m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/car_van/car_van2.gltf");
 
 	m_speed = 0.0f;
-	m_angle = { 0.0f, 0.0f, 0.0f };
-	m_scale = { 1.0f, 1.0f, 1.0f };
+	if (m_scale == Math::Vector3::Zero) m_scale = { 1.0f, 1.0f, 1.0f };
 	m_level = SpeedLevel::Idle;
 
 	ChangeSpeedLevel(SpeedLevel::Idle);
 	m_acceleration = 5.0f;
 
+	auto score = Reader::Instance().ReadScore();
+	m_deliveryScore = score.x;
+	m_deliveryDestroy = score.y;
+	m_destroyScore = score.z;
+
 	// --- イベント購読 ---
 
-	// 衝突結果
+	// 衝突結果（エフェクトやクラッシュ反応のみ残す）
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
 			{
@@ -36,8 +45,7 @@ void Player::Init()
 				switch (e.type)
 				{
 				case Events::Player::HitResult::HitResultType::Destroyed:
-					m_destroyScore += 1000;
-					return;
+					return; // スコア加算は削除
 
 				case Events::Player::HitResult::HitResultType::Bounced:
 				default:
@@ -61,66 +69,21 @@ void Player::Init()
 			})
 	);
 
-	// 配達完了
+	// 配達完了（演出のアニメーションのみ残す）
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::DeliveryPointCompleted>([this](const Events::Player::DeliveryPointCompleted& e)
 			{
-				m_deliveryScore += 10000;
 				m_isDeliveryAnime = true;
 				m_deliveryAnimeTime = 0.0f;
-				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
-
-				Math::Vector3 score = Reader::Instance().ReadScore();
-				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
-				{
-					score = { (float)m_deliveryScore, (float)m_destroyScore, score.z };
-					Reader::Instance().WriteScore(score);
-					GLOBALEVENT.publish(Events::Else::GameEnd());
-					GLOBALEVENT.publish(Events::Else::GameToResultBegin());
-				}
 			})
 	);
 
-	// 配達地点破壊
-	m_subscriber.push_back(
-		GLOBALEVENT.subscribe<Events::Player::DeliveryPointDeleted>([this](const Events::Player::DeliveryPointDeleted& e)
-			{
-				m_deliveryDestroy++;
-				Math::Vector3 score = Reader::Instance().ReadScore();
-				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
-				{
-					score = { (float)m_deliveryScore, (float)m_destroyScore, score.z };
-					Reader::Instance().WriteScore(score);
-					GLOBALEVENT.publish(Events::Else::GameEnd());
-					GLOBALEVENT.publish(Events::Else::GameToResultBegin());
-				}
-			})
-	);
-
-	// スピードアップアイテム取得
+	// スピードアップアイテム取得（任意で加速）
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::GetSpeedUp>([this](const Events::Player::GetSpeedUp& e)
 			{
 				if (m_level >= SpeedLevel::Speed6) return;
 				ChangeSpeedLevel((SpeedLevel)((int)m_level + 1));
-			})
-	);
-
-	// ゲーム開始
-	m_subscriber.push_back(
-		GLOBALEVENT.subscribe<Events::Else::GameStart>([this](const Events::Else::GameStart& e)
-			{
-				m_isControllable = true;
-			})
-	);
-
-	// ゲーム終了
-	m_subscriber.push_back(
-		GLOBALEVENT.subscribe<Events::Else::GameEnd>([this](const Events::Else::GameEnd& e)
-			{
-				Math::Vector3 score = Reader::Instance().ReadScore();
-				score = { (float)m_deliveryScore, (float)m_destroyScore, score.z };
-				Reader::Instance().WriteScore(score);
 			})
 	);
 
@@ -131,16 +94,17 @@ void Player::Init()
 // 毎フレーム更新
 // =============================================================
 
-void Player::PreUpdate()
+void AutoPlayer::PreUpdate()
 {
 	m_amountMove = Math::Vector3::Zero;
 }
 
-void Player::Update(float dt)
+void AutoPlayer::Update(float dt)
 {
-	if (!m_isControllable && !m_isAutoPilot) return;
+	if (!m_isActive) return;
 
 	UpdateMove(dt);
+	UpdateAction(dt);
 
 	// 配達アニメーション（車体がぷるっと伸縮する）
 	if (m_isDeliveryAnime)
@@ -172,10 +136,12 @@ void Player::Update(float dt)
 		}
 	}
 
+	
+
 	KdAudioManager::Instance().SetListnerMatrix(m_mWorld);
 }
 
-void Player::PostUpdate()
+void AutoPlayer::PostUpdate()
 {
 	Math::Matrix rotMat =
 		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle.y)) *
@@ -205,12 +171,12 @@ void Player::PostUpdate()
 // 描画
 // =============================================================
 
-void Player::GenerateDepthMapFromLight()
+void AutoPlayer::GenerateDepthMapFromLight()
 {
 	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
 }
 
-void Player::DrawLit()
+void AutoPlayer::DrawLit()
 {
 	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
 }
@@ -219,7 +185,7 @@ void Player::DrawLit()
 // スピードレベル変更
 // =============================================================
 
-void Player::ChangeSpeedLevel(SpeedLevel level)
+void AutoPlayer::ChangeSpeedLevel(SpeedLevel level)
 {
 	if (m_level == level) return;
 	m_level = level;
@@ -239,6 +205,7 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 
 	m_speed = std::max(m_speed, m_minSpeed);
 
+	// 必要に応じてイベント通知を残すか削除するか選択可能
 	GLOBALEVENT.publish(Events::Player::ChangeSpeedLevel((int)m_level));
 }
 
@@ -246,10 +213,9 @@ void Player::ChangeSpeedLevel(SpeedLevel level)
 // 自動操縦 API
 // =============================================================
 
-void Player::StartAutoPilot(const std::vector<Math::Vector3>& waypoints)
+void AutoPlayer::StartAutoPilot(const std::vector<Math::Vector3>& waypoints)
 {
-	m_isAutoPilot = true;
-	m_isControllable = false;   // リザルト中は手動操作を無効化
+	m_isActive = true;
 	m_waypoints = waypoints;
 	m_waypointIndex = 0;
 	m_autoSteerInput = 0.0f;
@@ -262,9 +228,9 @@ void Player::StartAutoPilot(const std::vector<Math::Vector3>& waypoints)
 	}
 }
 
-void Player::StopAutoPilot()
+void AutoPlayer::StopAutoPilot()
 {
-	m_isAutoPilot = false;
+	//m_isActive = false;
 	m_autoSteerInput = 0.0f;
 	m_autoAccelInput = 0.0f;
 	m_waypointIndex = 0;
@@ -277,12 +243,11 @@ void Player::StopAutoPilot()
 }
 
 // =============================================================
-// 自動操縦の仮想入力計算（UpdateMove から毎フレーム呼ばれる）
+// 自動操縦の仮想入力計算
 // =============================================================
 
-void Player::UpdateAutoPilotInput(float dt)
+void AutoPlayer::UpdateAutoPilotInput(float dt)
 {
-	// ウェイポイントをすべて消化済み → 停止
 	if (m_waypoints.empty() || m_waypointIndex >= (int)m_waypoints.size())
 	{
 		StopAutoPilot();
@@ -300,6 +265,11 @@ void Player::UpdateAutoPilotInput(float dt)
 		if (m_waypointIndex >= (int)m_waypoints.size())
 		{
 			StopAutoPilot();
+			if (m_deliveryScore > 0)
+			{
+				m_isAction = true;
+				m_actionWait = 0.5f;
+			}
 			return;
 		}
 	}
@@ -320,62 +290,45 @@ void Player::UpdateAutoPilotInput(float dt)
 	}
 }
 
+void AutoPlayer::UpdateAction(float dt)
+{
+	if (!m_isAction)
+	{
+		return;
+	}
+	m_actionWait -= dt;
+	if (m_actionWait <= 0.f)
+	{
+		m_isDeliveryAnime = true;
+		m_deliveryAnimeTime = 0.0f;
+		m_deliveryScore--;
+		Reader::Instance().WriteScoreForPrd(Reader::Instance().ReadScoreForPrd() + 1);
+
+		m_actionWait = 0.5;
+		GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Dispatch));
+		if (m_deliveryScore <= 0)
+		{
+			m_isAction = false;
+			GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Completed));
+		}
+	}
+
+}
+
 // =============================================================
 // 移動処理
 // =============================================================
 
-void Player::UpdateMove(float dt)
+void AutoPlayer::UpdateMove(float dt)
 {
-	// ==========================================
-	// 0. 入力ソースの決定（手動 or 自動操縦）
-	// ==========================================
-	float steerInput = 0.0f;
-	bool  accelPressed = false;
-	bool  brakePressed = false;
+	// 自動操縦の入力を更新
+	UpdateAutoPilotInput(dt);
 
-	if (m_isAutoPilot)
-	{
-		UpdateAutoPilotInput(dt);
-		steerInput = m_autoSteerInput;
-		accelPressed = (m_autoAccelInput > 0.0f);
-		brakePressed = (m_autoAccelInput < 0.0f);
-	}
-	else
-	{
-		if (InputManager::Instance().IsPressed(VK_LEFT))  steerInput = -1.0f;
-		if (InputManager::Instance().IsPressed(VK_RIGHT)) steerInput = 1.0f;
-		accelPressed = InputManager::Instance().IsPressed(VK_UP);
-		brakePressed = InputManager::Instance().IsPressed(VK_DOWN);
-	}
+	bool accelPressed = (m_autoAccelInput > 0.0f);
+	bool brakePressed = (m_autoAccelInput < 0.0f);
 
 	// ==========================================
-	// 1. ステアリングの更新（手動操作のみ）
-	// ==========================================
-	// 自動操縦時は m_angle.y を直接書き換えるためステアリング処理は不要
-	if (!m_isAutoPilot)
-	{
-		if (steerInput != 0.0f)
-		{
-			m_steering += steerInput * m_steerSpeed * dt;
-		}
-		else
-		{
-			if (m_steering > 0.0f)
-			{
-				m_steering -= m_steerSpeed * dt;
-				if (m_steering < 0.0f) m_steering = 0.0f;
-			}
-			else if (m_steering < 0.0f)
-			{
-				m_steering += m_steerSpeed * dt;
-				if (m_steering > 0.0f) m_steering = 0.0f;
-			}
-		}
-		m_steering = std::clamp(m_steering, -m_maxSteerAngle, m_maxSteerAngle);
-	}
-
-	// ==========================================
-	// 2. アクセル / ブレーキ
+	// 1. アクセル / ブレーキ
 	// ==========================================
 	if (m_level != SpeedLevel::Clash)
 	{
@@ -396,29 +349,25 @@ void Player::UpdateMove(float dt)
 
 	m_speed = std::clamp(m_speed, m_minSpeed, m_maxSpeed);
 
-	// 一時的なデバッグ操作（手動時のみ）
-	if (!m_isAutoPilot && InputManager::Instance().IsTriggered(VK_SHIFT))
-	{
-		ChangeSpeedLevel((SpeedLevel)((int)m_level + 1));
-	}
-
 	// ==========================================
-	// 3. 車の向きの更新（バイシクルモデル）
+	// 2. 車の向きの更新（バイシクルモデル）
 	// ==========================================
-	if (std::abs(m_speed) > 0.01f)
+	// 自動操縦側で m_angle.y を直接書き換えている場合 m_steering は 0 のため変化しないが、
+	// 補間式アルゴリズムに変更した時のために計算式は残す
+	if (std::abs(m_speed) > 0.01f && m_steering != 0.0f)
 	{
 		float steerRad = DirectX::XMConvertToRadians(m_steering);
-		float angularVelocity = (m_speed * std::tan(steerRad)) / m_wheelBase;  // ω = V*tan(δ)/L
+		float angularVelocity = (m_speed * std::tan(steerRad)) / m_wheelBase;
 		m_angle.y += DirectX::XMConvertToDegrees(angularVelocity * dt);
 	}
 
 	// ==========================================
-	// 4. 移動ベクトルの計算
+	// 3. 移動ベクトルの計算
 	// ==========================================
 	float pitch_rad = DirectX::XMConvertToRadians(m_angle.x);
 	float yaw_rad = DirectX::XMConvertToRadians(m_angle.y);
 
-	// 水平推進ベクトル（重力を混ぜない）
+	// 水平推進ベクトル
 	Math::Vector3 forwardVec =
 	{
 		std::cos(pitch_rad) * std::sin(yaw_rad),
@@ -428,12 +377,6 @@ void Player::UpdateMove(float dt)
 	forwardVec.Normalize();
 	m_amountMove = forwardVec * m_speed * dt;
 
-	// ジャンプ（手動操作時のみ）
-	if (!m_isAutoPilot && InputManager::Instance().IsTriggered(VK_SPACE))
-	{
-		m_fallVelocity = 5.0f;
-	}
-
 	// 重力加速
 	m_fallVelocity -= GRAVITY_ACCEL * dt;
 	m_fallVelocity = std::max(m_fallVelocity, MAX_FALL_SPEED);
@@ -442,7 +385,7 @@ void Player::UpdateMove(float dt)
 	m_amountMove.y += m_fallDistance;
 
 	// ==========================================
-	// 5. 速度の自然減衰（摩擦・空気抵抗）
+	// 4. 速度の自然減衰（摩擦・空気抵抗）
 	// ==========================================
 	float friction = (m_speed < 0.0f) ? 0.995f : 0.55f;
 	m_speed *= std::exp(-friction * dt);
@@ -458,7 +401,7 @@ void Player::UpdateMove(float dt)
 // 地面との衝突処理
 // =============================================================
 
-void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList)
+void AutoPlayer::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList)
 {
 	KdCollider::RayInfo ray;
 	ray.m_pos = m_pos;
@@ -488,7 +431,6 @@ void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObjec
 
 	if (hit)
 	{
-		// めり込み解消：ぴったり床の高さに合わせる
 		if (m_amountMove.y + m_pos.y < hitPos.y)
 		{
 			m_amountMove.y = hitPos.y - m_pos.y;
@@ -499,19 +441,17 @@ void Player::UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObjec
 }
 
 // =============================================================
-// 壁との衝突処理（スフィアキャスト＋壁滑り）
+// 壁との衝突処理
 // =============================================================
 
-void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList, const Math::Matrix& rotMat)
+void AutoPlayer::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList, const Math::Matrix& rotMat)
 {
 	std::set<std::shared_ptr<KdGameObject>> hitObjectsThisFrame;
 
-	// 水平方向の推進ベクトルだけを壁滑りに使う（重力成分は別管理）
 	Math::Vector3 slidingVelocity = m_amountMove;
 	float savedGravityY = slidingVelocity.y;
 	slidingVelocity.y = 0.0f;
 
-	// 反復めり込み解消（L字コーナーでのスタック防止）
 	for (int iteration = 0; iteration < MAX_COLLISION_ITERATIONS; ++iteration)
 	{
 		KdCollider::SphereInfo spheres[SPHERE_NUM];
@@ -540,7 +480,6 @@ void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>
 
 		if (retSphereList.empty()) break;
 
-		// 法線ごとに最大めり込み量をまとめる
 		struct PushInfo { Math::Vector3 dir; float maxOverlap = 0.0f; };
 		std::vector<PushInfo> distinctPushes;
 
@@ -554,7 +493,7 @@ void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>
 			bool isDuplicate = false;
 			for (auto& push : distinctPushes)
 			{
-				if (push.dir.Dot(dir) > 0.9f)  // 約 25 度以内は同一の壁とみなす
+				if (push.dir.Dot(dir) > 0.9f)
 				{
 					isDuplicate = true;
 					if (ret.m_overlapDistance > push.maxOverlap)
@@ -572,10 +511,8 @@ void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>
 
 		for (const auto& push : distinctPushes)
 		{
-			// A. めり込んでいる分だけ即座に押し出す
 			m_amountMove += push.dir * push.maxOverlap;
 
-			// B. 壁滑り：推進ベクトルを壁の法線平面へ投影する
 			float dotResult = slidingVelocity.Dot(push.dir);
 			if (dotResult < 0.0f)
 			{
@@ -588,7 +525,6 @@ void Player::UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>
 		m_amountMove.y = savedGravityY;
 	}
 
-	// 新規衝突のみイベント通知（壁こすりのスパム防止）
 	for (auto& obj : hitObjectsThisFrame)
 	{
 		if (m_previousHitObjects.find(obj) == m_previousHitObjects.end())

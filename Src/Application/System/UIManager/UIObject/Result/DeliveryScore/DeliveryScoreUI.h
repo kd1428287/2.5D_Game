@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "../../UIObject.h"
+#include "../../../../../Object/Number/Number.h"
 
 class DeliveryScoreUI : public UIObject
 {
@@ -9,49 +10,42 @@ public:
 
 	void Init()override;
 	void Update(float dt)override;
-	void DrawSprite()override;
+	void GenerateDepthMapFromLight()override;
+	void DrawLit()override;
 
 private:
-	enum class RollPhase
-	{
-		Waiting,       // イベント待ち（全桁0表示）
-		FirstRoll,     // 1回目ロール：m_score を右から確定
-		WaitBetween,   // 1回目確定後の短い待機
-		ShowTimeBonus, // "TimeBonus" を拡大→縮小表示
-		WaitBetween2,  // TimeBonus消去後の短い待機
-		SecondRoll,    // 2回目ロール：m_finalScore を全桁一斉→右から確定
-		Done,
-	};
-	RollPhase m_phase = RollPhase::Waiting;
+	// m_pos / m_dir / アニメーション変数から m_number の m_mWorld を再構築する
+	void RebuildMatrix();
 
-	Math::Vector3 m_scorePos;
-	int m_score = 0;
-	int m_finalScore = 0;
-	int m_digitCount = 0;
+	std::shared_ptr<Number> m_number;
 
-	float m_rollTimer = 0.f;
-	float m_rollInterval = 0.05f;
-	float m_digitDelay = 0.6f;
-	float m_digitTimer = 0.f;
-	int   m_fixedFromRight = 0;
+	int   m_score = 0;
+	Math::Vector3 m_pos;		// ベース位置
+	float m_dir = 180.f;		// ベース向き[deg]
 
-	float m_phaseWait = 0.f;
-	float m_phaseWaitMax = 0.4f; // WaitBetween / WaitBetween2 の待機時間(秒)
+	// ---- アニメーション変数 ----
+	Math::Vector3 m_animOffset = {};   // 位置オフセット
+	float         m_animScale = 1.f;  // スケール倍率
+	float         m_animExtraDir = 0.f;  // 追加回転角度[deg]
 
-	// TimeBonus 演出
-	float m_bonusTimer = 0.f;
-	float m_bonusDuration = 1.8f; // 演出全体の長さ(秒)
-	//  0.0〜0.4 : スケールアップ
-	//  0.4〜1.4 : 静止表示
-	//  1.4〜1.8 : フェードアウト
-	float m_bonusScale = 0.f;
-	float m_bonusAlpha = 0.f;
+	ScopedSubscriber m_resPrbSub;
 
-	static constexpr int MAX_DIGITS = 8;
-	int m_digits[MAX_DIGITS] = {};
-	int m_currentRand[MAX_DIGITS] = {};
+	// ---- 演出1 : Delivery (カクっと下げて数字を変え、戻ってくる) ----
+	enum class DropState { Idle, DroppingDown, WaitBottom, RisingUp };
+	DropState m_dropState = DropState::Idle;
+	float     m_dropTimer = 0.f;
+	int       m_pendingScore = 0;	// 最下点で適用するスコア
 
-	ScopedSubscriber m_rollSub;
+	static constexpr float DROP_DURATION = 0.12f;	// 下がりきるまでの時間[s]
+	static constexpr float DROP_HOLD = 0.04f;	// 最下点で静止する時間[s]
+	static constexpr float RISE_DURATION = 0.12f;	// 元の位置に戻るまでの時間[s]
+	static constexpr float DROP_AMOUNT = 0.3f;	// 下げる量(ワールド単位)
 
-	void SetupDigits(int value);
+	// ---- 演出2 : Completed (くるっと回って一瞬大きくなる) ----
+	enum class SpinState { Idle, Spinning };
+	SpinState m_spinState = SpinState::Idle;
+	float     m_spinTimer = 0.f;
+
+	static constexpr float SPIN_DURATION = 0.4f;		// 1回転にかける時間[s]
+	static constexpr float SPIN_PEAK_SCALE = 1.5f;		// ピーク時のスケール倍率
 };

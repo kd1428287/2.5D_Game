@@ -100,6 +100,19 @@ namespace Events
 		struct FadeOutBegin : public Event {};
 		struct FadeOutCompleted : public Event {};
 
+		struct ResultPlayerProduction : public Event 
+		{
+			enum class State
+			{
+				Dispatch,
+				Delivery,
+				Completed,
+			};
+
+			State m_state;
+			ResultPlayerProduction(State state) :m_state(state) {};
+		};
+	
 		struct CreateObjectEvent : public Event
 		{
 			struct ObjectParameter

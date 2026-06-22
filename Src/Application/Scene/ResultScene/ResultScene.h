@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include"../BaseScene/BaseScene.h"
 
+class AutoPlayer;
+
 class ResultScene : public BaseScene
 {
 public:
@@ -18,4 +20,5 @@ private:
 
 	InScene m_state = InScene::Result;
 	float m_cnt = 0.f;
+	std::shared_ptr<AutoPlayer> m_player;
 };

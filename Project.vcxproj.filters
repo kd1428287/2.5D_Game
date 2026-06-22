@@ -199,6 +199,12 @@
     <Filter Include="Src\Application\Object\Effect\Smoke">
       <UniqueIdentifier>{e841050d-3ca7-4c3d-a47c-828a85135293}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Character\AutoPlayer">
+      <UniqueIdentifier>{2fc0b76f-d9ef-45d8-b914-16a92af26629}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Number">
+      <UniqueIdentifier>{90d9888f-e1f0-4d25-8899-a78d790e78cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -480,6 +486,12 @@
     <ClInclude Include="Src\Application\Object\Effect\Smoke\Smoke.h">
       <Filter>Src\Application\Object\Effect\Smoke</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Character\AutoPlayer\AutoPlayer.h">
+      <Filter>Src\Application\Object\Character\AutoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Number\Number.h">
+      <Filter>Src\Application\Object\Number</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -712,6 +724,12 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Effect\Smoke\Smoke.cpp">
       <Filter>Src\Application\Object\Effect\Smoke</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Character\AutoPlayer\AutoPlayer.cpp">
+      <Filter>Src\Application\Object\Character\AutoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Number\Number.cpp">
+      <Filter>Src\Application\Object\Number</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

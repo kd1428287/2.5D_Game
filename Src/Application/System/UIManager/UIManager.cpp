@@ -75,7 +75,7 @@ void UIManager::CreateUI(UIPaturn paturn)
 
 		break;
 	case UIPaturn::Result:
-		ui = std::make_shared<BackUI>();
+		/*ui = std::make_shared<BackUI>();
 		ui->Init();
 		m_UIobjList.push_back(ui);
 		ui = std::make_shared<DeliveryScoreUI>();
@@ -88,6 +88,10 @@ void UIManager::CreateUI(UIPaturn paturn)
 		ui->Init();
 		m_UIobjList.push_back(ui);
 		ui = std::make_shared<ResultTitleUI>();
+		ui->Init();
+		m_UIobjList.push_back(ui);*/
+
+		ui = std::make_shared<DeliveryScoreUI>();
 		ui->Init();
 		m_UIobjList.push_back(ui);
 		break;

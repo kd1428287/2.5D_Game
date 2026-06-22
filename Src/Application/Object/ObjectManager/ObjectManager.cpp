@@ -8,14 +8,15 @@
 #include "../EventObject/DeliveryPoint.h"
 #include "../Effect/Exprosion/Exprosion.h"
 #include "../Effect/Smoke/Smoke.h"
+#include "../Number/Number.h"
 
 void ObjectManager::Init()
 {
 	
 	m_factory["Player"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Player>(param.m_pos); };
 	m_factory["Exprosion"]	= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Exprosion>(param.m_pos); };
-	m_factory["Smoke"] = [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Smoke>(param.m_pos, param.m_scale, param.m_flg, param.m_float1); };
-	m_factory["Player"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Player>(param.m_pos); };
+	m_factory["Smoke"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Smoke>(param.m_pos, param.m_scale, param.m_flg, param.m_float1); };
+	m_factory["Number"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Number>(param.m_pos); };
 	m_factory["Player"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Player>(param.m_pos); };
 
 	m_createSub = GLOBALEVENT.subscribe<Events::Else::CreateObjectEvent>([this](const Events::Else::CreateObjectEvent& e) {
