@@ -28,7 +28,8 @@ void DestroyScoreUI::Init()
 	m_rolling = false;
 	m_finished = false;
 
-	m_pos = { 0.f, -100.f };
+	m_pos = { -400.f, -100.f,0.f };
+	m_scorePos = { 300,-100.f,0 };
 
 	m_rollSub = GLOBALEVENT.subscribe<Events::Else::DestroyScoreRollBegin>(
 		[this](const Events::Else::DestroyScoreRollBegin&)
@@ -89,38 +90,45 @@ void DestroyScoreUI::DrawSprite()
 	}
 	scoreBuf[MAX_DIGITS] = '\0';
 
-	std::string s = "DestroyScore  :     ";
-	s += scoreBuf;
+	std::string s = "破壊スコア :";
 
 	int outlineSize = 7;
-	auto sprite = KdFontManager::Instance().CreateFontTexture(5, s, 1, outlineSize);
+	auto sprite1 = KdFontManager::Instance().CreateFontTexture(7, s, 1, outlineSize);
+	auto sprite2 = KdFontManager::Instance().CreateFontTexture(5, scoreBuf, 1, outlineSize);
 
 	int totalWidth = 0;
-	for (auto& charData : sprite->GetTexList())
 	{
-		if (charData->FontTex)
-			totalWidth += charData->FontTex->GetInfo().Width;
-	}
+		for (auto& charData : sprite1->GetTexList())
+			if (charData->FontTex)
+				totalWidth += charData->FontTex->GetInfo().Width;
 
-	int offsetX = -totalWidth / 2;
-
-	for (auto& charData : sprite->GetTexList())
-	{
-		if (!charData->FontTex) continue;
-
-		if (charData->OutlineTex)
+		int offsetX = -totalWidth / 2;
+		for (auto& charData : sprite1->GetTexList())
 		{
+			if (!charData->FontTex) continue;
+			if (charData->OutlineTex)
+				KdShaderManager::Instance().m_spriteShader.DrawTex(
+					charData->OutlineTex, m_pos.x + offsetX, m_pos.y);
 			KdShaderManager::Instance().m_spriteShader.DrawTex(
-				charData->OutlineTex,
-				m_pos.x + offsetX,
-				m_pos.y);
+				charData->FontTex, m_pos.x + offsetX, m_pos.y);
+			offsetX += charData->FontTex->GetInfo().Width;
 		}
-
-		KdShaderManager::Instance().m_spriteShader.DrawTex(
-			charData->FontTex,
-			m_pos.x + offsetX,
-			m_pos.y);
-
-		offsetX += charData->FontTex->GetInfo().Width;
 	}
-}
+	{
+		for (auto& charData : sprite2->GetTexList())
+			if (charData->FontTex)
+				totalWidth += charData->FontTex->GetInfo().Width;
+
+		int offsetX = -totalWidth / 2;
+		for (auto& charData : sprite2->GetTexList())
+		{
+			if (!charData->FontTex) continue;
+			if (charData->OutlineTex)
+				KdShaderManager::Instance().m_spriteShader.DrawTex(
+					charData->OutlineTex, m_scorePos.x + offsetX, m_scorePos.y);
+			KdShaderManager::Instance().m_spriteShader.DrawTex(
+				charData->FontTex, m_scorePos.x + offsetX, m_scorePos.y);
+			offsetX += charData->FontTex->GetInfo().Width;
+		}
+	}
+};

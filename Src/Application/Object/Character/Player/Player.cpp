@@ -27,18 +27,33 @@ void Player::Init()
 		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
 		{
 			if (e.type == Events::Player::HitResult::HitResultType::Ignored)return;
-			if (e.type == Events::Player::HitResult::HitResultType::Destroyed)
+
+			int level = (int)m_level - 2;
+		
+			switch (e.type)
 			{
+			case Events::Player::HitResult::HitResultType::Destroyed:
 				m_destroyScore += 1000;
 				return;
+			case Events::Player::HitResult::HitResultType::Bounced:
+			default:
+				if (m_level != SpeedLevel::Clash && level > 0)
+				{
+					m_speed *= -0.5f;
+					m_clashCount = (float)level * 0.1f;
+					ChangeSpeedLevel(SpeedLevel::Clash);
+
+					for (int i = 0; i < (level); i++)
+					{
+						GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Smoke", m_pos, 0.1f, false, 5.f));
+					}
+				}
+				else if (level <= 0)
+				{
+					ChangeSpeedLevel(SpeedLevel::Clash);
+				}
+				break;
 			}
-			int level = (int)m_level - 2;
-			if (m_level != SpeedLevel::Clash && level > 0)
-			{
-				m_speed *= -0.5f;
-				m_clashCount = (float)level * 0.1f;
-			}
-			ChangeSpeedLevel(SpeedLevel::Clash);
 		})
 	);
 
@@ -49,6 +64,30 @@ void Player::Init()
 				m_isDeliveryAnime = true;
 				m_deliveryAnimeTime = 0.f;
 				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
+
+				Math::Vector3 score = Reader::Instance().ReadScore();
+				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
+				{
+					score = { (float)m_deliveryScore, (float)m_destroyScore,score.z };
+					Reader::Instance().WriteScore(score);
+					GLOBALEVENT.publish(Events::Else::GameEnd());
+					GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+				}
+			})
+	);
+
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Player::DeliveryPointDeleted>([this](const Events::Player::DeliveryPointDeleted& e)
+			{
+				m_deliveryDestroy++;
+				Math::Vector3 score = Reader::Instance().ReadScore();
+				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
+				{
+					score = { (float)m_deliveryScore, (float)m_destroyScore,score.z };
+					Reader::Instance().WriteScore(score);
+					GLOBALEVENT.publish(Events::Else::GameEnd());
+					GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+				}
 			})
 	);
 
@@ -71,7 +110,9 @@ void Player::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Else::GameEnd>([this](const Events::Else::GameEnd& e)
 			{
-				Reader::Instance().WriteScore({(float)m_deliveryScore,(float)m_destroyScore});
+				Math::Vector3 score = Reader::Instance().ReadScore();
+				score = { (float)m_deliveryScore, (float)m_destroyScore,score.z };
+				Reader::Instance().WriteScore(score);
 			})
 	);
 
@@ -112,6 +153,8 @@ void Player::Update(float dt)
 			m_scale.y = 1.0f - wave * m_deliveryAnimeAmplitude;
 		}
 	}
+
+	
 
 	if (m_level == SpeedLevel::Clash)
 	{
@@ -158,6 +201,11 @@ void Player::PostUpdate()
 		Math::Matrix::CreateScale(m_scale) * 
 		rotMat *
 		Math::Matrix::CreateTranslation(m_pos);
+
+	if (m_level > SpeedLevel::Speed3)
+	{
+		//GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Smoke", m_pos, 0.1f, true, 10.f));
+	}
 }
 
 void Player::GenerateDepthMapFromLight()

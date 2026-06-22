@@ -95,10 +95,26 @@ namespace Events
 		struct DestroyScoreRollEnd :public Event {};
 		struct DestroyScoreRollBegin :public Event {};
 
-		struct CreateObjectEvent {
+		struct FadeInBegin : public Event {};
+		struct FadeInCompleted : public Event {};
+		struct FadeOutBegin : public Event {};
+		struct FadeOutCompleted : public Event {};
+
+		struct CreateObjectEvent : public Event
+		{
+			struct ObjectParameter
+			{
+				Math::Vector3 m_pos;
+				float m_scale;
+				bool m_flg;
+				float m_float1;
+			};
+
 			std::string m_objectType; // "Player", "Enemy" など
-			Math::Vector3 m_pos;
-			CreateObjectEvent(const std::string& type, Math::Vector3 pos) :m_objectType(type), m_pos(pos) {};
+			ObjectParameter m_param;
+			CreateObjectEvent(const std::string& type, ObjectParameter param) :m_objectType(type), m_param(param) {};
+			CreateObjectEvent(const std::string& type, Math::Vector3 pos, float scale = 1.f, bool flg = false, float float1 = 1.f)
+				:m_objectType(type), m_param({ pos,scale,flg,float1 }) {};
 		};
 
 		struct CreateParticle : public Event

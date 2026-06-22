@@ -49,7 +49,7 @@ public:
 private:
 	std::vector<std::shared_ptr<KdGameObject>> m_objList;
 	std::vector<std::shared_ptr<KdGameObject>> m_nextObjList;
-	std::unordered_map<std::string, std::function<std::shared_ptr<KdGameObject>(Math::Vector3)>> m_factory;
+	std::unordered_map<std::string, std::function<std::shared_ptr<KdGameObject>(Events::Else::CreateObjectEvent::ObjectParameter)>> m_factory;
 
 	ScopedSubscriber m_createSub;
 };

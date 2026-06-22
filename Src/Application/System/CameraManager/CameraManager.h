@@ -5,8 +5,11 @@ class Player;
 enum class CameraState
 {
 	Title,
-	TitletoGame,
-	Game
+	TitleToGame,
+	Game,
+	GameToResult,
+	Result,
+	ResultToTitle
 };
 
 class CameraManager : public std::enable_shared_from_this<CameraManager>

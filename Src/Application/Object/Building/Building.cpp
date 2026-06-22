@@ -145,6 +145,8 @@ void Building::SetDir(float dir)
 void Building::Break(KdCollider::CollisionResult result)
 {
 	if (m_state != BuildingState::Unbroken)return;
+
+	GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Exprosion", GetPos() + Math::Vector3(0,0.1f,0)));
 	// 状態遷移
 	m_state = BuildingState::Broken;
 
@@ -244,6 +246,7 @@ void Building::SetModel(BuildingType type)
 		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/house_country.gltf");
 		break;
 	case BuildingType::House:
+		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/collection_point.gltf");
 		break;
 	default:
 		break;

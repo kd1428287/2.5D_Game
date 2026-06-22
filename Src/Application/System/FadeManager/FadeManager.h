@@ -53,11 +53,9 @@ private:
 	int m_width = 0;   // 修正: int に 0.f は型不一致
 	int m_height = 0;
 
-	ScopedSubscriber m_toResultSub = {};
-	ScopedSubscriber m_ResultSub = {};
-	ScopedSubscriber m_toTitleSub = {};
-	ScopedSubscriber m_TitleSub = {};
-
+	ScopedSubscriber m_FadeInSub = {};
+	ScopedSubscriber m_FadeOutSub = {};
+	
 private:
 	FadeManager() = default;
 	~FadeManager() = default;

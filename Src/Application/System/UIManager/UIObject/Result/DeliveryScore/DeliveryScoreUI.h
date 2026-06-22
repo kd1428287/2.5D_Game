@@ -24,6 +24,7 @@ private:
 	};
 	RollPhase m_phase = RollPhase::Waiting;
 
+	Math::Vector3 m_scorePos;
 	int m_score = 0;
 	int m_finalScore = 0;
 	int m_digitCount = 0;

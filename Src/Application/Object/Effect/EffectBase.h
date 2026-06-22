@@ -35,6 +35,8 @@ protected:
 	float m_anime = 0.f;
 	EffectAnimeParam m_animeParam = {};
 
+	float m_lifeTime = 0.f;
+
 	Math::Vector3 m_pos;
 	float m_scale = 0.f;
 	bool m_loopFlg = false;

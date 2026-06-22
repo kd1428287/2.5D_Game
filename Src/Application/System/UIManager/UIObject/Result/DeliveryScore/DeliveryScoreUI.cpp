@@ -30,6 +30,8 @@ void DeliveryScoreUI::Init()
 	m_score = static_cast<int>(Reader::Instance().ReadScore().x);
 	SetupDigits(m_score);
 
+	
+
 	m_fixedFromRight = 0;
 	m_digitTimer = 0.f;
 	m_rollTimer = 0.f;
@@ -41,7 +43,9 @@ void DeliveryScoreUI::Init()
 		m_currentRand[i] = 0;
 
 	m_phase = RollPhase::Waiting;
-	m_pos = { 0.f, 0.f };
+
+	m_pos = { -400,0,0 };
+	m_scorePos = { 300,0,0 };
 
 	m_rollSub = GLOBALEVENT.subscribe<Events::Else::DeliveryScoreRollBegin>(
 		[this](const Events::Else::DeliveryScoreRollBegin&)
@@ -216,27 +220,46 @@ void DeliveryScoreUI::DrawSprite()
 		}
 		scoreBuf[MAX_DIGITS] = '\0';
 
-		std::string s = "DeliveryScore :     ";
-		s += scoreBuf;
+		std::string s = "配達スコア :";
 
 		int outlineSize = 7;
-		auto sprite = KdFontManager::Instance().CreateFontTexture(5, s, 1, outlineSize);
+		auto sprite1 = KdFontManager::Instance().CreateFontTexture(7, s, 1, outlineSize);
+		auto sprite2 = KdFontManager::Instance().CreateFontTexture(6, scoreBuf, 1, outlineSize);
 
 		int totalWidth = 0;
-		for (auto& charData : sprite->GetTexList())
-			if (charData->FontTex)
-				totalWidth += charData->FontTex->GetInfo().Width;
-
-		int offsetX = -totalWidth / 2;
-		for (auto& charData : sprite->GetTexList())
 		{
-			if (!charData->FontTex) continue;
-			if (charData->OutlineTex)
+			for (auto& charData : sprite1->GetTexList())
+				if (charData->FontTex)
+					totalWidth += charData->FontTex->GetInfo().Width;
+
+			int offsetX = -totalWidth / 2;
+			for (auto& charData : sprite1->GetTexList())
+			{
+				if (!charData->FontTex) continue;
+				if (charData->OutlineTex)
+					KdShaderManager::Instance().m_spriteShader.DrawTex(
+						charData->OutlineTex, m_pos.x + offsetX, m_pos.y);
 				KdShaderManager::Instance().m_spriteShader.DrawTex(
-					charData->OutlineTex, m_pos.x + offsetX, m_pos.y);
-			KdShaderManager::Instance().m_spriteShader.DrawTex(
-				charData->FontTex, m_pos.x + offsetX, m_pos.y);
-			offsetX += charData->FontTex->GetInfo().Width;
+					charData->FontTex, m_pos.x + offsetX, m_pos.y);
+				offsetX += charData->FontTex->GetInfo().Width;
+			}
+		}
+		{
+			for (auto& charData : sprite2->GetTexList())
+				if (charData->FontTex)
+					totalWidth += charData->FontTex->GetInfo().Width;
+
+			int offsetX = -totalWidth / 2;
+			for (auto& charData : sprite2->GetTexList())
+			{
+				if (!charData->FontTex) continue;
+				if (charData->OutlineTex)
+					KdShaderManager::Instance().m_spriteShader.DrawTex(
+						charData->OutlineTex, m_scorePos.x + offsetX, m_scorePos.y);
+				KdShaderManager::Instance().m_spriteShader.DrawTex(
+					charData->FontTex, m_scorePos.x + offsetX, m_scorePos.y);
+				offsetX += charData->FontTex->GetInfo().Width;
+			}
 		}
 	}
 
@@ -265,14 +288,14 @@ void DeliveryScoreUI::DrawSprite()
 			if (charData->OutlineTex)
 				KdShaderManager::Instance().m_spriteShader.DrawTex(
 					charData->OutlineTex,
-					m_pos.x + offsetX,
-					m_pos.y + 80.f, // スコア行の少し上
+					m_scorePos.x + offsetX,
+					m_scorePos.y + 80.f, // スコア行の少し上
 					nullptr,
 					&color);
 			KdShaderManager::Instance().m_spriteShader.DrawTex(
 				charData->FontTex,
-				m_pos.x + offsetX,
-				m_pos.y + 80.f,
+				m_scorePos.x + offsetX,
+				m_scorePos.y + 80.f,
 				nullptr,
 				&color);
 			offsetX += charData->FontTex->GetInfo().Width;
