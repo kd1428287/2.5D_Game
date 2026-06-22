@@ -10,7 +10,7 @@ void TimeUI::Init()
 void TimeUI::Update(float dt)
 {
 	float elapsed = Reader::Instance().ReadTime();
-	m_time = 180.0f - elapsed;
+	m_time = 90.0f - elapsed;
 	if (m_time < 0.0f) m_time = 0.0f;
 }
 

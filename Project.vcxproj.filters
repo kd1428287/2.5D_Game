@@ -196,6 +196,9 @@
     <Filter Include="Src\Application\System\UIManager\UI\Result\ResultTItle">
       <UniqueIdentifier>{1d70c5a2-315c-4f43-8402-29032e6afaa9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\Object\Effect\Smoke">
+      <UniqueIdentifier>{e841050d-3ca7-4c3d-a47c-828a85135293}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -474,6 +477,9 @@
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\ResultTitle\ResultTitle.h">
       <Filter>Src\Application\System\UIManager\UI\Result\ResultTItle</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\Object\Effect\Smoke\Smoke.h">
+      <Filter>Src\Application\Object\Effect\Smoke</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -703,6 +709,9 @@
     </ClCompile>
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\ResultText\ResultTextUI.cpp">
       <Filter>Src\Application\System\UIManager\UI\Result\ResultText</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Effect\Smoke\Smoke.cpp">
+      <Filter>Src\Application\Object\Effect\Smoke</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

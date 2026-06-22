@@ -14,32 +14,45 @@ void FadeManager::Init(int w, int h)
 	m_width = w;
 	m_height = h;
 
-	// ゲーム → リザルト: 画面を暗転（FadeIn）
-	m_toResultSub = GLOBALEVENT.subscribe<Events::Else::GameToResultBegin>(
-		[this](const Events::Else::GameToResultBegin&)
-		{
-			StartFadeIn();
-		});
+	//// ゲーム → リザルト: 画面を暗転
+	//m_toResultSub = GLOBALEVENT.subscribe<Events::Else::GameToResultBegin>(
+	//	[this](const Events::Else::GameToResultBegin&)
+	//	{
+	//		StartFadeOut();
+	//	});
 
-	// リザルト開始: 画面を明転（FadeOut）
-	m_ResultSub = GLOBALEVENT.subscribe<Events::Else::ResultBegin>(
-		[this](const Events::Else::ResultBegin&)
+	//// リザルト開始: 画面を明転
+	//m_ResultSub = GLOBALEVENT.subscribe<Events::Else::ResultBegin>(
+	//	[this](const Events::Else::ResultBegin&)
+	//	{
+	//		StartFadeIn();
+	//	});
+
+	//// リザルト → タイトル: 画面を暗転
+	//m_toTitleSub = GLOBALEVENT.subscribe<Events::Else::ResultToTitleBegin>(
+	//	[this](const Events::Else::ResultToTitleBegin&)
+	//	{
+	//		StartFadeOut();
+	//	});
+
+	//// タイトル開始: 画面を明転
+	//m_TitleSub = GLOBALEVENT.subscribe<Events::Else::TitleBegin>(
+	//	[this](const Events::Else::TitleBegin&)
+	//	{
+	//		StartFadeIn();
+	//	});
+
+	m_FadeOutSub = GLOBALEVENT.subscribe<Events::Else::FadeOutBegin>(
+		[this](const Events::Else::FadeOutBegin&)
 		{
 			StartFadeOut();
 		});
 
-	// リザルト → タイトル: 画面を暗転（FadeIn）
-	m_toTitleSub = GLOBALEVENT.subscribe<Events::Else::ResultToTitleBegin>(
-		[this](const Events::Else::ResultToTitleBegin&)
+	// 画面を明転
+	m_FadeInSub = GLOBALEVENT.subscribe<Events::Else::FadeInBegin>(
+		[this](const Events::Else::FadeInBegin&)
 		{
 			StartFadeIn();
-		});
-
-	// タイトル開始: 画面を明転（FadeOut）
-	m_TitleSub = GLOBALEVENT.subscribe<Events::Else::TitleBegin>(
-		[this](const Events::Else::TitleBegin&)
-		{
-			StartFadeOut();
 		});
 }
 
@@ -93,18 +106,6 @@ void FadeManager::RequestState(FadeState next)
 
 void FadeManager::UpdateFadeIn(float dt)
 {
-	m_fadeScale = std::lerp(m_fadeScale, 1.f, m_fadeInSpeed * dt);
-
-	// 浮動小数点誤差を吸収して確実に 1.0 で止める
-	if (m_fadeScale >= 0.99f)
-	{
-		m_fadeScale = 1.f;
-		m_state = FadeState::FadeFinished;
-	}
-}
-
-void FadeManager::UpdateFadeOut(float dt)
-{
 	m_fadeScale = std::lerp(m_fadeScale, 0.f, m_fadeOutSpeed * dt);
 
 	// 浮動小数点誤差を吸収して確実に 0.0 で止める
@@ -112,5 +113,20 @@ void FadeManager::UpdateFadeOut(float dt)
 	{
 		m_fadeScale = 0.f;
 		m_state = FadeState::Idle;
+
+		GLOBALEVENT.publish(Events::Else::FadeInCompleted());
+	}
+}
+
+void FadeManager::UpdateFadeOut(float dt)
+{
+	m_fadeScale = std::lerp(m_fadeScale, 1.f, m_fadeInSpeed * dt);
+
+	// 浮動小数点誤差を吸収して確実に 1.0 で止める
+	if (m_fadeScale >= 0.99f)
+	{
+		m_fadeScale = 1.f;
+		m_state = FadeState::FadeFinished;
+		GLOBALEVENT.publish(Events::Else::FadeOutCompleted());
 	}
 }

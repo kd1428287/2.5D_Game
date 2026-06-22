@@ -94,6 +94,7 @@ void AudioManager::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Else::TitleBegin>([this](const Events::Else::TitleBegin& e)
 			{
+				KdAudioManager::Instance().StopAllSound();
 				PlayBGMWithFadeIn("Asset/Sound/soul-drive.wav", 0.5f, true);
 			})
 	);
@@ -116,7 +117,7 @@ void AudioManager::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::DeliveryPointDeleted>([this](const Events::Player::DeliveryPointDeleted& e)
 			{
-				PlaySE("Asset/Sound/Beep.wav", e.m_me.lock()->GetPos());
+				PlaySE2D("Asset/Sound/Beep.wav",5.0f);// , e.m_me.lock()->GetPos());
 			})
 	);
 
@@ -130,7 +131,7 @@ void AudioManager::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Else::GameToResultBegin>([this](const Events::Else::GameToResultBegin& e)
 			{
-				StopBGMWithFadeOut(0.5f);
+				StopBGMWithFadeOut(1.5f);
 			})
 	);
 
@@ -145,7 +146,7 @@ void AudioManager::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Else::ResultEnd>([this](const Events::Else::ResultEnd& e)
 			{
-				KdAudioManager::Instance().StopAllSound();
+				StopBGMWithFadeOut(1.5f);
 				PlaySE2D("Asset/Sound/Select.wav");
 			})
 	);

@@ -6,15 +6,24 @@
 #include "../Ground/Ground.h"
 #include "../SkySphere/SkySphere.h"
 #include "../EventObject/DeliveryPoint.h"
+#include "../Effect/Exprosion/Exprosion.h"
+#include "../Effect/Smoke/Smoke.h"
 
 void ObjectManager::Init()
 {
+	
+	m_factory["Player"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Player>(param.m_pos); };
+	m_factory["Exprosion"]	= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Exprosion>(param.m_pos); };
+	m_factory["Smoke"] = [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Smoke>(param.m_pos, param.m_scale, param.m_flg, param.m_float1); };
+	m_factory["Player"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Player>(param.m_pos); };
+	m_factory["Player"]		= [this](Events::Else::CreateObjectEvent::ObjectParameter param) { return this->CreateObject<Player>(param.m_pos); };
+
 	m_createSub = GLOBALEVENT.subscribe<Events::Else::CreateObjectEvent>([this](const Events::Else::CreateObjectEvent& e) {
 
 		auto it = m_factory.find(e.m_objectType);
 
 		if (it != m_factory.end()) {
-			it->second(e.m_pos); // マップに登録された関数を起動
+			it->second(e.m_param); // マップに登録された関数を起動
 		}
 		});
 }

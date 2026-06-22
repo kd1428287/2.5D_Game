@@ -13,6 +13,8 @@ private:
 
 private:
 	ScopedSubscriber m_endSub;
+	ScopedSubscriber m_fadeInSub;
+	ScopedSubscriber m_fadeOutSub;
 
 	InScene m_state = InScene::Result;
 	float m_cnt = 0.f;

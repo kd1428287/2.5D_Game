@@ -6,7 +6,7 @@ class Exprosion : public EffectBase
 {
 public:
 	Exprosion() {};
-	Exprosion(Math::Vector3 pos, float scale = 1.f, bool loop = false) :EffectBase(pos, scale, loop) {};
+	Exprosion(Math::Vector3 pos, float scale = 2.f, bool loop = false) :EffectBase(pos, scale, loop) {};
 	~Exprosion()override {};
 
 	void Init()override;

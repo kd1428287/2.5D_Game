@@ -30,8 +30,8 @@ void GameScene::Init()
 
 	// タイトルフェーズから開始
 	GLOBALEVENT.publish(Events::Else::TitleBegin());
+	GLOBALEVENT.publish(Events::Else::FadeInBegin());
 	m_state = InScene::Title;
-	m_resultTransitionTimer = 0.f;
 
 	// ゲーム終了イベントを受けて遷移フェーズへ移行
 	m_endSub = GLOBALEVENT.subscribe<Events::Else::GameEnd>(
@@ -41,8 +41,19 @@ void GameScene::Init()
 			{
 				// 暗転開始を通知し、遷移カウントを開始する
 				GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+				GLOBALEVENT.publish(Events::Else::FadeOutBegin());
 				m_state = InScene::GameToResult;
-				m_resultTransitionTimer = 0.f;
+			}
+		});
+
+	// ゲーム終了イベントを受けて遷移フェーズへ移行
+	m_fadeOutSub = GLOBALEVENT.subscribe<Events::Else::FadeOutCompleted>(
+		[this](const Events::Else::FadeOutCompleted&)
+		{
+			if (m_state == InScene::GameToResult)
+			{
+				GLOBALEVENT.publish(Events::Else::GameToResultEnd());
+				SceneManager::Instance().SetNextScene(SceneManager::SceneType::Result);
 			}
 		});
 }
@@ -62,31 +73,10 @@ void GameScene::Event(float dt)
 		}
 	}
 
-	// ゲーム → リザルト 遷移処理
-	if (m_state == InScene::GameToResult)
-	{
-		UpdateGameToResult(dt);
-	}
-
 	if (InputManager::Instance().IsTriggered('T'))
 	{
 		GLOBALEVENT.publish(Events::Else::GameEnd());
-		GLOBALEVENT.publish(Events::Else::GameToResultBegin());
+		//GLOBALEVENT.publish(Events::Else::GameToResultBegin());
 	}
 	
-}
-
-void GameScene::UpdateGameToResult(float dt)
-{
-	m_resultTransitionTimer += dt;
-
-	// 暗転が完了する時間（秒）を待ってからシーン切り替え
-	constexpr float kTransitionWaitSec = 1.5f;
-	if (m_resultTransitionTimer >= kTransitionWaitSec)
-	{
-		// リザルトシーンへ移行
-		// ※ ResultBegin は ResultScene::Init() 側で publish するため、ここでは発行しない
-		GLOBALEVENT.publish(Events::Else::GameToResultEnd());
-		SceneManager::Instance().SetNextScene(SceneManager::SceneType::Result);
-	}
 }

@@ -5,11 +5,16 @@ void Exprosion::Init()
 {
 	m_polygon = std::make_shared<KdSquarePolygon>(KdAssets::Instance().m_textures.GetData("Asset/Textures/Effect/pipo-btleffect022.png"));
 	//m_polygon = std::make_shared<KdSquarePolygon>(KdAssets::Instance().m_textures.GetData("Asset/Textures/Effect/pipo-mapeffect005.png"));
-	m_polygon->SetSplit(8,1);
+	m_polygon->SetSplit(8, 1);
 	m_animeParam.startIdx = 0;
 	m_animeParam.endIdx = 8;
 	m_animeParam.animeIdx = m_animeParam.startIdx;
 	m_animeParam.cntSpeed = 10.f;
+
+	//for (int i = 0; i < 5; i++)
+	{
+		GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Smoke", m_pos, 0.3f, false, 40.f));
+	}
 }
 
 void Exprosion::Update(float dt)

@@ -27,18 +27,33 @@ void Player::Init()
 		GLOBALEVENT.subscribe<Events::Player::HitResult>([this](const Events::Player::HitResult& e)
 		{
 			if (e.type == Events::Player::HitResult::HitResultType::Ignored)return;
-			if (e.type == Events::Player::HitResult::HitResultType::Destroyed)
+
+			int level = (int)m_level - 2;
+		
+			switch (e.type)
 			{
+			case Events::Player::HitResult::HitResultType::Destroyed:
 				m_destroyScore += 1000;
 				return;
+			case Events::Player::HitResult::HitResultType::Bounced:
+			default:
+				if (m_level != SpeedLevel::Clash && level > 0)
+				{
+					m_speed *= -0.5f;
+					m_clashCount = (float)level * 0.1f;
+					ChangeSpeedLevel(SpeedLevel::Clash);
+
+					for (int i = 0; i < (level); i++)
+					{
+						GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Smoke", m_pos, 0.1f, false, 5.f));
+					}
+				}
+				else if (level <= 0)
+				{
+					ChangeSpeedLevel(SpeedLevel::Idle);
+				}
+				break;
 			}
-			int level = (int)m_level - 2;
-			if (m_level != SpeedLevel::Clash && level > 0)
-			{
-				m_speed *= -0.5f;
-				m_clashCount = (float)level * 0.1f;
-			}
-			ChangeSpeedLevel(SpeedLevel::Clash);
 		})
 	);
 
@@ -139,6 +154,8 @@ void Player::Update(float dt)
 		}
 	}
 
+	
+
 	if (m_level == SpeedLevel::Clash)
 	{
 		m_clashCount -= dt;
@@ -184,6 +201,11 @@ void Player::PostUpdate()
 		Math::Matrix::CreateScale(m_scale) * 
 		rotMat *
 		Math::Matrix::CreateTranslation(m_pos);
+
+	if (m_level > SpeedLevel::Speed3)
+	{
+		//GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Smoke", m_pos, 0.1f, true, 10.f));
+	}
 }
 
 void Player::GenerateDepthMapFromLight()

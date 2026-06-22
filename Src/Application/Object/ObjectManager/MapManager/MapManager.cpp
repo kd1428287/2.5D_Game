@@ -102,8 +102,7 @@ std::vector<int> MapManager::GenarateMap(ObjectManager& objManager)
 {
 	// ── フェーズ 1〜3: タイプ分け確定 ───────────────────
 	GenerateRandomWalk();
-	//PlaceEventPoints(objManager, 3, 1);
-	PlaceEventPoints(objManager, 1, 1);
+	PlaceEventPoints(objManager, 3, 1);
 	ClassifyTiles();   // ★ここ以降 mapType は読み取り専用として扱う
 
 	std::random_device rd;
