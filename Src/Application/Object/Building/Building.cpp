@@ -246,6 +246,7 @@ void Building::SetModel(BuildingType type)
 		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/house_country.gltf");
 		break;
 	case BuildingType::House:
+		m_model = KdAssets::Instance().m_modeldatas.GetData("Asset/Models/map_tiles/collection_point.gltf");
 		break;
 	default:
 		break;

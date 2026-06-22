@@ -23,7 +23,7 @@ void GameScene::Init()
 	m_cameraManager->SetCameraTarget(player);
 
 	// マップ生成
-	auto map = m_mapManager->GenarateMap(*m_objectManager);
+	auto map = m_mapManager->GenerateMap(*m_objectManager);
 	m_spawnManager->SetMapData(map);
 
 	m_objectManager->CreateObject<SkySphere>();

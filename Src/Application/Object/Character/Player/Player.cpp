@@ -50,7 +50,7 @@ void Player::Init()
 				}
 				else if (level <= 0)
 				{
-					ChangeSpeedLevel(SpeedLevel::Idle);
+					ChangeSpeedLevel(SpeedLevel::Clash);
 				}
 				break;
 			}
