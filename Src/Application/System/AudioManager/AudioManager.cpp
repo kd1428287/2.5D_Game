@@ -145,6 +145,7 @@ void AudioManager::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Else::ResultEnd>([this](const Events::Else::ResultEnd& e)
 			{
+				KdAudioManager::Instance().StopAllSound();
 				PlaySE2D("Asset/Sound/Select.wav");
 			})
 	);
