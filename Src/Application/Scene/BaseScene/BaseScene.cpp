@@ -1,6 +1,7 @@
 ﻿#include "BaseScene.h"
 
 #include "Application/System/CameraManager/CameraManager.h"
+#include "Application/System/UIManager/UIManager.h"
 #include "Application/Object/ObjectManager/ObjectManager.h"
 #include "../../main.h"
 
@@ -37,6 +38,7 @@ void BaseScene::Draw()
 	KdShaderManager::Instance().m_StandardShader.BeginGenerateDepthMapFromLight();
 	{
 		m_objectManager->GenerateDepthMapFromLight();
+		UIManager::Instance().GenerateDepthMapFromLight();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndGenerateDepthMapFromLight();
 
@@ -53,6 +55,8 @@ void BaseScene::Draw()
 	KdShaderManager::Instance().m_StandardShader.BeginLit();
 	{
 		m_objectManager->DrawLit();
+		
+		UIManager::Instance().DrawLit();
 	}
 	KdShaderManager::Instance().m_StandardShader.EndLit();
 

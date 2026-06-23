@@ -107,6 +107,7 @@ namespace Events
 				Dispatch,
 				Delivery,
 				Completed,
+				Add
 			};
 
 			State m_state;

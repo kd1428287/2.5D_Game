@@ -13,6 +13,7 @@ void DeliveryScoreUI::RebuildMatrix()
 
 void DeliveryScoreUI::Init()
 {
+	m_pos = { 0,0.5f,0 };
 	m_number = std::make_shared<Number>(m_pos, m_score, m_dir);
 	m_number->Init();
 
@@ -107,11 +108,13 @@ void DeliveryScoreUI::Update(float dt)
 			m_animExtraDir = 0.f;
 			m_animScale = 1.f;
 			m_spinState = SpinState::Idle;
+			GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Add));
 		}
 	}
 
 	// アニメーション変数を反映して m_number の行列を更新
 	RebuildMatrix();
+	m_number->SetMatrix(m_mWorld);
 }
 
 void DeliveryScoreUI::GenerateDepthMapFromLight()

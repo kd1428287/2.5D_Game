@@ -1,18 +1,19 @@
 ﻿#pragma once
+#include "../Player/Player.h"
 
-enum class SpeedLevel
-{
-	Idle,
-	Speed1,
-	Speed2,
-	Speed3,
-	Speed4,
-	Speed5,
-	Speed6,
-	Clash,
-};
+//enum class SpeedLevel
+//{
+//	Idle,
+//	Speed1,
+//	Speed2,
+//	Speed3,
+//	Speed4,
+//	Speed5,
+//	Speed6,
+//	Clash,
+//};
 
-class AutoPlayer : public KdGameObject
+class AutoPlayer : public Player
 {
 public:
 	AutoPlayer() {}

@@ -1,5 +1,6 @@
 ﻿#include "Building.h"
 #include "../Character/Player/Player.h"
+#include "../Character/Player/Player.h"
 
 void Building::Init()
 {

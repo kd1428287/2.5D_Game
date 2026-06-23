@@ -87,6 +87,18 @@ void AutoPlayer::Init()
 			})
 	);
 
+	// 衝突結果（エフェクトやクラッシュ反応のみ残す）
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Else::ResultPlayerProduction>([this](const Events::Else::ResultPlayerProduction& e)
+			{
+				if (e.m_state != Events::Else::ResultPlayerProduction::State::Add)return;
+				std::vector<Math::Vector3> vec;
+				vec.push_back({ -10.f,0.1f,0.8f });
+				StartAutoPilot(vec);
+				ChangeSpeedLevel(SpeedLevel::Speed5);
+			})
+	);
+
 	m_pCollider->RegisterCollisionShape("PlayerCollision", m_model, KdCollider::Type::TypeEvent);
 }
 
@@ -306,6 +318,7 @@ void AutoPlayer::UpdateAction(float dt)
 
 		m_actionWait = 0.5;
 		GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Dispatch));
+		GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Delivery));
 		if (m_deliveryScore <= 0)
 		{
 			m_isAction = false;

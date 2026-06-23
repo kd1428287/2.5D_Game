@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class UIObject : KdGameObject
+class UIObject : public KdGameObject
 {
 public:
 	UIObject() {};

@@ -20,8 +20,8 @@ private:
 	std::shared_ptr<Number> m_number;
 
 	int   m_score = 0;
-	Math::Vector3 m_pos;		// ベース位置
-	float m_dir = 180.f;		// ベース向き[deg]
+	Math::Vector3 m_pos = { 0,0.5f,0 };		// ベース位置
+	float m_dir = 160.f;		// ベース向き[deg]
 
 	// ---- アニメーション変数 ----
 	Math::Vector3 m_animOffset = {};   // 位置オフセット

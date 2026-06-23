@@ -46,6 +46,22 @@ void UIManager::DrawSprite()
 	}
 }
 
+void UIManager::GenerateDepthMapFromLight()
+{
+	for (auto& obj : m_UIobjList)
+	{
+		obj->GenerateDepthMapFromLight();
+	}
+}
+
+void UIManager::DrawLit()
+{
+	for (auto& obj : m_UIobjList)
+	{
+		obj->DrawLit();
+	}
+}
+
 void UIManager::Release()
 {
 	m_UIobjList.clear();

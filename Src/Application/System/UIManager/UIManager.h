@@ -21,6 +21,8 @@ public:
 	void Init();
 	void Update(float dt);
 	void DrawSprite();
+	void GenerateDepthMapFromLight();
+	void DrawLit();
 	void Release();
 
 	void CreateUI(UIPaturn paturn);

@@ -122,6 +122,9 @@ void Application::PreDraw()
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 void Application::Draw()
 {
+	/*UIManager::Instance().GenerateDepthMapFromLight();
+	UIManager::Instance().DrawLit();*/
+
 	SceneManager::Instance().Draw();
 }
 
