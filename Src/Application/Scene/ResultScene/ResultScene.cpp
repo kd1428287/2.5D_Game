@@ -12,8 +12,6 @@ void ResultScene::Init()
 	BaseScene::Init();
 
 	// プレイヤー生成
-	//const Math::Vector3 startPos = { 1.6f, 0.2f, 0.8f };
-	//const Math::Vector3 startPos = { 2.4f, 0.2f, 0.79f };
 	const Math::Vector3 startPos = { 3.2f, 0.2f, 0.8f };
 	m_player = m_objectManager->CreateObject<AutoPlayer>(startPos);
 

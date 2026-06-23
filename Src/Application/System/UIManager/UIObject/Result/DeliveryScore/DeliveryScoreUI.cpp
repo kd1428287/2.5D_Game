@@ -13,9 +13,14 @@ void DeliveryScoreUI::RebuildMatrix()
 
 void DeliveryScoreUI::Init()
 {
-	m_pos = { 1.5,0.5f,1.5f };
-	m_number = std::make_shared<Number>(m_pos, m_score, m_dir);
-	m_number->Init();
+	m_pos = { 1.5f,0.5f,1.5f };
+
+	// 十の位と一の位をそれぞれ初期化
+	m_numberTens = std::make_shared<Number>(m_pos, m_score / 10, m_dir);
+	m_numberTens->Init();
+
+	m_numberOnes = std::make_shared<Number>(m_pos, m_score % 10, m_dir);
+	m_numberOnes->Init();
 
 	m_resPrbSub =
 		GLOBALEVENT.subscribe<Events::Else::ResultPlayerProduction>([this](const Events::Else::ResultPlayerProduction& e)
@@ -23,14 +28,12 @@ void DeliveryScoreUI::Init()
 				switch (e.m_state)
 				{
 				case Events::Else::ResultPlayerProduction::State::Delivery:
-					// 演出1 : カクっと下げて数字を変え、戻ってくる
 					m_pendingScore = Reader::Instance().ReadScoreForPrd();
 					m_dropState = DropState::DroppingDown;
 					m_dropTimer = 0.f;
 					break;
 
 				case Events::Else::ResultPlayerProduction::State::Completed:
-					// 演出2 : くるっと回って一瞬大きくなる
 					m_spinState = SpinState::Spinning;
 					m_spinTimer = 0.f;
 					break;
@@ -50,12 +53,14 @@ void DeliveryScoreUI::Update(float dt)
 	{
 		m_dropTimer += dt;
 		float t = std::min(m_dropTimer / DROP_DURATION, 1.f);
-		// イーズイン : 加速しながら落ちる
 		m_animOffset.y = -DROP_AMOUNT * (t * t);
 
 		if (t >= 1.f)
 		{
-			m_number->SetNumber(m_pendingScore);
+			// スコアを桁ごとに分解して適用
+			m_numberTens->SetNumber(m_pendingScore / 10);
+			m_numberOnes->SetNumber(m_pendingScore % 10);
+
 			m_score = m_pendingScore;
 			m_dropState = DropState::WaitBottom;
 			m_dropTimer = 0.f;
@@ -76,7 +81,6 @@ void DeliveryScoreUI::Update(float dt)
 	{
 		m_dropTimer += dt;
 		float t = std::min(m_dropTimer / RISE_DURATION, 1.f);
-		// イーズアウト : 減速しながら戻る
 		float inv = 1.f - t;
 		m_animOffset.y = -DROP_AMOUNT * (inv * inv);
 
@@ -97,10 +101,7 @@ void DeliveryScoreUI::Update(float dt)
 		m_spinTimer += dt;
 		float t = std::min(m_spinTimer / SPIN_DURATION, 1.f);
 
-		// Y軸を 0→360° 回す
 		m_animExtraDir = 360.f * t;
-
-		// スケール : sin カーブで 1 → PEAK → 1 と変化
 		m_animScale = 1.f + (SPIN_PEAK_SCALE - 1.f) * std::sin(DirectX::XM_PI * t);
 
 		if (t >= 1.f)
@@ -112,17 +113,35 @@ void DeliveryScoreUI::Update(float dt)
 		}
 	}
 
-	// アニメーション変数を反映して m_number の行列を更新
+	// 基準となるワールド行列を計算
 	RebuildMatrix();
-	m_number->SetMatrix(m_mWorld);
+
+	// 行列の更新
+	if (m_score >= 10)
+	{
+		// 2桁のときは、中心(m_mWorld)から左右に半分ずつずらす
+		float halfGapX = GAP_WIDTH * 0.05f;
+		float halfGap = GAP_WIDTH * 0.5f;
+		m_numberTens->SetMatrix(Math::Matrix::CreateTranslation(-halfGapX, 0, halfGap) * m_mWorld);
+		m_numberOnes->SetMatrix(Math::Matrix::CreateTranslation(halfGapX, 0, -halfGap) * m_mWorld);
+	}
+	else
+	{
+		// 1桁のときは、一の位をジャストセンターに配置
+		m_numberOnes->SetMatrix(m_mWorld);
+	}
 }
 
 void DeliveryScoreUI::GenerateDepthMapFromLight()
 {
-	m_number->GenerateDepthMapFromLight();
+	// 10以上のときのみ十の位を描画・計算する
+	if (m_score >= 10) m_numberTens->GenerateDepthMapFromLight();
+	m_numberOnes->GenerateDepthMapFromLight();
 }
 
 void DeliveryScoreUI::DrawLit()
 {
-	m_number->DrawLit();
+	// 10以上のときのみ十の位を描画する
+	if (m_score >= 10) m_numberTens->DrawLit();
+	m_numberOnes->DrawLit();
 }

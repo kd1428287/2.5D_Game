@@ -402,12 +402,6 @@ void Player::UpdateMove(float dt)
 
 	m_speed = std::clamp(m_speed, m_minSpeed, m_maxSpeed);
 
-	// 一時的なデバッグ操作（手動時のみ）
-	if (!m_isAutoPilot && InputManager::Instance().IsTriggered(VK_SHIFT))
-	{
-		ChangeSpeedLevel((SpeedLevel)((int)m_level + 1));
-	}
-
 	// ==========================================
 	// 3. 車の向きの更新（バイシクルモデル）
 	// ==========================================
@@ -433,12 +427,6 @@ void Player::UpdateMove(float dt)
 	};
 	forwardVec.Normalize();
 	m_amountMove = forwardVec * m_speed * dt;
-
-	// ジャンプ（手動操作時のみ）
-	if (!m_isAutoPilot && InputManager::Instance().IsTriggered(VK_SPACE))
-	{
-		m_fallVelocity = 5.0f;
-	}
 
 	// 重力加速
 	m_fallVelocity -= GRAVITY_ACCEL * dt;

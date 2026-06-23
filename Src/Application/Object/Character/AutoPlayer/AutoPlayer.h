@@ -65,6 +65,8 @@ private:
 	int m_deliveryDestroy = 0;
 	int m_destroyScore = 0;
 
+	bool m_isResult = false;
+
 	// --- 状態フラグ ---
 	bool m_isActive = false;         // 自動操縦が稼働中かどうか
 	bool m_isDeliveryAnime = false;

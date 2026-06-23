@@ -17,10 +17,12 @@ private:
 	// m_pos / m_dir / アニメーション変数から m_number の m_mWorld を再構築する
 	void RebuildMatrix();
 
-	std::shared_ptr<Number> m_number;
+	// 1桁ずつ個別に保持する
+	std::shared_ptr<Number> m_numberTens;	// 十の位
+	std::shared_ptr<Number> m_numberOnes;	// 一の位
 
 	int   m_score = 0;
-	Math::Vector3 m_pos = { 0,0.5f,0 };		// ベース位置
+	Math::Vector3 m_pos = { 1.5f,0.5f,1.5f };		// ベース位置
 	float m_dir = 160.f;		// ベース向き[deg]
 
 	// ---- アニメーション変数 ----
@@ -48,4 +50,7 @@ private:
 
 	static constexpr float SPIN_DURATION = 0.4f;		// 1回転にかける時間[s]
 	static constexpr float SPIN_PEAK_SCALE = 1.5f;		// ピーク時のスケール倍率
+
+	// ---- 2桁化用の定数 ----
+	static constexpr float GAP_WIDTH = 0.3f;	// 数字と数字の間隔（モデルのサイズに合わせて調整してください）
 };

@@ -110,7 +110,7 @@ private:
 	SpeedLevel m_level = SpeedLevel::Idle;
 
 	// --- スコア ---
-	int m_deliveryScore = 5;	// = 0;
+	int m_deliveryScore = 0;
 	int m_deliveryDestroy = 0;
 	int m_destroyScore = 0;
 

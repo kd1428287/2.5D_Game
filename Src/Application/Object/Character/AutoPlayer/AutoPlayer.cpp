@@ -277,8 +277,9 @@ void AutoPlayer::UpdateAutoPilotInput(float dt)
 		if (m_waypointIndex >= (int)m_waypoints.size())
 		{
 			StopAutoPilot();
-			if (m_deliveryScore > 0)
+			if (!m_isResult)
 			{
+				m_isResult = true;
 				m_isAction = true;
 				m_actionWait = 0.5f;
 			}
@@ -314,16 +315,19 @@ void AutoPlayer::UpdateAction(float dt)
 		m_isDeliveryAnime = true;
 		m_deliveryAnimeTime = 0.0f;
 		m_deliveryScore--;
+		if (m_deliveryScore < 0)
+		{
+			m_isAction = false;
+			GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Completed));
+			return;
+		}
+
 		Reader::Instance().WriteScoreForPrd(Reader::Instance().ReadScoreForPrd() + 1);
 
 		m_actionWait = 0.5;
 		GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Dispatch));
 		GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Delivery));
-		if (m_deliveryScore <= 0)
-		{
-			m_isAction = false;
-			GLOBALEVENT.publish(Events::Else::ResultPlayerProduction(Events::Else::ResultPlayerProduction::State::Completed));
-		}
+		
 	}
 
 }
