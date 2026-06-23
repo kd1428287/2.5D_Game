@@ -31,7 +31,7 @@ void SpawnManager::SetMapData(std::vector<int> mapData)
 	{
 		data = 0;
 	}
-	SpawnSpeedUp(10);
+	SpawnSpeedUp(20);
 };
 
 void SpawnManager::Update(float dt)

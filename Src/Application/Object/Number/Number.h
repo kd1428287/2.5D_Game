@@ -3,6 +3,7 @@
 class Number : public KdGameObject
 {
 	friend class DeliveryScoreUI;
+	friend class DestroyScoreUI;
 
 public:
 	Number() {};
@@ -24,11 +25,11 @@ public:
 	void SetPos(Math::Vector3 pos) { m_pos = pos; }
 	void SetDir(float dir) { m_dir = dir; }
 	void SetNumber(int num);
+	void SetMatrix(Math::Matrix mat) { m_mWorld = mat; }
 
 	float GetDir() { return m_dir; }
 
 	Math::Vector3 GetPos() const override { return m_pos; }
-	void SetMatrix(const Math::Matrix& mat) { m_mWorld = mat; }
 
 private:
 	std::shared_ptr<KdModelData> m_model = nullptr;

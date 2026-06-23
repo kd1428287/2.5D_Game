@@ -8,6 +8,7 @@
 #include "UIObject/Result/Back/BackUI.h"
 #include "UIObject/Result/ResultText/ResultTextUI.h"
 #include "UIObject/Result/ResultTitle/ResultTitle.h"
+#include "UIObject/Result/CardBoard/CardBoard.h"
 
 void UIManager::Init()
 {
@@ -91,26 +92,21 @@ void UIManager::CreateUI(UIPaturn paturn)
 
 		break;
 	case UIPaturn::Result:
-		/*ui = std::make_shared<BackUI>();
-		ui->Init();
-		m_UIobjList.push_back(ui);
+
 		ui = std::make_shared<DeliveryScoreUI>();
 		ui->Init();
 		m_UIobjList.push_back(ui);
-		ui = std::make_shared<DestroyScoreUI>();
+		/*ui = std::make_shared<DestroyScoreUI>();
+		ui->Init();
+		m_UIobjList.push_back(ui);*/
+		ui = std::make_shared<CardBoard>();
 		ui->Init();
 		m_UIobjList.push_back(ui);
 		ui = std::make_shared<ResultTextUI>();
 		ui->Init();
 		m_UIobjList.push_back(ui);
-		ui = std::make_shared<ResultTitleUI>();
-		ui->Init();
-		m_UIobjList.push_back(ui);*/
-
-		ui = std::make_shared<DeliveryScoreUI>();
-		ui->Init();
-		m_UIobjList.push_back(ui);
 		break;
+
 	default:
 		break;
 	}

@@ -169,7 +169,21 @@ void AudioManager::Init()
 			})
 	);
 
+	m_subscriber.push_back(
+		GLOBALEVENT.subscribe<Events::Else::ResultPlayerProduction>([this](const Events::Else::ResultPlayerProduction& e)
+			{
+				if (e.m_state == Events::Else::ResultPlayerProduction::State::Delivery)
+				{
+					PlaySE2D("Asset/Sound/Select.wav");
+				}
 
+				if (e.m_state == Events::Else::ResultPlayerProduction::State::Completed)
+				{
+					PlaySE2D("Asset/Sound/Item.wav");
+				}
+				
+			})
+	);
 
 	// エンジン音・アイドル音の補間速度を設定
 	m_engineDriveSound.interpSpeed = EngineAudioParam::PitchInterpSpeed;

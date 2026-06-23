@@ -281,6 +281,7 @@
     <ClInclude Include="Src\Application\Object\Effect\EffectBase.h" />
     <ClInclude Include="Src\Application\Object\Effect\Exprosion\Exprosion.h" />
     <ClInclude Include="Src\Application\Object\Effect\Smoke\Smoke.h" />
+    <ClInclude Include="Src\Application\Object\Effect\Walk\Walk.h" />
     <ClInclude Include="Src\Application\Object\EventObject\DeliveryPoint.h" />
     <ClInclude Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.h" />
     <ClInclude Include="Src\Application\Object\Ground\Ground.h" />
@@ -309,6 +310,7 @@
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Game\Meter\MeterUI.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Game\Time\TimeUI.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\Back\BackUI.h" />
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\CardBoard\CardBoard.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\DeliveryScore\DeliveryScoreUI.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\DestroyScore\DestroyScoreUI.h" />
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\ResultText\ResultTextUI.h" />
@@ -370,6 +372,7 @@
     <ClCompile Include="Src\Application\Object\Character\Player\Player.cpp" />
     <ClCompile Include="Src\Application\Object\Effect\Exprosion\Exprosion.cpp" />
     <ClCompile Include="Src\Application\Object\Effect\Smoke\Smoke.cpp" />
+    <ClCompile Include="Src\Application\Object\Effect\Walk\Walk.cpp" />
     <ClCompile Include="Src\Application\Object\EventObject\DeliveryPoint.cpp" />
     <ClCompile Include="Src\Application\Object\EventObject\SpeedUpObject\SpeedUpObject.cpp" />
     <ClCompile Include="Src\Application\Object\Ground\Ground.cpp" />
@@ -395,6 +398,7 @@
     <ClCompile Include="Src\Application\System\UIManager\UIManager.cpp" />
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Game\Meter\MeterUI.cpp" />
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Game\Time\TimeUI.cpp" />
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\CardBoard\CardBoard.cpp" />
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\DeliveryScore\DeliveryScoreUI.cpp" />
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\DestroyScore\DestroyScoreUI.cpp" />
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\ResultText\ResultTextUI.cpp" />

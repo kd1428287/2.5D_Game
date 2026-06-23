@@ -205,6 +205,12 @@
     <Filter Include="Src\Application\Object\Number">
       <UniqueIdentifier>{90d9888f-e1f0-4d25-8899-a78d790e78cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Application\System\UIManager\UI\Result\CardBoard">
+      <UniqueIdentifier>{3f6dcdb4-fb7d-470f-9fe1-825231985665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Application\Object\Effect\Walk">
+      <UniqueIdentifier>{e6146874-21d0-4c14-be5f-58719baf2133}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Pch.h">
@@ -492,6 +498,12 @@
     <ClInclude Include="Src\Application\Object\Number\Number.h">
       <Filter>Src\Application\Object\Number</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\CardBoard\CardBoard.h">
+      <Filter>Src\Application\System\UIManager\UI\Result\CardBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Application\Object\Effect\Walk\Walk.h">
+      <Filter>Src\Application\Object\Effect\Walk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Pch.cpp">
@@ -730,6 +742,12 @@
     </ClCompile>
     <ClCompile Include="Src\Application\Object\Number\Number.cpp">
       <Filter>Src\Application\Object\Number</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\CardBoard\CardBoard.cpp">
+      <Filter>Src\Application\System\UIManager\UI\Result\CardBoard</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Application\Object\Effect\Walk\Walk.cpp">
+      <Filter>Src\Application\Object\Effect\Walk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,7 @@ void DeliveryScoreUI::RebuildMatrix()
 
 void DeliveryScoreUI::Init()
 {
-	m_pos = { 0,0.5f,0 };
+	m_pos = { 1.5,0.5f,1.5f };
 	m_number = std::make_shared<Number>(m_pos, m_score, m_dir);
 	m_number->Init();
 

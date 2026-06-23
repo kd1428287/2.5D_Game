@@ -118,9 +118,9 @@ void CameraManager::SetUp(CameraState state)
 		KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurSamplingNum(8);       // サンプリング数(品質)
 		return;
 	case CameraState::Result:
-		m_camPos = { 1.2f, 0.f, 1.2f };
+		m_camPos = { 1.3f, 0.f, 1.3f };
 		m_camDis = { 0,1.5f,-1.5f };
-		m_camDis = { 0,2.5f,-2.5f };
+		//m_camDis = { 0,2.5f,-2.5f };
 		m_camAng = { 45.f,225.f,-45.f };
 
 		//m_camAng = { 0,0,0 };

@@ -36,7 +36,7 @@ void Player::Init()
 				switch (e.type)
 				{
 				case Events::Player::HitResult::HitResultType::Destroyed:
-					m_destroyScore += 1000;
+					m_destroyScore += 1;
 					return;
 
 				case Events::Player::HitResult::HitResultType::Bounced:
@@ -65,7 +65,7 @@ void Player::Init()
 	m_subscriber.push_back(
 		GLOBALEVENT.subscribe<Events::Player::DeliveryPointCompleted>([this](const Events::Player::DeliveryPointCompleted& e)
 			{
-				m_deliveryScore += 10000;
+				m_deliveryScore += 1;
 				m_isDeliveryAnime = true;
 				m_deliveryAnimeTime = 0.0f;
 				KdDebugGUI::Instance().AddLog("%d", m_deliveryScore);
@@ -87,7 +87,7 @@ void Player::Init()
 			{
 				m_deliveryDestroy++;
 				Math::Vector3 score = Reader::Instance().ReadScore();
-				if ((m_deliveryScore / 10000) + m_deliveryDestroy >= score.z)
+				if (m_deliveryScore + m_deliveryDestroy >= score.z)
 				{
 					score = { (float)m_deliveryScore, (float)m_destroyScore, score.z };
 					Reader::Instance().WriteScore(score);
@@ -141,6 +141,12 @@ void Player::Update(float dt)
 	if (!m_isControllable && !m_isAutoPilot) return;
 
 	UpdateMove(dt);
+
+	//if (m_level > SpeedLevel::Speed3)
+	{
+		/*float angle = std::atan2(m_angle.x, m_angle.z);
+		GLOBALEVENT.publish(Events::Else::CreateObjectEvent("Smoke", m_pos, 0.1f, false, angle));*/
+	}
 
 	// 配達アニメーション（車体がぷるっと伸縮する）
 	if (m_isDeliveryAnime)

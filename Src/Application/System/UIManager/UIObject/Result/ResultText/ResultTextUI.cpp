@@ -6,9 +6,10 @@ void ResultTextUI::Init()
 	m_pos = m_basePos;
 	m_isPressed = true;
 
-	m_endSub = GLOBALEVENT.subscribe<Events::Else::DestroyScoreRollEnd>
-		([this](const Events::Else::DestroyScoreRollEnd& e)
+	m_endSub = GLOBALEVENT.subscribe<Events::Else::ResultPlayerProduction>
+		([this](const Events::Else::ResultPlayerProduction& e)
 			{
+				if (e.m_state != Events::Else::ResultPlayerProduction::State::Add)return;
 				m_isPressed = false;
 				m_fadeAlpha = 1.0f;
 			}
