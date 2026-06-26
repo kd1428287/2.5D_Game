@@ -22,6 +22,7 @@
 //    wheelBase : 前後輪間距離(デフォルト1.3f)
 //    tread     : 左右輪間距離(デフォルト0.8f)
 // ─────────────────────────────────────────────
+
 class CarDust : public EffectBase
 {
 public:

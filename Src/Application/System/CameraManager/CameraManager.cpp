@@ -6,8 +6,8 @@
 
 void CameraManager::Release()
 {
-	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(0); 
-	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(0,1);   
+	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(0);
+	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(0, 1);
 }
 
 void CameraManager::Init()
@@ -16,8 +16,8 @@ void CameraManager::Init()
 	SetUp(m_state);
 
 	m_camera = std::make_unique<KdCamera>();
-	m_camera->SetProjectionMatrix(m_projection,2000.f,0.05f);
-	
+	m_camera->SetProjectionMatrix(m_projection, 2000.f, 0.05f);
+
 	m_blurIntensity = 0.f;
 	m_blurMaxRange = 0.f;
 	m_blurMinRange = 0.f;
@@ -34,7 +34,7 @@ void CameraManager::Init()
 				{
 					m_blurIntensity = 0.3f + e.level * 0.3f;
 					m_blurMinRange = 0.5f - e.level * 0.06f;
-					m_blurMaxRange = 1.f -e.level * 0.05f;
+					m_blurMaxRange = 1.f - e.level * 0.05f;
 				}
 				else
 				{
@@ -49,6 +49,21 @@ void CameraManager::Init()
 				m_blurIntensity = 0.f;
 				m_blurMaxRange = 0.f;
 				m_blurMinRange = 0.f;
+			}
+		});
+
+	m_driftSub = GLOBALEVENT.subscribe<Events::Player::DriftResult>([this](const Events::Player::DriftResult& e)
+		{
+			switch (e.type)
+			{
+			case Events::Player::DriftResult::DriftResultType::Begin:return;
+			case Events::Player::DriftResult::DriftResultType::Success:
+				//m_projection = m_targetProj * 1.15f;
+				return;
+			case Events::Player::DriftResult::DriftResultType::Failure:return;
+
+			default:
+				return;
 			}
 		});
 
@@ -105,8 +120,12 @@ void CameraManager::SetUp(CameraState state)
 		m_startProj = m_projection;
 		return;
 	case CameraState::Game:
+		//m_camYawQuat = ...; // ゲーム開始時は車体向きで初期化(UpdateGameの初回Slerpで収束)
+		m_camYawQuat = Math::Quaternion::Identity;
+
 		m_camDis = DEF_DIS;
 		m_camAng.x = 25.0f;
+		m_camAng.z = 0.0f;
 		m_projection = 60.0f;
 		m_targetAngle = -20.f;
 		m_targetProj = m_projection;
@@ -115,15 +134,13 @@ void CameraManager::SetUp(CameraState state)
 		m_blurIntensity = 0.f;
 		m_blurMaxRange = 0.f;
 		m_blurMinRange = 0.f;
+
 		KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurSamplingNum(8);       // サンプリング数(品質)
 		return;
 	case CameraState::Result:
 		m_camPos = { 1.3f, 0.f, 1.3f };
 		m_camDis = { 0,1.5f,-1.5f };
-		//m_camDis = { 0,2.5f,-2.5f };
 		m_camAng = { 45.f,225.f,-45.f };
-
-		//m_camAng = { 0,0,0 };
 
 		m_projection = 60.f;
 		m_targetObj.reset();
@@ -191,7 +208,7 @@ void CameraManager::UpdateTitle(float dt)
 		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_camAng.y)) *
 		targetMat;
 
-	m_camera->SetCameraMatrix(mat);	
+	m_camera->SetCameraMatrix(mat);
 }
 
 void CameraManager::UpdateTitletoGame(float dt)
@@ -251,7 +268,10 @@ void CameraManager::UpdateTitletoGame(float dt)
 	// 6. 遷移完了判定
 	if (m_transitionProgress >= 1.0f)
 	{
-		// Gameステートへ移行
+		// Quat を車体向きで初期化してから Game へ移行(初回の急回転を防ぐ)
+		float yaw = DirectX::XMConvertToRadians(_targetObj->GetAngle().y);
+		m_camYawQuat = Math::Quaternion::CreateFromAxisAngle(Math::Vector3::Up, yaw);
+
 		SetUp(CameraState::Game);
 		GLOBALEVENT.publish(Events::Else::TitleToGameEnd());
 		GLOBALEVENT.publish(Events::Else::GameStart());
@@ -264,51 +284,100 @@ void CameraManager::UpdateGame(float dt)
 	if (!m_targetObj.expired()) _targetObj = m_targetObj.lock();
 
 	UpdateProjection(dt);
-	UpdateAngle(_targetObj, dt);
+	//UpdateAngle(_targetObj, dt);
 	UpdateDistance(_targetObj, dt);
 
 	Math::Matrix targetMat = _targetObj->GetMatrix();
-	m_camPos.y = std::lerp(m_camPos.y, targetMat.Translation().y, m_speed * 2.f * dt);
-	m_camPos.x = targetMat.Translation().x;
-	m_camPos.z = targetMat.Translation().z;
-	//targetMat.Translation(m_camPos);
 
-	// スケール・回転・位置を分解する
-	Math::Vector3 scale, translation;
-	Math::Quaternion rotation;
-	targetMat.Decompose(scale, rotation, translation);
+	// ── 追従座標(XZ即時・Y補間) ───────────────────────────
+	Math::Vector3 playerPos = targetMat.Translation();
+	m_camPos.x = playerPos.x;
+	m_camPos.z = playerPos.z;
+	m_camPos.y = std::lerp(m_camPos.y, playerPos.y, m_speed * 2.f * dt);
 
-	// スケールなしで行列を再構築
-	Math::Matrix _mat = Math::Matrix::CreateFromQuaternion(rotation)
-		* Math::Matrix::CreateTranslation(m_camPos);
+	// ── カメラ Y 回転をクォータニオン Slerp で追従 ──────────
+	// atan2 + 角度補間は z≒0 付近で ±π 折り返しバグが起きるため
+	// クォータニオンで保持し Slerp することで原理的に解決する
+	bool isDrifting = _targetObj->IsDrifting();
+
+	// 追従先クォータニオンを作る
+	Math::Quaternion targetYawQuat;
+	if (isDrifting)
+	{
+		Math::Vector3 moveDir = _targetObj->GetMoveDirection();
+		if (moveDir.LengthSquared() > 0.001f)
+		{
+			// 慣性方向ベクトルから Y 回転クォータニオンを生成
+			float yaw = std::atan2(moveDir.x, moveDir.z);
+			targetYawQuat = Math::Quaternion::CreateFromAxisAngle(Math::Vector3::Up, yaw);
+		}
+		else
+		{
+			targetYawQuat = m_camYawQuat; // 停止中は現状維持
+		}
+	}
+	else
+	{
+		// 車体の Y 角度からクォータニオンを生成
+		float yaw = DirectX::XMConvertToRadians(_targetObj->GetAngle().y);
+		targetYawQuat = Math::Quaternion::CreateFromAxisAngle(Math::Vector3::Up, yaw);
+	}
+
+	// Slerp で補間(折り返し問題が起きない)
+	float yawLerpSpeed = isDrifting ? 2.0f : 6.0f;
+	m_camYawQuat = Math::Quaternion::Slerp(
+		m_camYawQuat, targetYawQuat, std::min(yawLerpSpeed * dt, 1.0f));
+	m_camYawQuat.Normalize();
+
+	// ── ドリフト中のカメラロール(横傾き) ────────────────
+	float targetRoll = 0.0f;
+	if (isDrifting)
+	{
+		Math::Vector3 moveDir = _targetObj->GetMoveDirection();
+		if (moveDir.LengthSquared() > 0.001f)
+		{
+			// 車体向きと慣性方向のズレをクォータニオンの差から求める
+			float vehicleYaw = DirectX::XMConvertToRadians(_targetObj->GetAngle().y);
+			Math::Quaternion vehicleQ = Math::Quaternion::CreateFromAxisAngle(Math::Vector3::Up, vehicleYaw);
+			float moveDirYaw = std::atan2(moveDir.x, moveDir.z);
+			Math::Quaternion moveDirQ = Math::Quaternion::CreateFromAxisAngle(Math::Vector3::Up, moveDirYaw);
+			// 差分クォータニオン → Y軸回転量を取り出す
+			Math::Quaternion diffQ;
+			vehicleQ.Inverse(diffQ);
+			diffQ *= moveDirQ;
+			// diffQ の Y 成分から角度を近似(小角度で十分な精度)
+			float driftRad = 2.0f * std::asin(std::clamp(diffQ.y, -1.0f, 1.0f));
+			targetRoll = std::clamp(DirectX::XMConvertToDegrees(driftRad) * 0.3f, -8.0f, 8.0f);
+		}
+	}
+	m_camAng.z = std::lerp(m_camAng.z, targetRoll, 6.0f * dt);
 
 	// シェイクの減衰処理
 	Math::Vector3 shakeOffset = Math::Vector3::Zero;
 	if (m_shakeTime > 0.0f)
 	{
 		m_shakeTime -= dt;
-		// ランダムな方向に揺らす
 		shakeOffset.x = KdRandom::GetFloat(-1.f, 1.f) * m_shakeStrength;
 		shakeOffset.y = KdRandom::GetFloat(-1.f, 1.f) * m_shakeStrength;
-
-		// 時間経過とともに弱める
 		m_shakeStrength *= 0.9f;
 	}
 
-	// カメラの姿勢を計算
-	// 「車自体の向き(targetMat)」に対し、「カメラの基本角度(m_camAng)」と「オフセット(currentSteerOffset)」を加える
+	// カメラ行列合成
+	// X 俯瞰 → Z ロール → 後方オフセット → Y 追従(Quat) + ステアオフセット → 追従座標
+	Math::Matrix yawMat =
+		Math::Matrix::CreateFromQuaternion(m_camYawQuat) *
+		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_steeringOffset));
 	Math::Matrix mat =
 		Math::Matrix::CreateRotationX(DirectX::XMConvertToRadians(m_camAng.x)) *
+		Math::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_camAng.z)) *
 		Math::Matrix::CreateTranslation(m_camDis + shakeOffset) *
-		// ここで (カメラの基本Y回転 + ステアリングによるYオフセット) を計算
-		Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_camAng.y + m_steeringOffset)) *
-		//targetMat;
-		_mat;
+		yawMat *
+		Math::Matrix::CreateTranslation(m_camPos);
 
 	m_camera->SetCameraMatrix(mat);
 
-	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(m_blurIntensity);      // 0.0~1.0で強度を直接指定
-	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(m_blurMinRange, m_blurMaxRange);    // ブラーがかかり始める/最大になる範囲
+	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurIntensity(m_blurIntensity);
+	KdShaderManager::Instance().m_postProcessShader.SetSpeedBlurRange(m_blurMinRange, m_blurMaxRange);
 }
 
 void CameraManager::UpdateResult(float dt)
@@ -385,7 +454,7 @@ void CameraManager::UpdateAngle(const std::shared_ptr<Player>& target, float dt)
 
 }
 
-void CameraManager::UpdateDistance(const std::shared_ptr<Player>&target, float dt)
+void CameraManager::UpdateDistance(const std::shared_ptr<Player>& target, float dt)
 {
 	float t = m_speed * dt;
 	m_camDis = Math::Vector3::Lerp(m_camDis, m_targetPos, t);

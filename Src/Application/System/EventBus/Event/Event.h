@@ -22,6 +22,18 @@ namespace Events
 			GetSpeedUp(const std::shared_ptr<KdGameObject>& me) :m_me(me) {};
 		};
 
+		struct DriftResult : public Event
+		{
+			enum class DriftResultType
+			{
+				Begin,
+				Success,
+				Failure,
+			};
+			DriftResultType type;
+			DriftResult(DriftResultType _type) :type(_type) {};
+		};
+
 		struct OnHit : public Event
 		{
 			std::weak_ptr<KdGameObject> m_me;

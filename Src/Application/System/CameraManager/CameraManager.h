@@ -42,7 +42,7 @@ public:
 
 private:
 	void UpdateProjection(float dt);
-	void UpdateAngle(const std::shared_ptr<Player>& target,float dt);
+	void UpdateAngle(const std::shared_ptr<Player>& target, float dt);
 	void UpdateDistance(const std::shared_ptr<Player>& target, float dt);
 
 	std::unique_ptr<KdCamera> m_camera = nullptr;
@@ -60,6 +60,9 @@ private:
 	float m_shakeTime = 0.0f;     // 残りシェイク時間
 
 	std::weak_ptr<Player> m_targetObj = {};
+
+	// 移動方向追従用 Y 回転クォータニオン(atan2折り返しバグ対策)
+	Math::Quaternion m_camYawQuat = Math::Quaternion::Identity;
 
 	float m_targetProj = 0.0f;
 	Math::Vector3 m_targetPos;
@@ -80,6 +83,7 @@ private:
 	float m_ambientLight = 0.f;
 
 	ScopedSubscriber m_speedSub;
+	ScopedSubscriber m_driftSub;
 	ScopedSubscriber m_hitSub;
 	ScopedSubscriber m_toGameSub;
 	ScopedSubscriber m_toResultSub;

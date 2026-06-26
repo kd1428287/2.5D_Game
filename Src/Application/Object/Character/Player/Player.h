@@ -26,10 +26,10 @@ public:
 	};
 	~Player() override {}
 
-	void Init()         override;
-	void PreUpdate()    override;
+	void Init()           override;
+	void PreUpdate()      override;
 	void Update(float dt) override;
-	void PostUpdate()   override;
+	void PostUpdate()     override;
 
 	void GenerateDepthMapFromLight() override;
 	void DrawLit()                   override;
@@ -41,18 +41,24 @@ public:
 	float         GetSteeringInput() const { return m_steering / m_maxSteerAngle; }
 	Math::Vector3 GetAngle()         const { return m_angle; }
 	int           GetDeliveryScore() const { return m_deliveryScore; }
-	bool          IsAutoPilot()      const { return m_isAutoPilot; }
 
-	// リザルト演出用：自動操縦 API
-	// waypoints を渡すと順番に巡回する。空の場合は直進し続ける。
-	void StartAutoPilot(const std::vector<Math::Vector3>& waypoints = {});
-	void StopAutoPilot();   // 停止後は速度が自然減衰して止まる
+	// ドリフト中かどうか(エフェクト側から参照)
+	bool          IsDrifting()       const { return m_isDrifting; }
+
+	// 実際の移動方向(ドリフト中は車体向きとズレる) XZ正規化済み
+	Math::Vector3 GetMoveDirection() const
+	{
+		Math::Vector3 dir = { m_velocity.x, 0.0f, m_velocity.z };
+		float len = dir.Length();
+		if (len > 0.001f) dir /= len;
+		return dir;
+	}
 
 private:
 	void UpdateMove(float dt);
 	void UpdateGroundCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList);
 	void UpdateWallCollision(const std::vector<std::shared_ptr<KdGameObject>>& objList, const Math::Matrix& rotMat);
-	void UpdateAutoPilotInput(float dt);    // 自動操縦の仮想入力を毎フレーム計算する
+	void UpdateAutoPilotInput(float dt);
 
 private:
 	// --- モデル ---
@@ -63,46 +69,71 @@ private:
 	bool m_isDeliveryAnime = false;
 
 	// --- 配達アニメーション ---
-	float m_deliveryAnimeTime = 0.0f;   // 経過タイマー
-	float m_deliveryAnimeAmplitude = 0.5f;   // 振れ幅
-	float m_deliveryAnimeSpeed = 7.0f;   // 速度
+	float m_deliveryAnimeTime = 0.0f;
+	float m_deliveryAnimeAmplitude = 0.5f;
+	float m_deliveryAnimeSpeed = 7.0f;
 
 	// --- トランスフォーム ---
-	Math::Vector3 m_pos;    // 確定座標
-	Math::Vector3 m_angle;  // 車体方向
-	Math::Vector3 m_scale;  // 車体の大きさ
+	Math::Vector3 m_pos;
+	Math::Vector3 m_angle;
+	Math::Vector3 m_scale;
 
 	// --- 移動・速度 ---
-	Math::Vector3 m_amountMove;          // 1F での移動距離
-	float m_speed = 0.0f;             // 現在のスピード
-	float m_maxSpeed = 2.0f;             // 最大のスピード
-	float m_minSpeed = -2.0f;            // 最低のスピード
+	Math::Vector3 m_amountMove;
+	Math::Vector3 m_moveVec;		// 車体の向きベクトル
+	Math::Vector3 m_velocity;		// 【追加】実際の移動速度ベクトル(ドリフト用)
+	float m_turnSpeed = 0.0f;
+	float m_speed = 0.0f;
+	float m_maxSpeed = 2.0f;
+	float m_minSpeed = -2.0f;
 
 	// --- 重力・落下 ---
-	float       m_fallVelocity = 0.0f;    // 現在の垂直方向の速度
-	float       m_fallDistance = 0.0f;    // 現在の落下距離
-	const float GRAVITY_ACCEL = 9.8f;    // 重力加速度
-	const float MAX_FALL_SPEED = -10.0f;  // 終端速度
+	float       m_fallVelocity = 0.0f;
+	float       m_fallDistance = 0.0f;
+	const float GRAVITY_ACCEL = 9.8f;
+	const float MAX_FALL_SPEED = -10.0f;
 
 	// --- クラッシュ ---
-	float m_clashCount = 0.0f;   // クラッシュ中の操作不能残り時間
+	float m_clashCount = 0.0f;
 
 	// --- 加速 ---
 	float m_acceleration = 0.0f;
 
 	// --- バイシクルモデル用ステアリング ---
-	float m_steering = 0.0f;   // 現在のステアリング角（度）
-	float m_steerSpeed = 90.0f;  // ハンドルを切る速さ（度/秒）
-	float m_maxSteerAngle = 35.0f;  // ハンドルの最大切れ角（度）
-	float m_wheelBase = 0.2f;   // ホイールベース（前輪〜後輪の距離）
+	float m_steering = 0.0f;
+	float m_steerSpeed = 90.0f;
+	float m_maxSteerAngle = 35.0f;
+	float m_wheelBase = 0.2f;
+
+	// ================================================================
+	// --- ドリフト ---
+	// ================================================================
+	bool  m_isDrifting = false;  // ドリフト状態フラグ
+	bool  m_wasDrifting = false;  // 前フレームのドリフト状態(解除検出用)
+	float m_driftDir = 0.0f;   // ドリフト開始時のステア方向(-1 or +1)
+	float m_driftAngle = 0.0f;   // 速度ベクトルと車体向きのズレ角(ラジアン)
+	float m_driftStartAngleRad = 0.0f;   // ドリフト開始時の車体向き(ラジアン)
+	float m_lateralFriction = 8.0f;   // 通常時の横グリップ強度
+	float m_driftFriction = 1.5f;   // ドリフト時の横グリップ強度(小さいほど滑る)
+
+	// ドリフト中に開始角から曲げられる最大角度
+	static constexpr float k_driftMaxRotationDeg = 95.0f;
+	// ドリフト中のアクセル効率(1.0=通常と同じ、小さいほど控えめ)
+	static constexpr float k_driftAccelScale = 0.6f;
+	// ドリフト中の旋回レート倍率
+	static constexpr float k_driftSteerScale = 1.8f;
+	// ドリフト解除時の速度ブースト倍率
+	static constexpr float k_driftReleaseBoost = 1.15f;
+	// ドリフト開始に必要な最低速度
+	static constexpr float k_driftTriggerSpeed = 1.1f;
+	// ================================================================
 
 	// --- 当たり判定 ---
 	static constexpr int SPHERE_NUM = 3;
-	const float         m_sphereOffsets[SPHERE_NUM] = { 0.07f, 0.0f, -0.07f };  // 前・中・後
+	const float         m_sphereOffsets[SPHERE_NUM] = { 0.07f, 0.0f, -0.07f };
 	const float         m_sphereRadius = 0.05f;
 	const Math::Vector3 m_sphereHeightOffset = { 0.0f, 0.06f, 0.0f };
 
-	// コーナーハメを防ぐ反復解消の最大回数
 	static constexpr int MAX_COLLISION_ITERATIONS = 3;
 	std::set<std::shared_ptr<KdGameObject>> m_previousHitObjects;
 
@@ -114,18 +145,5 @@ private:
 	int m_deliveryDestroy = 0;
 	int m_destroyScore = 0;
 
-	// --- 自動操縦 ---
-	bool m_isAutoPilot = false;
-
-	// UpdateAutoPilotInput() が毎フレーム書き込む仮想入力値（-1.0 〜 1.0）
-	float m_autoSteerInput = 0.0f;  // 仮想ステアリング入力
-	float m_autoAccelInput = 0.0f;  // 仮想アクセル入力（正=アクセル / 負=ブレーキ）
-
-	// ウェイポイント巡回
-	std::vector<Math::Vector3> m_waypoints;          // 巡回リスト（ワールド座標）
-	int   m_waypointIndex = 0;
-	float m_waypointReachRadius = 0.01f;              // 到達とみなす距離
-
-	// 演出で見せたい目標速度レベル（外部から変更可能）
 	SpeedLevel m_autoPilotTargetLevel = SpeedLevel::Speed3;
 };

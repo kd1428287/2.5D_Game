@@ -73,6 +73,7 @@ void GameScene::Event(float dt)
 		}
 	}
 
+
 	//if (InputManager::Instance().IsTriggered('T'))
 	//{
 	//	GLOBALEVENT.publish(Events::Else::GameEnd());

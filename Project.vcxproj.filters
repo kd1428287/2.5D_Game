@@ -208,7 +208,7 @@
     <Filter Include="Src\Application\System\UIManager\UI\Result\CardBoard">
       <UniqueIdentifier>{3f6dcdb4-fb7d-470f-9fe1-825231985665}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Src\Application\Object\Effect\Walk">
+    <Filter Include="Src\Application\Object\Effect\CarDust">
       <UniqueIdentifier>{e6146874-21d0-4c14-be5f-58719baf2133}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -501,8 +501,8 @@
     <ClInclude Include="Src\Application\System\UIManager\UIObject\Result\CardBoard\CardBoard.h">
       <Filter>Src\Application\System\UIManager\UI\Result\CardBoard</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Application\Object\Effect\Walk\Walk.h">
-      <Filter>Src\Application\Object\Effect\Walk</Filter>
+    <ClInclude Include="Src\Application\Object\Effect\CarDust\CarDust.h">
+      <Filter>Src\Application\Object\Effect\CarDust</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -746,8 +746,8 @@
     <ClCompile Include="Src\Application\System\UIManager\UIObject\Result\CardBoard\CardBoard.cpp">
       <Filter>Src\Application\System\UIManager\UI\Result\CardBoard</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Application\Object\Effect\Walk\Walk.cpp">
-      <Filter>Src\Application\Object\Effect\Walk</Filter>
+    <ClCompile Include="Src\Application\Object\Effect\CarDust\CarDust.cpp">
+      <Filter>Src\Application\Object\Effect\CarDust</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
