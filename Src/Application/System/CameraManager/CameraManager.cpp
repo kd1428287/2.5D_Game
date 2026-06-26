@@ -58,7 +58,6 @@ void CameraManager::Init()
 			{
 			case Events::Player::DriftResult::DriftResultType::Begin:return;
 			case Events::Player::DriftResult::DriftResultType::Success:
-				//m_projection = m_targetProj * 1.15f;
 				return;
 			case Events::Player::DriftResult::DriftResultType::Failure:return;
 

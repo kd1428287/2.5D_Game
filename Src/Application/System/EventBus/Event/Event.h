@@ -134,13 +134,14 @@ namespace Events
 				float m_scale;
 				bool m_flg;
 				float m_float1;
+				Math::Vector3 m_vector;
 			};
 
 			std::string m_objectType; // "Player", "Enemy" など
 			ObjectParameter m_param;
 			CreateObjectEvent(const std::string& type, ObjectParameter param) :m_objectType(type), m_param(param) {};
-			CreateObjectEvent(const std::string& type, Math::Vector3 pos, float scale = 1.f, bool flg = false, float float1 = 1.f)
-				:m_objectType(type), m_param({ pos,scale,flg,float1 }) {};
+			CreateObjectEvent(const std::string& type, Math::Vector3 pos, float scale = 1.f, bool flg = false, float float1 = 1.f, Math::Vector3 vector = {0,0,0})
+				:m_objectType(type), m_param({ pos,scale,flg,float1,vector }) {};
 		};
 
 		struct CreateParticle : public Event

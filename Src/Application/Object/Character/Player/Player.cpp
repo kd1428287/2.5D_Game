@@ -206,7 +206,12 @@ void Player::PostUpdate()
 		rotMat *
 		Math::Matrix::CreateTranslation(m_pos);
 
-	GLOBALEVENT.publish(Events::Else::CreateObjectEvent(GetPos());
+	Events::Else::CreateObjectEvent::ObjectParameter param;
+	param.m_pos = GetPos();
+	param.m_vector = m_moveVec;
+	param.m_float1 = std::atan2(m_moveVec.z, m_moveVec.x);
+	GLOBALEVENT.publish(Events::Else::CreateObjectEvent("CarDust",param));
+
 }
 
 // =============================================================

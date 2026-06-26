@@ -117,7 +117,7 @@ private:
 	float m_driftFriction = 1.5f;   // ドリフト時の横グリップ強度(小さいほど滑る)
 
 	// ドリフト中に開始角から曲げられる最大角度
-	static constexpr float k_driftMaxRotationDeg = 95.0f;
+	static constexpr float k_driftMaxRotationDeg = 65.0f;
 	// ドリフト中のアクセル効率(1.0=通常と同じ、小さいほど控えめ)
 	static constexpr float k_driftAccelScale = 0.6f;
 	// ドリフト中の旋回レート倍率
